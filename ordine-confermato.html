@@ -1,0 +1,69 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Ordine confermato | CDA Tivoli</title>
+<meta name="robots" content="noindex, nofollow">
+<link rel="stylesheet" href="stile.css">
+</head>
+<body>
+
+<header class="site-header">
+  <div class="nav-row">
+    <a href="index.html" class="logo">CDA<small>Camper &amp; Lavorazioni · Tivoli</small></a>
+    <ul class="main-menu">
+      <li><a href="shop.html">Shop Camper</a></li>
+      <li><a href="servizi.html">Servizi Camper</a></li>
+      <li><a href="lavorazioni.html">Lavorazioni Speciali</a></li>
+      <li><a href="chi-siamo.html">Chi Siamo</a></li>
+      <li><a href="contatti.html">Contatti</a></li>
+    </ul>
+    <div class="nav-actions">
+      <a href="contatti.html" class="btn btn-outline btn-sm">Richiedi preventivo</a>
+      <a href="carrello.html" class="btn-cart">🛒 Carrello <span>(0)</span></a>
+    </div>
+    <button class="nav-toggle" aria-label="Apri menu" aria-expanded="false"><span></span><span></span><span></span></button>
+  </div>
+</header>
+
+<section style="padding:80px 0;">
+  <div class="container" style="max-width:560px;text-align:center;">
+    <span class="tag" style="display:block;margin-bottom:12px;">Ordine ricevuto</span>
+    <h1 style="margin-bottom:18px;">Grazie per il tuo ordine!</h1>
+    <p style="font-size:16px;margin-bottom:8px;">Il pagamento è andato a buon fine. Riceverai una email di conferma con tutti i dettagli a breve.</p>
+    <p id="order-ref" style="font-family:var(--font-mono, monospace);font-size:13px;color:var(--steel);margin-bottom:32px;"></p>
+
+    <div class="info-card" style="text-align:left;margin-bottom:32px;">
+      <h3>Cosa succede ora</h3>
+      <div class="info-line"><span class="k">01</span><span class="v">Prepariamo il tuo ordine nella nostra sede di Tivoli</span></div>
+      <div class="info-line"><span class="k">02</span><span class="v">Ti avvisiamo quando parte la spedizione (o è pronto per il ritiro)</span></div>
+      <div class="info-line"><span class="k">03</span><span class="v">Hai un dubbio? Chiamaci al 389 547 2846</span></div>
+    </div>
+
+    <a href="shop.html" class="btn btn-primary">Torna allo Shop</a>
+  </div>
+</section>
+
+<footer class="site-footer">
+  <div class="container">
+    <div class="footer-bottom">
+      <span>© 2026 CDA — Tivoli (RM). Tutti i diritti riservati.</span>
+      <span>P.IVA da definire · <a href="privacy.html" style="color:inherit;text-decoration:underline;">Privacy</a> · <a href="termini.html" style="color:inherit;text-decoration:underline;">Termini</a></span>
+    </div>
+  </div>
+</footer>
+
+<script src="js/main.js"></script>
+<script>
+  var params = new URLSearchParams(window.location.search);
+  var sessionId = params.get('session_id');
+  if (sessionId) {
+    document.getElementById('order-ref').textContent = 'Riferimento ordine: ' + sessionId;
+  }
+  // L'ordine è confermato: svuotiamo il carrello locale.
+  localStorage.removeItem('cda_cart_items');
+  document.querySelectorAll('.btn-cart span').forEach(function (span) { span.textContent = '(0)'; });
+</script>
+</body>
+</html>

@@ -1,0 +1,7 @@
+User-agent: *
+Allow: /
+Disallow: /admin.html
+Disallow: /privacy.html
+Disallow: /termini.html
+
+Sitemap: https://www.cda-camper.it/sitemap.xml

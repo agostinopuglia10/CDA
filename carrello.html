@@ -1,0 +1,142 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Il tuo carrello | CDA Tivoli</title>
+<meta name="robots" content="noindex, follow">
+<link rel="stylesheet" href="stile.css">
+</head>
+<body>
+
+<header class="site-header">
+  <div class="nav-row">
+    <a href="index.html" class="logo">CDA<small>Camper &amp; Lavorazioni · Tivoli</small></a>
+    <ul class="main-menu">
+      <li>
+        <a href="shop.html">Shop Camper</a>
+        <ul class="dropdown">
+          <li><a href="shop.html#categoria-1">Categoria 1</a></li>
+          <li><a href="shop.html#categoria-2">Categoria 2</a></li>
+          <li><a href="shop.html#categoria-3">Categoria 3</a></li>
+          <li><a href="shop.html#categoria-4">Categoria 4</a></li>
+          <li><a href="shop.html#categoria-5">Categoria 5</a></li>
+          <li><a href="shop.html#categoria-6">Categoria 6</a></li>
+        </ul>
+      </li>
+      <li>
+        <a href="servizi.html">Servizi Camper</a>
+        <ul class="dropdown">
+          <li><a href="servizi.html#manutenzione">Manutenzione Camper</a></li>
+          <li><a href="servizi.html#impianti">Impianti</a></li>
+          <li><a href="servizi.html#installazione">Installazione Accessori</a></li>
+          <li><a href="servizi.html#riparazioni">Riparazioni</a></li>
+        </ul>
+      </li>
+      <li>
+        <a href="lavorazioni.html">Lavorazioni Speciali</a>
+        <ul class="dropdown">
+          <li><a href="lavorazioni.html#taglio">Taglio Lamiera</a></li>
+          <li><a href="lavorazioni.html#piegatura">Piegatura Lamiera</a></li>
+          <li><a href="lavorazioni.html#infissi">Infissi e Lavorazioni Speciali</a></li>
+        </ul>
+      </li>
+      <li><a href="chi-siamo.html">Chi Siamo</a></li>
+      <li><a href="contatti.html">Contatti</a></li>
+    </ul>
+    <div class="nav-actions">
+      <a href="contatti.html" class="btn btn-outline btn-sm">Richiedi preventivo</a>
+      <a href="carrello.html" class="btn-cart">🛒 Carrello <span>(0)</span></a>
+    </div>
+    <button class="search-toggle" aria-label="Cerca" aria-expanded="false"><svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="7" stroke-width="2"/><line x1="21" y1="21" x2="16.65" y2="16.65" stroke-width="2" stroke-linecap="round"/></svg></button>
+    <button class="nav-toggle" aria-label="Apri menu" aria-expanded="false"><span></span><span></span><span></span></button>
+  </div>
+</header>
+<div class="search-panel">
+  <form class="search-form" action="shop.html" method="get">
+    <input type="search" name="q" placeholder="Cerca prodotti, es. pannello solare..." aria-label="Cerca prodotti nello shop">
+    <button type="submit" class="btn btn-primary btn-sm">Cerca</button>
+  </form>
+</div>
+
+<section style="padding:36px 0 80px;">
+  <div class="container">
+    <div class="breadcrumb" style="margin-bottom:24px;"><a href="index.html">Home</a> / <a href="shop.html">Shop Camper</a> / Carrello</div>
+    <h1 style="margin-bottom:28px;">Il tuo carrello</h1>
+
+    <div id="cart-empty" class="cart-empty">
+      <h2>Il carrello è vuoto</h2>
+      <p>Aggiungi qualche accessorio dallo shop per iniziare.</p>
+      <a href="shop.html" class="btn btn-primary">Vai allo Shop</a>
+    </div>
+
+    <div id="cart-content" style="display:none;">
+      <div id="shipping-progress" class="shipping-progress"></div>
+      <div class="cart-grid">
+        <div>
+          <div class="cart-list" id="cart-list"></div>
+          <div id="cross-sell" class="cross-sell"></div>
+        </div>
+        <div class="cart-summary">
+          <h3>Riepilogo</h3>
+          <div class="cart-summary-row"><span>Subtotale</span><span id="cart-subtotal">€ 0,00</span></div>
+          <div class="cart-summary-row"><span>Spedizione</span><span id="cart-shipping">Calcolata al passo successivo</span></div>
+          <div class="cart-summary-row total"><span>Totale</span><span id="cart-total">€ 0,00</span></div>
+          <button class="btn btn-primary" id="checkout-btn">Vai al pagamento</button>
+          <p id="checkout-status" class="form-status" role="status" aria-live="polite"></p>
+          <div class="trust-strip" style="padding:20px 0 0;margin-top:4px;border-top:1px solid var(--line);border-bottom:none;justify-content:flex-start;gap:22px;flex-wrap:wrap;">
+            <div class="trust-item" style="font-size:12px;">🔒 Pagamento sicuro</div>
+            <div class="trust-item" style="font-size:12px;">↩️ Reso 14 giorni</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<footer class="site-footer">
+  <div class="container">
+    <div class="footer-grid">
+      <div>
+        <div class="footer-logo">CDA</div>
+        <p style="color:var(--steel-light);font-size:14.5px;max-width:280px;">Shop online camper, servizi di officina e lavorazioni su lamiera. Con sede a Tivoli (RM).</p>
+      </div>
+      <div>
+        <h5>Shop</h5>
+        <ul>
+          <li><a href="shop.html#categoria-1">Categoria 1</a></li>
+          <li><a href="shop.html#categoria-2">Categoria 2</a></li>
+          <li><a href="shop.html#categoria-3">Categoria 3</a></li>
+          <li><a href="shop.html">Vedi tutto</a></li>
+        </ul>
+      </div>
+      <div>
+        <h5>Servizi</h5>
+        <ul>
+          <li><a href="servizi.html#manutenzione">Manutenzione</a></li>
+          <li><a href="servizi.html#impianti">Impianti</a></li>
+          <li><a href="servizi.html#installazione">Installazione</a></li>
+          <li><a href="lavorazioni.html">Lavorazioni speciali</a></li>
+        </ul>
+      </div>
+      <div>
+        <h5>Azienda</h5>
+        <ul>
+          <li><a href="chi-siamo.html">Chi siamo</a></li>
+          <li><a href="contatti.html">Contatti</a></li>
+          <li><a href="contatti.html">Via Arci n.24, Tivoli (RM)</a></li>
+        </ul>
+      </div>
+    </div>
+    <div class="footer-bottom">
+      <span>© 2026 CDA — Tivoli (RM). Tutti i diritti riservati.</span>
+      <span>P.IVA da definire · <a href="privacy.html" style="color:inherit;text-decoration:underline;">Privacy</a> · <a href="termini.html" style="color:inherit;text-decoration:underline;">Termini</a></span>
+    </div>
+  </div>
+</footer>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="js/supabase-config.js"></script>
+<script src="js/main.js"></script>
+</body>
+</html>

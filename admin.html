@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Area Riservata | CDA</title>
+<meta name="robots" content="noindex, nofollow">
+<link rel="stylesheet" href="stile.css">
+</head>
+<body>
+
+<header class="site-header">
+  <div class="nav-row" style="justify-content:center;">
+    <a href="index.html" class="logo">CDA<small>Camper &amp; Lavorazioni · Tivoli</small></a>
+  </div>
+</header>
+
+<div class="login-wrap">
+  <div class="login-card">
+    <h1>Area Riservata</h1>
+    <p class="lead-sm">Accesso riservato al personale CDA per la gestione di ordini, prodotti e richieste.</p>
+
+    <form onsubmit="return false;">
+      <div class="field">
+        <label for="email">Email</label>
+        <input type="email" id="email" name="email" placeholder="nome@cda-camper.it" required>
+      </div>
+      <div class="field">
+        <label for="password">Password</label>
+        <input type="password" id="password" name="password" placeholder="••••••••" required>
+      </div>
+      <button type="submit" class="btn btn-primary">Accedi</button>
+    </form>
+
+    <div class="login-note">
+      Questa è solo l'interfaccia grafica: il modulo non è ancora collegato a un sistema di autenticazione reale. L'accesso verrà attivato collegando questa pagina a Supabase Auth (o all'area amministrativa nativa, se si opterà per Shopify).
+    </div>
+
+    <a href="index.html" class="login-back">← Torna al sito</a>
+  </div>
+</div>
+
+</body>
+</html>
