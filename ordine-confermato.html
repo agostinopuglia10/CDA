@@ -61,6 +61,21 @@
   if (sessionId) {
     document.getElementById('order-ref').textContent = 'Riferimento ordine: ' + sessionId;
   }
+
+  // Registra la conversione su GA4 usando gli articoli ancora nel carrello,
+  // PRIMA di svuotarlo.
+  try {
+    var items = JSON.parse(localStorage.getItem('cda_cart_items')) || [];
+    if (typeof trackEvent === 'function' && items.length) {
+      trackEvent('purchase', {
+        transaction_id: sessionId || 'n-d',
+        currency: 'EUR',
+        value: items.reduce(function (sum, it) { return sum + (it.price_cents * it.quantity) / 100; }, 0),
+        items: items.map(function (it) { return { item_id: it.id, item_name: it.name, quantity: it.quantity, price: it.price_cents / 100 }; })
+      });
+    }
+  } catch (e) {}
+
   // L'ordine è confermato: svuotiamo il carrello locale.
   localStorage.removeItem('cda_cart_items');
   document.querySelectorAll('.btn-cart span').forEach(function (span) { span.textContent = '(0)'; });

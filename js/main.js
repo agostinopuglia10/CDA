@@ -167,6 +167,12 @@ function initCart() {
       saveCartItems(items);
       updateCartDisplay();
 
+      trackEvent('add_to_cart', {
+        currency: 'EUR',
+        value: (info.priceCents * qty) / 100,
+        items: [{ item_id: info.id, item_name: info.name, quantity: qty, price: info.priceCents / 100 }]
+      });
+
       var original = btn.textContent;
       btn.textContent = isLarge ? '✓ Aggiunto al carrello' : '✓';
       btn.classList.add('added');
@@ -234,6 +240,13 @@ function loadAnalytics() {
   gtag('config', GA_MEASUREMENT_ID);
 }
 
+// Invia un evento a GA4 solo se l'utente ha dato il consenso e Analytics è attivo
+// (loadAnalytics imposta window.__gaLoaded). Se il consenso non c'è, non fa nulla.
+function trackEvent(name, params) {
+  if (!window.__gaLoaded || !window.dataLayer) return;
+  window.dataLayer.push(['event', name, params || {}]);
+}
+
 function initContactForm() {
   var form = document.getElementById('quote-form');
   if (!form) return;
@@ -275,6 +288,7 @@ function initContactForm() {
         showStatus('error', 'Si è verificato un errore, riprova o contattaci direttamente. (' + result.error.message + ')');
       } else {
         showStatus('success', 'Richiesta inviata! Ti risponderemo entro 24 ore.');
+        trackEvent('generate_lead', { request_type: payload.request_type, source_page: payload.source_page });
         form.reset();
       }
     });
@@ -539,6 +553,12 @@ function initCartPage() {
         statusEl.textContent = 'Il pagamento online non è ancora collegato. Contattaci per completare l\'ordine.';
         return;
       }
+
+      trackEvent('begin_checkout', {
+        currency: 'EUR',
+        value: realItems.reduce(function (sum, it) { return sum + (it.price_cents * it.quantity) / 100; }, 0),
+        items: realItems.map(function (it) { return { item_id: it.id, item_name: it.name, quantity: it.quantity, price: it.price_cents / 100 }; })
+      });
 
       checkoutBtn.disabled = true;
       var originalText = checkoutBtn.textContent;
