@@ -142,6 +142,9 @@
         <ul class="spec-list">
           <li><span>Categoria</span><span id="spec-category">Energia</span></li>
           <li><span>Disponibilità</span><span id="spec-availability">Su ordinazione, spedizione diretta</span></li>
+          <!-- Compare solo quando "delivery_time_text" è compilato su Supabase
+               (tabella "site_settings") — vedi initDeliveryInfo() in js/main.js. -->
+          <li id="spec-delivery-row" style="display:none;"><span>Consegna</span><span id="spec-delivery"></span></li>
           <li><span>Spedizione</span><span>Tutta Italia</span></li>
           <li><span>Installazione</span><span>Disponibile nel centro tecnico</span></li>
           <li><span>Reso</span><span>Entro 14 giorni</span></li>

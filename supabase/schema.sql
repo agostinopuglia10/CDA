@@ -164,6 +164,34 @@ create table if not exists order_items (
 );
 
 -- ============================================
+-- RECENSIONI CLIENTI
+-- Per aggiungerne una: Table Editor > testimonials > Insert row, con
+-- customer_name e review_text (active è true di default). Finché la
+-- tabella è vuota, il sito non mostra la sezione recensioni.
+-- ============================================
+create table if not exists testimonials (
+  id uuid primary key default gen_random_uuid(),
+  customer_name text not null,
+  review_text text not null,
+  active boolean not null default true,
+  sort_order int not null default 0,
+  created_at timestamptz not null default now()
+);
+
+-- ============================================
+-- IMPOSTAZIONI GENERALI DEL SITO
+-- Riga unica (id sempre 1). Compila delivery_time_text dal Table Editor
+-- quando hai un tempo di consegna medio reale (es. "5-7 giorni lavorativi").
+-- ============================================
+create table if not exists site_settings (
+  id int primary key default 1 check (id = 1),
+  delivery_time_text text,
+  created_at timestamptz not null default now()
+);
+
+insert into site_settings (id) values (1) on conflict (id) do nothing;
+
+-- ============================================
 -- SICUREZZA (Row Level Security)
 -- Regola generale: il sito pubblico può SOLO leggere prodotti/categorie
 -- e SOLO inserire richieste di preventivo. Non può mai leggere gli
@@ -196,6 +224,15 @@ create policy "quote_requests_public_insert" on quote_requests for insert with c
 alter table newsletter_signups enable row level security;
 drop policy if exists "newsletter_signups_public_insert" on newsletter_signups;
 create policy "newsletter_signups_public_insert" on newsletter_signups for insert with check (true);
+
+alter table testimonials enable row level security;
+drop policy if exists "testimonials_public_read" on testimonials;
+create policy "testimonials_public_read" on testimonials for select using (active = true);
+-- Nessuna policy di insert/update pubblica: si aggiungono solo dal Table Editor.
+
+alter table site_settings enable row level security;
+drop policy if exists "site_settings_public_read" on site_settings;
+create policy "site_settings_public_read" on site_settings for select using (true);
 
 alter table orders enable row level security;
 alter table order_items enable row level security;

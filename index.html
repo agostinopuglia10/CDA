@@ -252,6 +252,9 @@
   <div class="trust-item"><strong>Tivoli</strong> (RM) — centro tecnico in sede</div>
   <div class="trust-item"><strong>Preventivi</strong> rapidi entro 24h</div>
   <div class="trust-item"><strong>Shop + centro tecnico</strong> un solo interlocutore</div>
+  <!-- Compare solo quando "delivery_time_text" è compilato su Supabase
+       (tabella "site_settings") — vedi initDeliveryInfo() in js/main.js. -->
+  <div class="trust-item" id="trust-delivery-item" style="display:none;"><strong>Consegna</strong> <span id="trust-delivery-text"></span></div>
 </div>
 
 <section style="padding:48px 0;">
@@ -266,8 +269,10 @@
   </div>
 </section>
 
-<!-- ATTENZIONE: recensioni segnaposto, da sostituire con recensioni reali dei clienti prima della pubblicazione. -->
-<section>
+<!-- Recensioni reali: caricate da Supabase (tabella "testimonials"). Finché
+     non ce n'è nessuna attiva, questa sezione resta nascosta di proposito
+     invece di mostrare testi finti — vedi initTestimonials() in js/main.js. -->
+<section id="testimonials-section" style="display:none;">
   <div class="container">
     <div class="section-head">
       <div>
@@ -275,20 +280,7 @@
         <h2>Cosa dicono i clienti</h2>
       </div>
     </div>
-    <div class="cat-grid" style="grid-template-columns:repeat(auto-fit, minmax(240px, 1fr));">
-      <div class="cat-card" style="cursor:default;">
-        <p style="font-style:italic;margin-bottom:12px;">"[Recensione da inserire — sostituire con una testimonianza reale di un cliente]"</p>
-        <h3 style="font-size:16px;">[Nome cliente]</h3>
-      </div>
-      <div class="cat-card" style="cursor:default;">
-        <p style="font-style:italic;margin-bottom:12px;">"[Recensione da inserire — sostituire con una testimonianza reale di un cliente]"</p>
-        <h3 style="font-size:16px;">[Nome cliente]</h3>
-      </div>
-      <div class="cat-card" style="cursor:default;">
-        <p style="font-style:italic;margin-bottom:12px;">"[Recensione da inserire — sostituire con una testimonianza reale di un cliente]"</p>
-        <h3 style="font-size:16px;">[Nome cliente]</h3>
-      </div>
-    </div>
+    <div class="cat-grid" id="testimonials-grid" style="grid-template-columns:repeat(auto-fit, minmax(240px, 1fr));"></div>
   </div>
 </section>
 

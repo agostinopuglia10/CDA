@@ -14,13 +14,110 @@ document.addEventListener('DOMContentLoaded', function () {
     Promise.resolve(initShopCatalog()),
     Promise.resolve(initCategoryPage()),
     Promise.resolve(initFeaturedCarousel()),
-    Promise.resolve(initProductPage())
+    Promise.resolve(initProductPage()),
+    Promise.resolve(initTestimonials()),
+    Promise.resolve(initDeliveryInfo())
   ]).then(function () {
     initCart();
     initProductFilters();
     initQtySelector();
   });
 });
+
+// Calcola il risparmio (in centesimi) di ogni kit rispetto alla somma dei
+// componenti acquistati singolarmente. Usata per mostrare "Risparmi €X"
+// sul badge dei kit in tutte le viste a lista/carosello (shop, categoria,
+// in evidenza), non solo nella scheda prodotto.
+function getBundleSavingsMap(bundleIds) {
+  if (!bundleIds || bundleIds.length === 0 || !supabaseClient) return Promise.resolve({});
+  return supabaseClient
+    .from('bundle_items')
+    .select('bundle_id, quantity, component:component_product_id(price_cents), bundle:bundle_id(price_cents)')
+    .in('bundle_id', bundleIds)
+    .then(function (res) {
+      var totals = {};
+      var bundlePrices = {};
+      (res.data || []).forEach(function (row) {
+        if (!row.component) return;
+        var qty = row.quantity || 1;
+        totals[row.bundle_id] = (totals[row.bundle_id] || 0) + row.component.price_cents * qty;
+        if (row.bundle) bundlePrices[row.bundle_id] = row.bundle.price_cents;
+      });
+      var map = {};
+      Object.keys(totals).forEach(function (id) {
+        var savings = totals[id] - (bundlePrices[id] || 0);
+        if (savings > 0) map[id] = savings;
+      });
+      return map;
+    })
+    .catch(function () { return {}; });
+}
+
+// Recensioni reali (tabella "testimonials" su Supabase). Il proprietario le
+// aggiunge dal Table Editor di Supabase, senza toccare il codice: basta una
+// riga con customer_name + review_text (active = true di default). Finché
+// non ce n'è nessuna, la sezione resta nascosta invece di mostrare testi finti.
+function initTestimonials() {
+  var section = document.getElementById('testimonials-section');
+  var grid = document.getElementById('testimonials-grid');
+  if (!section || !grid || !supabaseClient) return;
+
+  return supabaseClient
+    .from('testimonials')
+    .select('customer_name, review_text')
+    .eq('active', true)
+    .order('sort_order')
+    .then(function (res) {
+      if (res.error || !res.data || res.data.length === 0) return; // nessuna recensione vera ancora: sezione nascosta
+      grid.innerHTML = '';
+      res.data.forEach(function (t) {
+        var card = document.createElement('div');
+        card.className = 'cat-card';
+        card.style.cursor = 'default';
+
+        var quote = document.createElement('p');
+        quote.style.fontStyle = 'italic';
+        quote.style.marginBottom = '12px';
+        quote.textContent = '"' + t.review_text + '"';
+
+        var name = document.createElement('h3');
+        name.style.fontSize = '16px';
+        name.textContent = t.customer_name;
+
+        card.appendChild(quote);
+        card.appendChild(name);
+        grid.appendChild(card);
+      });
+      section.style.display = '';
+    })
+    .catch(function () { /* connessione assente o errore: sezione nascosta */ });
+}
+
+// Tempo di consegna medio (tabella "site_settings", riga unica id=1, campo
+// delivery_time_text). Il proprietario lo compila dal Table Editor di
+// Supabase quando ha un dato reale — finché il campo è vuoto, niente badge
+// né promessa sui tempi viene mostrata da nessuna parte del sito.
+function initDeliveryInfo() {
+  if (!supabaseClient) return;
+  var tripItem = document.getElementById('trust-delivery-item');
+  var tripText = document.getElementById('trust-delivery-text');
+  var specRow = document.getElementById('spec-delivery-row');
+  var specText = document.getElementById('spec-delivery');
+  if (!tripItem && !specRow) return; // nessun punto di questa pagina lo mostra
+
+  return supabaseClient
+    .from('site_settings')
+    .select('delivery_time_text')
+    .eq('id', 1)
+    .single()
+    .then(function (res) {
+      var text = res.data && res.data.delivery_time_text;
+      if (res.error || !text) return; // tempo di consegna non ancora definito
+      if (tripItem && tripText) { tripText.textContent = text; tripItem.style.display = ''; }
+      if (specRow && specText) { specText.textContent = text; specRow.style.display = ''; }
+    })
+    .catch(function () { /* dato non ancora impostato */ });
+}
 
 function initShopCatalog() {
   var grid = document.querySelector('.product-grid');
@@ -34,6 +131,8 @@ function initShopCatalog() {
     .then(function (res) {
       if (res.error || !res.data || res.data.length === 0) return; // fallback silenzioso: restano i placeholder
 
+      var bundleIds = res.data.filter(function (p) { return p.is_bundle; }).map(function (p) { return p.id; });
+      return getBundleSavingsMap(bundleIds).then(function (savingsMap) {
       grid.innerHTML = '';
       res.data.forEach(function (p) {
         // Il pulsante filtro usa lo slug di primo livello (interni/esterni/...),
@@ -42,7 +141,9 @@ function initShopCatalog() {
         var topSlug = p.categories && p.categories.path ? p.categories.path.split('.')[0] : (p.categories ? p.categories.slug : '');
         var catName = p.categories ? p.categories.name : '';
         var priceEUR = (p.price_cents / 100).toLocaleString('it-IT', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
-        var badge = p.is_bundle ? '<span class="product-badge">Kit risparmio</span>' : (p.featured ? '<span class="product-badge">In evidenza</span>' : '');
+        var badge = p.is_bundle
+          ? '<span class="product-badge">' + (savingsMap[p.id] ? 'Risparmi ' + formatEUR(savingsMap[p.id]) : 'Kit risparmio') + '</span>'
+          : (p.featured ? '<span class="product-badge">In evidenza</span>' : '');
         var thumb = p.image_url
           ? '<img src="' + p.image_url + '" alt="' + p.name + '" style="width:100%;height:100%;object-fit:cover;">'
           : 'Foto prodotto';
@@ -65,6 +166,7 @@ function initShopCatalog() {
           '</div>';
         grid.appendChild(card);
       });
+      });
     })
     .catch(function () { /* connessione assente o errore: restano i placeholder */ });
 }
@@ -75,16 +177,21 @@ function initFeaturedCarousel() {
 
   return supabaseClient
     .from('products')
-    .select('id, name, price_cents, image_url, featured, categories(slug, name)')
+    .select('id, name, price_cents, image_url, featured, is_bundle, categories(slug, name)')
     .eq('active', true)
     .eq('featured', true)
     .then(function (res) {
       if (res.error || !res.data || res.data.length === 0) return; // fallback silenzioso: restano i placeholder
 
+      var bundleIds = res.data.filter(function (p) { return p.is_bundle; }).map(function (p) { return p.id; });
+      return getBundleSavingsMap(bundleIds).then(function (savingsMap) {
       track.innerHTML = '';
       res.data.forEach(function (p) {
         var catName = p.categories ? p.categories.name : '';
         var priceEUR = (p.price_cents / 100).toLocaleString('it-IT', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+        var badge = p.is_bundle
+          ? '<span class="product-badge">' + (savingsMap[p.id] ? 'Risparmi ' + formatEUR(savingsMap[p.id]) : 'Kit risparmio') + '</span>'
+          : '<span class="product-badge">In evidenza</span>';
         var thumb = p.image_url
           ? '<img src="' + p.image_url + '" alt="' + p.name + '" style="width:100%;height:100%;object-fit:cover;">'
           : 'Foto prodotto';
@@ -93,7 +200,7 @@ function initFeaturedCarousel() {
         card.className = 'product-card promo-card';
         card.innerHTML =
           '<a class="product-link" href="prodotto.html?id=' + p.id + '">' +
-            '<div class="product-thumb"><span class="product-badge">In evidenza</span>' + thumb + '</div>' +
+            '<div class="product-thumb">' + badge + thumb + '</div>' +
           '</a>' +
           '<div class="product-body">' +
             '<span class="product-cat">' + catName + '</span>' +
@@ -103,6 +210,7 @@ function initFeaturedCarousel() {
             '</div>' +
           '</div>';
         track.appendChild(card);
+      });
       });
     })
     .catch(function () { /* connessione assente o errore: restano i placeholder */ });
@@ -339,12 +447,16 @@ function loadCategoryFromSupabase(pathStr, subcatGrid, grid) {
             .then(function (prodRes) {
               if (prodRes.error || !prodRes.data || prodRes.data.length === 0) return; // nessun prodotto: restano i placeholder
 
+              var bundleIds = prodRes.data.filter(function (p) { return p.is_bundle; }).map(function (p) { return p.id; });
+              return getBundleSavingsMap(bundleIds).then(function (savingsMap) {
               grid.innerHTML = '';
               prodRes.data.forEach(function (p) {
                 var subSlug = p.categories ? p.categories.slug : '';
                 var subName = p.categories ? p.categories.name : '';
                 var priceEUR = (p.price_cents / 100).toLocaleString('it-IT', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
-                var badge = p.is_bundle ? '<span class="product-badge">Kit risparmio</span>' : (p.featured ? '<span class="product-badge">In evidenza</span>' : '');
+                var badge = p.is_bundle
+                  ? '<span class="product-badge">' + (savingsMap[p.id] ? 'Risparmi ' + formatEUR(savingsMap[p.id]) : 'Kit risparmio') + '</span>'
+                  : (p.featured ? '<span class="product-badge">In evidenza</span>' : '');
                 var thumb = p.image_url
                   ? '<img src="' + p.image_url + '" alt="' + p.name + '" style="width:100%;height:100%;object-fit:cover;">'
                   : 'Foto prodotto';
@@ -366,6 +478,7 @@ function loadCategoryFromSupabase(pathStr, subcatGrid, grid) {
                     '</div>' +
                   '</div>';
                 grid.appendChild(card);
+              });
               });
             });
         });
@@ -426,10 +539,14 @@ function renderRelatedProducts(p) {
         .then(function (res) {
           if (res.error || !res.data || res.data.length === 0) return; // restano i placeholder
 
+          var bundleIds = res.data.filter(function (rp) { return rp.is_bundle; }).map(function (rp) { return rp.id; });
+          return getBundleSavingsMap(bundleIds).then(function (savingsMap) {
           grid.innerHTML = '';
           res.data.forEach(function (rp) {
             var priceEUR = formatEUR(rp.price_cents);
-            var badge = rp.is_bundle ? '<span class="product-badge">Kit risparmio</span>' : (rp.featured ? '<span class="product-badge">In evidenza</span>' : '');
+            var badge = rp.is_bundle
+              ? '<span class="product-badge">' + (savingsMap[rp.id] ? 'Risparmi ' + formatEUR(savingsMap[rp.id]) : 'Kit risparmio') + '</span>'
+              : (rp.featured ? '<span class="product-badge">In evidenza</span>' : '');
             var thumb = rp.image_url
               ? '<img src="' + rp.image_url + '" alt="' + rp.name + '" style="width:100%;height:100%;object-fit:cover;">'
               : 'Foto prodotto';
@@ -448,6 +565,7 @@ function renderRelatedProducts(p) {
                 '</div>' +
               '</div>';
             grid.appendChild(card);
+          });
           });
         });
     });
