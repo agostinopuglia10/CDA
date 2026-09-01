@@ -46,6 +46,10 @@ Stato: la struttura del sito (pagine, database, categorie, carrello, kit, SEO ba
 
 ## 📣 Marketing / Social
 
+- [x] **Newsletter collegata a MailerLite**: creato l'account MailerLite. Fatta `supabase/functions/sync-newsletter-signup`, distribuita e attiva — ogni iscrizione dal form del sito viene mandata automaticamente a MailerLite (prima restavano solo nel database, senza inviare mai nulla a nessuno). Per accenderla del tutto mancano solo 2 cose che devi fare tu su Supabase (Edge Functions → Secrets), stesso procedimento già fatto per Stripe/Resend:
+  - `MAILERLITE_API_KEY` — da MailerLite: Integrazioni → Developer API
+  - `MAILERLITE_GROUP_ID` (facoltativo) — se vuoi che gli iscritti finiscano in un Gruppo specifico
+  - poi va collegato il trigger: Supabase → Database → Webhooks → tabella `newsletter_signups`, evento Insert, funzione `sync-newsletter-signup`
 - [ ] **Pagina Facebook + profilo Instagram per CDA**: da creare/confermare se non esistono già — servono comunque per collegare bene il Pixel Meta già attivo (oggi punta solo al sito, non a pagine social) e per pubblicare i post.
 - [ ] **Iniziare a pubblicare contenuti organici**: materiale già pronto e riutilizzabile dal sito — foto prodotto reali (197/200), i 6 kit con sconto vero, foto prima/dopo delle lavorazioni lamiera. Non serve aspettare dominio/Stripe per iniziare a postare: i contenuti possono anche solo far conoscere l'attività, senza per forza linkare al sito finché non è online sul dominio definitivo.
 - [ ] **Campagne a pagamento (Meta Ads)**: da valutare più avanti, non ora. Il Pixel è collegato e funzionante ma ha bisogno di un po' di traffico/eventi reali accumulati prima di poter ottimizzare bene una campagna — meglio partire con post organici, poi passare a sponsorizzate quando c'è dominio definitivo + un minimo storico di dati.
