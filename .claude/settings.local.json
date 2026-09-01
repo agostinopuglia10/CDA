@@ -28,7 +28,10 @@
       "Bash(curl -s --path-as-is -o /dev/null -w \"status: %{http_code}\\\\n\" \"http://localhost:8642/%2e%2e/%2e%2e/%2e%2e/Windows/win.ini\")",
       "Bash(curl -s -o /dev/null -w \"status: %{http_code}\\\\n\" \"http://localhost:8642/js/main.js\")",
       "Bash(netstat -ano)",
-      "Bash(git -C \"/c/Users/PC/Desktop/CDA,Ecom\" status --short)"
+      "Bash(git -C \"/c/Users/PC/Desktop/CDA,Ecom\" status --short)",
+      "Bash(curl -s -X PATCH https://udynqqqxjcyhdeygqumi.supabase.co/rest/v1/products?id=eq.bcf65d80-8633-4e2b-b2f1-b6f6c5d3dd40 -H 'apikey: sb_publishable_xjJru5AOW6V242H2L7rZTg_Lg6zXYw5' -H 'Authorization: Bearer sb_publishable_xjJru5AOW6V242H2L7rZTg_Lg6zXYw5' -H 'Content-Type: application/json' -d '{\"price_cents\": 1}' -w '\\\\nHTTP_STATUS:%{http_code}\\\\n')",
+      "mcp__claude-in-chrome__navigate",
+      "Bash(node -c \"/c/Users/PC/Desktop/CDA,Ecom/js/main.js\")"
     ]
   }
 }

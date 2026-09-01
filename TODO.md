@@ -6,7 +6,7 @@ Stato: la struttura del sito (pagine, database, categorie, carrello, kit, SEO ba
 
 - [ ] **Stripe checkout**: il codice esiste ed è stato distribuito (`supabase/functions/create-checkout-session`) ma manca ancora la chiave segreta Stripe (`STRIPE_SECRET_KEY` nei secrets della Edge Function su Supabase) — senza quella non funziona. Va aggiunta e testata con un pagamento reale (anche da 1€, poi rimborsato) prima di fidarsene.
 - [ ] **Notifica email nuove richieste**: Edge Function scritta e distribuita (`supabase/functions/notify-new-quote`) ma non collegata — serve un account Resend, le chiavi `RESEND_API_KEY`/`NOTIFY_EMAIL` nei secrets, e configurare il Database Webhook su Supabase.
-- [ ] **P.IVA e ragione sociale**: in attesa del commercialista. Una volta definite, vanno aggiornate `privacy.html` e `termini.html` (oggi sono ancora scheletri generici) e il footer di tutte le pagine.
+- [x] **P.IVA e ragione sociale**: dati ufficiali ricevuti — **CDA di Talucci Maria**, P.IVA **04047161007**, PEC **talucci.maria@pec.it**, tel. 0774 411288, fax 0774 411120. Aggiornati footer di tutte le 13 pagine, `privacy.html` (Titolare del trattamento) e `termini.html` (Informazioni generali). Nel farlo, trovato e tolto un residuo dimenticato in `termini.html` che menzionava ancora "ritiro gratuito in sede" (vecchio modello, già rimosso ovunque altrove). Restano comunque testi segnaposto generici da far verificare a un legale prima della pubblicazione definitiva (il disclaimer in cima alle due pagine lo dice già).
 - [x] **Foto prodotto**: 197 prodotti su 200 hanno ora un'immagine reale (collegata direttamente ai server di Euro Accessoires Italia / GES — verifica di avere l'autorizzazione scritta, vedi punto sotto). Restano solo 3 senza foto (nessun match affidabile trovato sui siti dei fornitori, meglio lasciarli vuoti che sbagliare): **Presa 12V 7 Pin in PVC/plastica**, **Presa esterna 220V con salvavita Bticino**, **Mastice per ricostruzione legno 1 litro**.
 - [x] **Feed prodotti Google Shopping**: `supabase/functions/product-feed` distribuita e verificata funzionante (risponde con XML valido). Genera in automatico il feed con tutti i prodotti che hanno foto+prezzo reale. Prima di attivarlo su Google Merchant restano da fare: 1) il sito deve essere pubblicato su un dominio reale (Google verifica che i link prodotto siano raggiungibili), 2) verificare l'autorizzazione sulle immagini (stesso punto sopra).
 - [x] **Campo "brand" corretto**: rimosso il nome del grossista dal campo `brand` (era il caso per 134 prodotti). Ora ogni prodotto ha il produttore reale verificato sui siti dei fornitori (Autoterm, Dometic, Fiamma, Thetford, Thule, Truma, Victron Energy, ecc.) oppure `brand = NULL` per gli articoli generici/senza marchio (116 prodotti, verificato non essere un errore).
@@ -36,9 +36,19 @@ Stato: la struttura del sito (pagine, database, categorie, carrello, kit, SEO ba
 
 - [x] Sito pubblicato in anteprima (sola visualizzazione) su Netlify, collegato al branch `feature/ga4-conversion-tracking` del repo GitHub — si aggiorna da solo a ogni push: **https://relaxed-strudel-133bd6.netlify.app**. Da non confondere con il lancio reale: manca ancora dominio definitivo, Stripe attivo, dati reali.
 
+## 🔒 Sicurezza
+
+- [x] **Controllo di sicurezza fatto il 2026-08-14** (revisione codice + test dal vivo). Trovate e sistemate 2 falle reali, poi ridistribuite/pubblicate:
+  - Server di anteprima locale (`scripts/dev-server.js`): non controllava che i file richiesti restassero dentro la cartella del sito (path traversal) e ascoltava su tutta la rete invece che solo sul PC locale — corretto, verificato con un vero tentativo di attacco bloccato.
+  - Email di notifica preventivi (`supabase/functions/notify-new-quote`): i campi del form Contatti finivano senza filtro nell'email — un link camuffato scritto nel messaggio sarebbe apparso cliccabile nella tua casella. Corretto con escaping HTML, ridistribuita su Supabase (v2).
+- [x] **Prezzi al sicuro da modifiche esterne**: verificato (RLS attiva + test reale di modifica fallito) che nessuno può cambiare prezzi/prodotti dal sito pubblico usando la chiave che gira nel browser — può solo leggere. Stessa cosa per gli ordini clienti: non leggibili né modificabili dall'esterno.
+- [x] **Dati di pagamento (carte/IBAN)**: non passano né dal sito né da Supabase — il checkout reindirizza su Stripe (certificato PCI-DSS), che è già di fatto il "server separato" per i dati sensibili. Da NON fare mai: costruire un modulo carta proprio, o salvare IBAN clienti su Supabase (per i rimborsi si usa il pannello Stripe).
+
 ## ✅ Già confermato reale (non serve ritoccare)
 
 - Orari di apertura (08:30–13:00, 14:30–18:00) confermati reali dall'utente.
 - Indirizzo: Via Arci n.24, Tivoli (RM).
 - Telefono: 389 547 2846.
 - GA4 Measurement ID reale collegato.
+- Ragione sociale: CDA di Talucci Maria — P.IVA 04047161007 — PEC talucci.maria@pec.it — tel. 0774 411288 — fax 0774 411120.
+- Pixel Meta collegato (ID 1274471299084547) in `js/main.js`, attivo solo dopo consenso cookie "Accetta tutti" (mai prima, verificato). Invia gli stessi eventi già tracciati su GA4 (AddToCart, InitiateCheckout, Purchase, Lead, Subscribe). Banner cookie e privacy policy aggiornati per menzionare anche i cookie di marketing, non solo statistici.

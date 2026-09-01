@@ -889,7 +889,7 @@ function initCookieBanner() {
   banner.setAttribute('aria-label', 'Consenso cookie');
   banner.innerHTML =
     '<div class="cookie-banner-inner">' +
-      '<p>Usiamo cookie tecnici necessari al funzionamento del sito e, solo con il tuo consenso, cookie di analisi statistica. Maggiori informazioni nella <a href="privacy.html">Privacy Policy</a>.</p>' +
+      '<p>Usiamo cookie tecnici necessari al funzionamento del sito e, solo con il tuo consenso, cookie di analisi statistica e di marketing (per mostrarti annunci pertinenti su Facebook/Instagram). Maggiori informazioni nella <a href="privacy.html">Privacy Policy</a>.</p>' +
       '<div class="cookie-banner-actions">' +
         '<button type="button" class="btn btn-outline cookie-reject">Solo necessari</button>' +
         '<button type="button" class="btn btn-primary cookie-accept">Accetta tutti</button>' +
@@ -915,24 +915,68 @@ function initCookieBanner() {
 
 function loadAnalytics() {
   var GA_MEASUREMENT_ID = 'G-H2W2W8FGY6';
-  if (window.__gaLoaded) return;
-  window.__gaLoaded = true;
+  if (!window.__gaLoaded) {
+    window.__gaLoaded = true;
+    var script = document.createElement('script');
+    script.async = true;
+    script.src = 'https://www.googletagmanager.com/gtag/js?id=' + GA_MEASUREMENT_ID;
+    document.head.appendChild(script);
+    window.dataLayer = window.dataLayer || [];
+    function gtag(){ dataLayer.push(arguments); }
+    gtag('js', new Date());
+    gtag('config', GA_MEASUREMENT_ID);
+  }
 
-  var script = document.createElement('script');
-  script.async = true;
-  script.src = 'https://www.googletagmanager.com/gtag/js?id=' + GA_MEASUREMENT_ID;
-  document.head.appendChild(script);
-  window.dataLayer = window.dataLayer || [];
-  function gtag(){ dataLayer.push(arguments); }
-  gtag('js', new Date());
-  gtag('config', GA_MEASUREMENT_ID);
+  var META_PIXEL_ID = '1274471299084547';
+  if (!window.__metaLoaded) {
+    window.__metaLoaded = true;
+    !function(f,b,e,v,n,t,s)
+    {if(f.fbq)return;n=f.fbq=function(){n.callMethod?
+    n.callMethod.apply(n,arguments):n.queue.push(arguments)};
+    if(!f._fbq)f._fbq=n;n.push=n;n.loaded=!0;n.version='2.0';
+    n.queue=[];t=b.createElement(e);t.async=!0;
+    t.src=v;s=b.getElementsByTagName(e)[0];
+    s.parentNode.insertBefore(t,s)}(window, document,'script',
+    'https://connect.facebook.net/en_US/fbevents.js');
+    fbq('init', META_PIXEL_ID);
+    fbq('track', 'PageView');
+  }
 }
 
-// Invia un evento a GA4 solo se l'utente ha dato il consenso e Analytics è attivo
-// (loadAnalytics imposta window.__gaLoaded). Se il consenso non c'è, non fa nulla.
+// Nomi degli eventi standard di Meta corrispondenti ai nostri eventi GA4,
+// così ogni chiamata a trackEvent() invia il dato a entrambi senza dover
+// toccare i punti del codice dove viene chiamata.
+var META_EVENT_MAP = {
+  add_to_cart: 'AddToCart',
+  begin_checkout: 'InitiateCheckout',
+  purchase: 'Purchase',
+  generate_lead: 'Lead',
+  newsletter_signup: 'Subscribe'
+};
+
+// Invia un evento a GA4 e al Pixel Meta, solo se il consenso è stato dato
+// (loadAnalytics imposta i due flag qui sotto). Se il consenso non c'è, non fa nulla.
 function trackEvent(name, params) {
-  if (!window.__gaLoaded || !window.dataLayer) return;
-  window.dataLayer.push(['event', name, params || {}]);
+  params = params || {};
+
+  if (window.__gaLoaded && window.dataLayer) {
+    window.dataLayer.push(['event', name, params]);
+  }
+
+  if (window.__metaLoaded && typeof fbq === 'function') {
+    var metaName = META_EVENT_MAP[name];
+    if (metaName) {
+      var metaParams = {};
+      if (params.currency) metaParams.currency = params.currency;
+      if (typeof params.value === 'number') metaParams.value = params.value;
+      if (Array.isArray(params.items)) {
+        metaParams.content_type = 'product';
+        metaParams.content_ids = params.items.map(function (it) { return it.item_id; });
+        metaParams.contents = params.items.map(function (it) { return { id: it.item_id, quantity: it.quantity }; });
+      }
+      fbq('track', metaName, metaParams);
+    }
+  }
 }
 
 function initContactForm() {
