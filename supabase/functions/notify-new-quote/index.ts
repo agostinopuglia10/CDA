@@ -11,10 +11,9 @@
 // 2. Prendi la tua API key da resend.com/api-keys
 // 3. Nel progetto Supabase, Edge Functions > Secrets, aggiungi:
 //      RESEND_API_KEY   = la chiave presa da Resend
-//      NOTIFY_EMAIL     = l'indirizzo a cui vuoi ricevere gli avvisi
-//                         (per ora: agostino.puglia@gmail.com — cambialo
-//                          qui quando avrai l'email definitiva
-//                          dell'attività, senza toccare il codice)
+//      NOTIFY_EMAIL     = facoltativo, solo se vuoi ricevere gli avvisi
+//                         su un indirizzo diverso da quello di default
+//                         (oggi: talucci.maria@alice.it, impostato nel codice)
 // 4. Pubblica questa funzione da Edge Functions > Deploy a new function,
 //    chiamata "notify-new-quote", incollando questo file
 // 5. Collega il "trigger": Database > Webhooks > Create a new webhook
@@ -28,9 +27,10 @@
 // ============================================================
 
 const RESEND_API_KEY = Deno.env.get('RESEND_API_KEY')!;
-// Placeholder: sostituiscilo aggiornando il secret NOTIFY_EMAIL su Supabase,
-// non serve ripubblicare la funzione.
-const NOTIFY_EMAIL = Deno.env.get('NOTIFY_EMAIL') || 'agostino.puglia@gmail.com';
+// Email reale del titolare. Puoi cambiarla senza toccare il codice
+// impostando il secret NOTIFY_EMAIL su Supabase, se un giorno vuoi
+// mandarle altrove.
+const NOTIFY_EMAIL = Deno.env.get('NOTIFY_EMAIL') || 'talucci.maria@alice.it';
 // Il mittente deve appartenere a un dominio verificato su Resend;
 // finché non ne verifichi uno tuo (es. info@cda-camper.it), usa quello di test.
 const FROM_EMAIL = Deno.env.get('FROM_EMAIL') || 'CDA Sito <onboarding@resend.dev>';
