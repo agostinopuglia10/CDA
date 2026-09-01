@@ -2,6 +2,20 @@
 
 Stato (2026-09-01): struttura, integrazioni tecniche (Stripe, notifiche email, newsletter, sicurezza) e dati aziendali ufficiali sono tutti a posto e verificati end-to-end. Quello che resta prima di aprire davvero al pubblico è: **dominio definitivo**, e i contenuti reali ancora mancanti (🟡 sotto — recensioni, tempi di consegna, conferma telefono, autorizzazione immagini).
 
+## 🎨 Estetica/UX (ispirato ai grandi e-commerce, 2026-09-01)
+
+- [x] Hover elevation sulle card prodotto (desktop) — angoli restano vivi, coerente con l'identità del sito.
+- [x] Tolti sconti finti (badge "-15%"/"-10%") dalle card placeholder del carosello "Selezionati per te" — restavano solo se Supabase non rispondeva, ma un visitatore avrebbe visto uno sconto inventato.
+- [x] Trust signal (spedizione/reso/pagamenti) spostati subito sotto il pulsante d'acquisto sulla scheda prodotto (prima erano più in fondo, dopo il link installazione).
+- [x] Notifica "Aggiunto al carrello" (toast, in alto a destra su desktop / in basso su mobile), oltre al feedback sul bottone.
+- [x] **Filtro per marca** nello shop, popolato in automatico con le marche reali presenti nel catalogo (nessuna marca scritta a mano).
+- [x] **Barra fissa d'acquisto su mobile**: scorrendo oltre il pulsante "Aggiungi al carrello" sulla scheda prodotto, compare una barra in fondo allo schermo con prezzo + pulsante, sempre raggiungibile.
+- [x] **Indicatore di passaggio** Carrello → Pagamento → Conferma, nel carrello e nella pagina di conferma ordine.
+- [x] **Carosello prodotti in evidenza aggiunto anche in home** (prima esisteva solo su shop.html).
+- [x] **Sottocategorie di categoria.html**: da grandi card (occupavano molto spazio, specialmente su mobile) a chip compatte in una riga — i prodotti si vedono più in alto. Nota: le chip non mostrano più le foto che avevano le card grandi (in alcune sottocategorie, es. Verande/Portaggio) — scelta deliberata per restare compatte, ma è una foto in meno rispetto a prima: dimmi se preferisci tornare alle card con foto.
+
+Tutto verificato dal vivo (desktop + mobile, tema chiaro + scuro): nessuna funzionalità esistente si è rotta (ricerca con carosello nascosto, filtro categoria/veicolo/sottocategoria, carrello). Pubblicato su Netlify.
+
 ## 🔴 Da fare prima di aprire davvero al pubblico
 
 - [x] **Stripe checkout — funzionante, verificato end-to-end (2026-09-01)**: chiave `STRIPE_SECRET_KEY` salvata su Supabase. Testato con una vera chiamata alla funzione: genera correttamente una sessione di pagamento, verificata anche visivamente aprendo la pagina — mostra il prodotto giusto ("Interruttore Unipolare Grigio — 14,00€") e la ragione sociale corretta ("Sandbox di CDA di TALUCCI MARIA"). Ordine di prova ripulito dal database. **Attenzione**: è ancora la chiave di **test** (`sk_test_...`, modalità sandbox — nessun soldo vero si muove). Prima del lancio reale va sostituita con la chiave **live** (`sk_live_...`) da Stripe, quando l'attività è pronta ad accettare pagamenti veri.
