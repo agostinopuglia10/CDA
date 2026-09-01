@@ -13,7 +13,22 @@
       "mcp__claude-in-chrome__tabs_context_mcp",
       "Bash(git -C \"/c/Users/PC/Desktop/CDA,Ecom\" status)",
       "Bash(git -C \"/c/Users/PC/Desktop/CDA,Ecom\" branch -vv)",
-      "Bash(git -C \"/c/Users/PC/Desktop/CDA,Ecom\" log --oneline -5)"
+      "Bash(git -C \"/c/Users/PC/Desktop/CDA,Ecom\" log --oneline -5)",
+      "Bash(git -C \"/c/Users/PC/Desktop/CDA,Ecom\" remote set-head origin main)",
+      "Bash(git -C \"/c/Users/PC/Desktop/CDA,Ecom\" symbolic-ref refs/remotes/origin/HEAD)",
+      "Bash(git diff *)",
+      "Read(//tmp/**)",
+      "Bash(git -C \"C:/Users/PC/Desktop/CDA,Ecom\" log --oneline -- scripts/dev-server.js .claude/launch.json)",
+      "Bash(node -c \"/c/Users/PC/Desktop/CDA,Ecom/scripts/dev-server.js\")",
+      "Bash(node -e ' *)",
+      "Bash(curl -s -o /dev/null -w \"status: %{http_code}\\\\n\" \"http://localhost:8642/index.html\")",
+      "Bash(curl -s -o /dev/null -w \"status: %{http_code}\\\\n\" \"http://localhost:8642/../../../../Windows/win.ini\")",
+      "Bash(curl -s -o /dev/null -w \"status: %{http_code}\\\\n\" \"http://localhost:8642/%2e%2e/%2e%2e/%2e%2e/Windows/win.ini\")",
+      "Bash(curl -s --path-as-is -o /dev/null -w \"status: %{http_code}\\\\n\" \"http://localhost:8642/../../../../Windows/win.ini\")",
+      "Bash(curl -s --path-as-is -o /dev/null -w \"status: %{http_code}\\\\n\" \"http://localhost:8642/%2e%2e/%2e%2e/%2e%2e/Windows/win.ini\")",
+      "Bash(curl -s -o /dev/null -w \"status: %{http_code}\\\\n\" \"http://localhost:8642/js/main.js\")",
+      "Bash(netstat -ano)",
+      "Bash(git -C \"/c/Users/PC/Desktop/CDA,Ecom\" status --short)"
     ]
   }
 }

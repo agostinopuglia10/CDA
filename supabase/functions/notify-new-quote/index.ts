@@ -40,14 +40,18 @@ Deno.serve(async (req) => {
     const payload = await req.json();
     const record = payload.record || {};
 
+    // Il form Contatti è pubblico: chiunque può scrivere HTML nei campi
+    // (es. un link camuffato nel messaggio). Va sempre "escapato" prima di
+    // finire nel corpo HTML dell'email, altrimenti verrebbe reso cliccabile
+    // nella tua casella di posta.
     const html = `
       <h2>Nuova richiesta dal sito CDA</h2>
-      <p><strong>Nome:</strong> ${record.name || '-'}</p>
-      <p><strong>Email:</strong> ${record.email || '-'}</p>
-      <p><strong>Telefono:</strong> ${record.phone || '-'}</p>
-      <p><strong>Motivo:</strong> ${record.request_type || '-'}</p>
-      <p><strong>Messaggio:</strong> ${record.message || '-'}</p>
-      <p><strong>Pagina di provenienza:</strong> ${record.source_page || '-'}</p>
+      <p><strong>Nome:</strong> ${escapeHtml(record.name) || '-'}</p>
+      <p><strong>Email:</strong> ${escapeHtml(record.email) || '-'}</p>
+      <p><strong>Telefono:</strong> ${escapeHtml(record.phone) || '-'}</p>
+      <p><strong>Motivo:</strong> ${escapeHtml(record.request_type) || '-'}</p>
+      <p><strong>Messaggio:</strong> ${escapeHtml(record.message) || '-'}</p>
+      <p><strong>Pagina di provenienza:</strong> ${escapeHtml(record.source_page) || '-'}</p>
       <hr>
       <p style="color:#888;font-size:12px;">Rispondi direttamente all'email del cliente per contattarlo.</p>
     `;
@@ -86,3 +90,13 @@ Deno.serve(async (req) => {
     });
   }
 });
+
+function escapeHtml(value: unknown): string {
+  if (value === null || value === undefined) return '';
+  return String(value)
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;')
+    .replace(/'/g, '&#39;');
+}
