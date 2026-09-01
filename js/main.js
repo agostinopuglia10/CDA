@@ -21,6 +21,7 @@ document.addEventListener('DOMContentLoaded', function () {
     initCart();
     initProductFilters();
     initQtySelector();
+    initStickyBuyBar();
   });
 });
 
@@ -126,10 +127,12 @@ function initShopCatalog() {
 
   return supabaseClient
     .from('products')
-    .select('id, name, price_cents, image_url, featured, is_bundle, vehicle_compatibility, categories(slug, name, path)')
+    .select('id, name, price_cents, image_url, featured, is_bundle, vehicle_compatibility, brand, categories(slug, name, path)')
     .eq('active', true)
     .then(function (res) {
       if (res.error || !res.data || res.data.length === 0) return; // fallback silenzioso: restano i placeholder
+
+      populateBrandFilter(res.data);
 
       var bundleIds = res.data.filter(function (p) { return p.is_bundle; }).map(function (p) { return p.id; });
       return getBundleSavingsMap(bundleIds).then(function (savingsMap) {
@@ -153,6 +156,7 @@ function initShopCatalog() {
         card.setAttribute('data-cat', topSlug);
         card.setAttribute('data-bundle', p.is_bundle ? 'true' : 'false');
         card.setAttribute('data-vehicle', p.vehicle_compatibility || 'universale');
+        card.setAttribute('data-brand', p.brand || '');
         card.innerHTML =
           '<a class="product-link" href="prodotto.html?id=' + p.id + '">' +
             '<div class="product-thumb">' + badge + thumb + '</div>' +
@@ -169,6 +173,33 @@ function initShopCatalog() {
       });
     })
     .catch(function () { /* connessione assente o errore: restano i placeholder */ });
+}
+
+// Popola il filtro marca con le marche vere trovate nei prodotti caricati
+// (mai una lista scritta a mano — le marche cambiano col catalogo). I
+// prodotti senza marca (brand = NULL, verificato non essere un errore)
+// restano visibili sotto "Tutte le marche": non c'è un filtro dedicato
+// per loro, per non complicare la UI per un caso limite.
+function populateBrandFilter(products) {
+  var select = document.getElementById('brand-select');
+  if (!select) return;
+
+  var brands = [];
+  products.forEach(function (p) {
+    if (p.brand && brands.indexOf(p.brand) === -1) brands.push(p.brand);
+  });
+  if (brands.length === 0) {
+    select.closest('.brand-filter-wrap').style.display = 'none';
+    return;
+  }
+  brands.sort(function (a, b) { return a.localeCompare(b, 'it'); });
+
+  brands.forEach(function (brand) {
+    var opt = document.createElement('option');
+    opt.value = brand;
+    opt.textContent = brand;
+    select.appendChild(opt);
+  });
 }
 
 function initFeaturedCarousel() {
@@ -351,31 +382,29 @@ function applyCategoryData(pathStr, subcatGrid, grid) {
 
   subcatGrid.innerHTML = '';
   var allBtn = document.createElement('button');
-  allBtn.className = 'cat-card active';
+  allBtn.className = 'subcat-chip active';
   allBtn.setAttribute('data-subcat', 'all');
-  allBtn.setAttribute('style', 'cursor:pointer;width:100%;border:none;text-align:left;font-family:inherit;');
-  allBtn.innerHTML = '<span class="cat-index">—</span><h3>Tutti i prodotti</h3>';
+  allBtn.textContent = 'Tutti i prodotti';
   subcatGrid.appendChild(allBtn);
 
   // Le sottocategorie "foglia" (senza children propri) restano filtri
   // in pagina, come oggi. Quelle che hanno a loro volta un 3° livello
   // diventano link che portano alla loro pagina — l'unica differenza
   // di comportamento è "ha children o no", il codice non sa in anticipo
-  // quanto è profondo un ramo.
-  childSlugs.forEach(function (slug, idx) {
+  // quanto è profondo un ramo. Le foto (child.img) qui non si usano più:
+  // le chip sono compatte apposta, una card fotografica grande resta
+  // solo per le categorie di primo livello in home.
+  childSlugs.forEach(function (slug) {
     var child = children[slug];
     var hasChildren = child.children && Object.keys(child.children).length > 0;
-    var photo = child.img ? '<img class="cat-photo" src="' + child.img + '" alt="' + child.name + '">' : '';
-    var inner = photo + '<span class="cat-index">' + String(idx + 1).padStart(2, '0') + '</span><h3>' + child.name + '</h3>';
     var el = document.createElement(hasChildren ? 'a' : 'button');
-    el.className = child.img ? 'cat-card has-photo' : 'cat-card';
-    el.setAttribute('style', 'cursor:pointer;width:100%;border:none;text-align:left;font-family:inherit;');
+    el.className = 'subcat-chip';
     if (hasChildren) {
       el.setAttribute('href', 'categoria.html?slug=' + pathStr + '.' + slug);
     } else {
       el.setAttribute('data-subcat', slug);
     }
-    el.innerHTML = inner;
+    el.textContent = child.name;
     subcatGrid.appendChild(el);
   });
 
@@ -826,6 +855,36 @@ function getProductInfoFromButton(btn) {
   return { id: id, name: name, priceCents: priceCents || 0 };
 }
 
+// Barra fissa in fondo allo schermo su mobile (prodotto.html): compare
+// quando si scorre oltre il vero pulsante d'acquisto, così su schermi
+// piccoli il tasto "Aggiungi al carrello" resta sempre raggiungibile
+// senza dover tornare su. Non duplica la logica del carrello: il suo
+// bottone si limita a "premere" quello vero, stessa quantità/tracking.
+function initStickyBuyBar() {
+  var bar = document.getElementById('buy-bar-sticky');
+  var purchaseRow = document.querySelector('.purchase-row');
+  var realAddBtn = document.getElementById('product-add-btn');
+  var priceSourceEl = document.getElementById('product-price');
+  if (!bar || !purchaseRow || !realAddBtn || typeof IntersectionObserver === 'undefined') return;
+
+  var priceEl = document.getElementById('buy-bar-price');
+  if (priceEl && priceSourceEl) priceEl.textContent = priceSourceEl.textContent;
+
+  var barBtn = document.getElementById('buy-bar-btn');
+  if (barBtn) {
+    barBtn.addEventListener('click', function () {
+      realAddBtn.click();
+    });
+  }
+
+  var observer = new IntersectionObserver(function (entries) {
+    entries.forEach(function (entry) {
+      bar.classList.toggle('show', !entry.isIntersecting && entry.boundingClientRect.top < 0);
+    });
+  }, { threshold: 0 });
+  observer.observe(purchaseRow);
+}
+
 function initCart() {
   function updateCartDisplay() {
     var count = getCartItems().reduce(function (sum, it) { return sum + it.quantity; }, 0);
@@ -868,8 +927,48 @@ function initCart() {
         btn.textContent = original;
         btn.classList.remove('added');
       }, 1200);
+
+      showCartToast(info, qty);
     });
   });
+}
+
+var cartToastTimer = null;
+
+// Notifica non invasiva mostrata dopo ogni aggiunta al carrello, in
+// aggiunta al feedback sul bottone (due segnali distinti: uno locale
+// sul bottone cliccato, uno globale per chi non guarda più lì).
+function showCartToast(info, qty) {
+  var toast = document.getElementById('cart-toast');
+  if (!toast) {
+    toast = document.createElement('div');
+    toast.id = 'cart-toast';
+    toast.className = 'cart-toast';
+    document.body.appendChild(toast);
+  }
+
+  toast.innerHTML =
+    '<div class="cart-toast-title">Aggiunto al carrello</div>' +
+    '<div class="cart-toast-body">' + (qty > 1 ? qty + ' × ' : '') + escapeHtmlText(info.name) + '</div>' +
+    '<div class="cart-toast-price">' + formatEUR(info.priceCents * qty) + '</div>' +
+    '<a href="carrello.html" class="cart-toast-link">Vai al carrello →</a>';
+
+  toast.classList.add('show');
+  if (cartToastTimer) clearTimeout(cartToastTimer);
+  cartToastTimer = setTimeout(function () {
+    toast.classList.remove('show');
+  }, 3500);
+}
+
+// Il nome prodotto arriva anche da schede statiche non ancora collegate
+// a Supabase (vedi getProductInfoFromButton): va comunque "escapato"
+// prima di finire nell'HTML del toast.
+function escapeHtmlText(value) {
+  if (value === null || value === undefined) return '';
+  return String(value)
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;');
 }
 
 function initCookieBanner() {
@@ -1103,10 +1202,12 @@ function initProductFilters() {
   if (!filterBar) return;
 
   var vehicleSelect = document.getElementById('vehicle-select');
+  var brandSelect = document.getElementById('brand-select');
   var cards = Array.prototype.slice.call(grid.querySelectorAll('.product-card'));
   var currentCat = 'all';
   var currentQuery = '';
   var currentVehicle = 'all';
+  var currentBrand = 'all';
 
   function applyFilters() {
     var visibleCount = 0;
@@ -1115,9 +1216,10 @@ function initProductFilters() {
         || (currentCat === 'kit' && card.getAttribute('data-bundle') === 'true');
       var vehicle = card.getAttribute('data-vehicle') || 'universale';
       var matchesVehicle = currentVehicle === 'all' || vehicle === 'universale' || vehicle === currentVehicle;
+      var matchesBrand = currentBrand === 'all' || card.getAttribute('data-brand') === currentBrand;
       var text = card.textContent.toLowerCase();
       var matchesQuery = !currentQuery || text.indexOf(currentQuery) !== -1;
-      var show = matchesCat && matchesVehicle && matchesQuery;
+      var show = matchesCat && matchesVehicle && matchesBrand && matchesQuery;
       card.style.display = show ? '' : 'none';
       if (show) visibleCount++;
     });
@@ -1128,6 +1230,13 @@ function initProductFilters() {
   if (vehicleSelect) {
     vehicleSelect.addEventListener('change', function () {
       currentVehicle = vehicleSelect.value;
+      applyFilters();
+    });
+  }
+
+  if (brandSelect) {
+    brandSelect.addEventListener('change', function () {
+      currentBrand = brandSelect.value;
       applyFilters();
     });
   }

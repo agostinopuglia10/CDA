@@ -372,7 +372,10 @@ section{padding:80px 0;}
 .product-grid{
   display:grid;grid-template-columns:repeat(4,1fr);gap:20px;
 }
-.product-card{background:var(--white);border:1px solid var(--line);}
+.product-card{background:var(--white);border:1px solid var(--line);transition:transform .15s ease,box-shadow .15s ease;}
+@media (hover:hover){
+  .product-card:hover{transform:translateY(-3px);box-shadow:0 10px 24px rgba(0,0,0,.14);}
+}
 .product-thumb{
   aspect-ratio:1/1;background:var(--img-bg);
   display:flex;align-items:center;justify-content:center;
@@ -453,6 +456,33 @@ section{padding:80px 0;}
 .spec-list li span:first-child{color:var(--steel);}
 .spec-list li span:last-child{font-weight:600;}
 .purchase-row{display:flex;gap:14px;flex-wrap:wrap;align-items:center;margin-bottom:18px;}
+.buy-trust-row{
+  display:flex;gap:18px;flex-wrap:wrap;
+  font-family:var(--font-display);font-size:12px;letter-spacing:.04em;
+  color:var(--steel);margin-bottom:22px;
+}
+/* Barra fissa d'acquisto (solo mobile, vedi @media max-width:960px) */
+.buy-bar-sticky{display:none;}
+
+/* Indicatore di passaggio (carrello -> pagamento -> conferma). Solo
+   orientativo: "Pagamento" avviene fuori dal sito (pagina ospitata da
+   Stripe), non promette uno step interno che non esiste. */
+.checkout-steps{
+  display:flex;gap:28px;flex-wrap:wrap;
+  padding-bottom:16px;margin-bottom:24px;border-bottom:1px solid var(--line);
+}
+.checkout-step{
+  display:flex;align-items:center;gap:8px;
+  font-family:var(--font-display);font-size:13px;letter-spacing:.06em;text-transform:uppercase;
+  color:var(--steel);padding-bottom:14px;border-bottom:2px solid var(--line);
+}
+.checkout-step-num{color:var(--steel);}
+.checkout-step.current{color:var(--ink);border-bottom-color:var(--red);}
+.checkout-step.current .checkout-step-num{color:var(--red);}
+.checkout-step.done{color:var(--ink);border-bottom-color:var(--success-fill);}
+.checkout-step.done .checkout-step-num{color:var(--success-fill);}
+.checkout-step.done.current{border-bottom-color:var(--red);}
+.checkout-step.done.current .checkout-step-num{color:var(--red);}
 .qty-selector{
   display:flex;align-items:center;border:2px solid var(--ink);height:52px;
 }
@@ -622,6 +652,28 @@ section{padding:80px 0;}
 .cookie-banner .btn-outline{border-color:var(--steel-light);color:var(--pure-white);}
 .cookie-banner .btn-outline:hover{border-color:var(--pure-white);}
 
+/* Notifica "aggiunto al carrello" */
+.cart-toast{
+  position:fixed;top:96px;right:24px;z-index:150;width:280px;
+  background:var(--charcoal);color:var(--pure-white);
+  border-left:4px solid var(--red);padding:16px 18px;
+  box-shadow:0 12px 28px rgba(0,0,0,.22);
+  opacity:0;visibility:hidden;transform:translateX(12px);
+  transition:opacity .2s ease,transform .2s ease,visibility .2s;
+}
+.cart-toast.show{opacity:1;visibility:visible;transform:translateX(0);}
+.cart-toast-title{
+  font-family:var(--font-display);font-size:13px;letter-spacing:.08em;text-transform:uppercase;
+  color:var(--red);margin-bottom:6px;
+}
+.cart-toast-body{font-size:14.5px;line-height:1.4;margin-bottom:4px;}
+.cart-toast-price{font-family:var(--font-display);font-size:15px;color:var(--pure-white);margin-bottom:10px;}
+.cart-toast-link{
+  display:inline-block;font-family:var(--font-display);font-size:13px;letter-spacing:.04em;
+  color:var(--pure-white);text-decoration:underline;
+}
+.cart-toast-link:hover{color:var(--red);}
+
 /* Admin login shell */
 .login-wrap{display:flex;justify-content:center;padding:80px 24px;}
 .login-card{
@@ -730,6 +782,7 @@ section{padding:80px 0;}
   font-family:var(--font-body);font-size:14.5px;color:var(--ink);
 }
 .vehicle-filter select:focus{border-color:var(--red);outline:none;}
+.brand-filter-wrap{display:flex;align-items:center;gap:12px;}
 .vehicle-filter .vehicle-hint{font-size:13px;color:var(--steel);margin-left:auto;}
 .vehicle-filter .vehicle-hint a{color:var(--red);font-weight:600;}
 
@@ -742,6 +795,23 @@ section{padding:80px 0;}
   padding:8px 16px;border:1px solid var(--line);background:var(--white);cursor:pointer;
 }
 .filter-bar button.active,.filter-bar button:hover{border-color:var(--red);color:var(--red);}
+
+/* Chip sottocategoria (categoria.html) — riga compatta al posto delle
+   card grandi, per lasciare più spazio ai prodotti sopra la piega
+   (soprattutto su mobile). Bordo/colore coerenti col filter-bar, ma
+   classe propria: qui il concetto è "sottocategoria di pagina", non
+   "filtro categoria di shop". */
+.subcat-chips-label{
+  font-family:var(--font-display);font-size:12px;letter-spacing:.1em;text-transform:uppercase;
+  color:var(--steel);margin-bottom:10px;
+}
+.subcat-chips{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:0;}
+.subcat-chip{
+  font-family:var(--font-display);font-size:13px;letter-spacing:.04em;text-transform:uppercase;
+  padding:8px 14px;border:1px solid var(--line);background:var(--white);color:var(--ink);
+  cursor:pointer;white-space:nowrap;text-decoration:none;display:inline-block;
+}
+.subcat-chip.active,.subcat-chip:hover{border-color:var(--red);color:var(--red);}
 
 .no-results{display:none;padding:48px 0;text-align:center;color:var(--steel);font-size:15px;}
 .no-results.show{display:block;}
@@ -808,6 +878,22 @@ section{padding:80px 0;}
   .cart-summary{position:static;}
   .cart-row{grid-template-columns:60px 1fr auto;}
   .footer-grid{grid-template-columns:1fr 1fr;}
+  .cart-toast{
+    top:auto;bottom:16px;left:16px;right:16px;width:auto;
+    transform:translateY(12px);
+  }
+  .cart-toast.show{transform:translateY(0);}
+  .buy-bar-sticky{
+    display:flex;align-items:center;justify-content:space-between;gap:16px;
+    position:fixed;left:0;right:0;bottom:0;z-index:140;
+    background:var(--white);border-top:1px solid var(--line);
+    padding:12px 16px;box-shadow:0 -8px 20px rgba(0,0,0,.12);
+    transform:translateY(100%);transition:transform .2s ease;
+  }
+  .buy-bar-sticky.show{transform:translateY(0);}
+  .buy-bar-price{font-family:var(--font-display);font-size:19px;color:var(--red);font-weight:700;white-space:nowrap;}
+  .buy-bar-sticky .btn{flex:1;justify-content:center;padding:12px 16px;}
+  .subcat-chips{flex-wrap:nowrap;overflow-x:auto;padding-bottom:4px;-webkit-overflow-scrolling:touch;}
 }
 @media (max-width:600px){
   .cat-grid,.product-grid,.service-grid,.lav-grid{grid-template-columns:1fr;}

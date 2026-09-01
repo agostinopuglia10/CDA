@@ -33,7 +33,9 @@
       "mcp__claude-in-chrome__navigate",
       "Bash(node -c \"/c/Users/PC/Desktop/CDA,Ecom/js/main.js\")",
       "Bash(curl -s -X POST https://udynqqqxjcyhdeygqumi.supabase.co/functions/v1/sync-newsletter-signup -H 'Content-Type: application/json' -d '{\"record\":{\"email\":\"test-verifica-cda@example.com\",\"source_page\":\"test-manuale\"}}' -w '\\\\nHTTP_STATUS:%{http_code}\\\\n')",
-      "mcp__644d751a-d090-4aaf-b985-fde3bf2ccc4d__apply_migration"
+      "mcp__644d751a-d090-4aaf-b985-fde3bf2ccc4d__apply_migration",
+      "mcp__visualize__read_me",
+      "mcp__visualize__show_widget"
     ]
   }
 }
