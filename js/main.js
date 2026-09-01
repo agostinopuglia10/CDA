@@ -1093,6 +1093,11 @@ function initProductFilters() {
   var filterBar = document.querySelector('.filter-bar');
   var searchPanel = document.querySelector('.search-panel');
   var noResults = document.getElementById('no-results');
+  // Il carosello "Selezionati per te" mostra prodotti in evidenza fissi,
+  // non legati alla ricerca: durante una ricerca attiva va nascosto,
+  // altrimenti sembra che i risultati mostrino "ancora tutto il catalogo"
+  // anche quando il filtro sulla griglia sotto funziona correttamente.
+  var featuredSection = document.getElementById('featured-section');
   if (!grid) return;
 
   if (!filterBar) return;
@@ -1117,6 +1122,7 @@ function initProductFilters() {
       if (show) visibleCount++;
     });
     if (noResults) noResults.classList.toggle('show', visibleCount === 0);
+    if (featuredSection) featuredSection.style.display = currentQuery ? 'none' : '';
   }
 
   if (vehicleSelect) {
