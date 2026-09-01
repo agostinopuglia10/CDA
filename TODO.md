@@ -44,6 +44,12 @@ Stato: la struttura del sito (pagine, database, categorie, carrello, kit, SEO ba
 - [x] **Prezzi al sicuro da modifiche esterne**: verificato (RLS attiva + test reale di modifica fallito) che nessuno può cambiare prezzi/prodotti dal sito pubblico usando la chiave che gira nel browser — può solo leggere. Stessa cosa per gli ordini clienti: non leggibili né modificabili dall'esterno.
 - [x] **Dati di pagamento (carte/IBAN)**: non passano né dal sito né da Supabase — il checkout reindirizza su Stripe (certificato PCI-DSS), che è già di fatto il "server separato" per i dati sensibili. Da NON fare mai: costruire un modulo carta proprio, o salvare IBAN clienti su Supabase (per i rimborsi si usa il pannello Stripe).
 
+## 📣 Marketing / Social
+
+- [ ] **Pagina Facebook + profilo Instagram per CDA**: da creare/confermare se non esistono già — servono comunque per collegare bene il Pixel Meta già attivo (oggi punta solo al sito, non a pagine social) e per pubblicare i post.
+- [ ] **Iniziare a pubblicare contenuti organici**: materiale già pronto e riutilizzabile dal sito — foto prodotto reali (197/200), i 6 kit con sconto vero, foto prima/dopo delle lavorazioni lamiera. Non serve aspettare dominio/Stripe per iniziare a postare: i contenuti possono anche solo far conoscere l'attività, senza per forza linkare al sito finché non è online sul dominio definitivo.
+- [ ] **Campagne a pagamento (Meta Ads)**: da valutare più avanti, non ora. Il Pixel è collegato e funzionante ma ha bisogno di un po' di traffico/eventi reali accumulati prima di poter ottimizzare bene una campagna — meglio partire con post organici, poi passare a sponsorizzate quando c'è dominio definitivo + un minimo storico di dati.
+
 ## ✅ Già confermato reale (non serve ritoccare)
 
 - Orari di apertura (08:30–13:00, 14:30–18:00) confermati reali dall'utente.
