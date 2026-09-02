@@ -1094,7 +1094,7 @@ function initContactForm() {
     e.preventDefault();
 
     if (!supabaseClient) {
-      showStatus('error', 'Il modulo non è ancora collegato: chiamaci al 389 547 2846 o scrivi a info@cda-camper.it nel frattempo.');
+      showStatus('error', 'Il modulo non è ancora collegato: chiamaci al 0774 411288 o scrivi a info@cda-camper.it nel frattempo.');
       return;
     }
 
@@ -1487,7 +1487,7 @@ function initCartPage() {
 
       if (realItems.length === 0) {
         statusEl.className = 'form-status show error';
-        statusEl.textContent = 'Il pagamento online non è ancora attivo. Chiamaci al 389 547 2846 o scrivi a info@cda-camper.it per completare l\'ordine.';
+        statusEl.textContent = 'Il pagamento online non è ancora attivo. Chiamaci al 0774 411288 o scrivi a info@cda-camper.it per completare l\'ordine.';
         return;
       }
       if (typeof supabaseClient === 'undefined' || !supabaseClient) {
@@ -1525,7 +1525,7 @@ function initCartPage() {
           checkoutBtn.disabled = false;
           checkoutBtn.textContent = originalText;
           statusEl.className = 'form-status show error';
-          statusEl.textContent = 'Il pagamento online non è ancora attivo (' + err.message + '). Chiamaci al 389 547 2846 per completare l\'ordine.';
+          statusEl.textContent = 'Il pagamento online non è ancora attivo (' + err.message + '). Chiamaci al 0774 411288 per completare l\'ordine.';
         });
     });
   }

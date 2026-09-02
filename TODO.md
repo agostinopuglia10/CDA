@@ -33,7 +33,7 @@ Tutto verificato dal vivo (desktop + mobile, tema chiaro + scuro): nessuna funzi
 - [ ] **Recensioni clienti reali**: non c'è ancora nessuna recensione vera, quindi la sezione "Cosa dicono i clienti" in home ora resta **nascosta automaticamente** finché non ce n'è almeno una (niente più placeholder finto `[Nome cliente]`). Per aggiungerne una in futuro non serve toccare il codice: Supabase → Table Editor → tabella `testimonials` → Insert row, compilando solo `customer_name` e `review_text` — appare da sola sul sito appena salvata.
 - [ ] **Email di contatto pubblica**: `info@cda-camper.it` resta un placeholder (dipende dal dominio, non ancora comprato) — nel frattempo il sito usa la PEC reale `talucci.maria@pec.it` dove serve un contatto legale (privacy/termini). L'email di notifica preventivi invece è già reale e funzionante (vedi sopra, 🔴).
 - [ ] **Tempi di consegna**: nessuna promessa mostrata di proposito finché non c'è un tempo medio reale. Pronto un meccanismo guidato per quando ci sarà: Supabase → Table Editor → tabella `site_settings` → riga con `id=1` → compila `delivery_time_text` (es. "5-7 giorni lavorativi") → compare da solo nella home (trust-strip) e nella scheda prodotto.
-- [ ] **Conferma numero di telefono definitivo** (389 547 2846) prima della pubblicazione.
+- [x] **Numero di telefono corretto in tutto il sito**: quello mostrato finora (389 547 2846) era sbagliato — il numero vero è **0774 411288** (stesso fisso già dato con P.IVA/ragione sociale). Corretto ovunque: footer/contatti, breadcrumb, spec pagina prodotto, dati strutturati SEO (JSON-LD) in index.html e contatti.html, messaggi di errore in `js/main.js`.
 - [ ] **Autorizzazione scritta** per le immagini prodotto prese da fornitori (Euro Accessoires Italia / GES), se non già ottenuta in forma scritta/verificabile.
 
 ## 🟢 Rifiniture minori (non bloccanti)
@@ -69,7 +69,6 @@ Tutto verificato dal vivo (desktop + mobile, tema chiaro + scuro): nessuna funzi
 
 - Orari di apertura (08:30–13:00, 14:30–18:00) confermati reali dall'utente.
 - Indirizzo: Via Arci n.24, Tivoli (RM).
-- Telefono: 389 547 2846.
 - GA4 Measurement ID reale collegato.
 - Ragione sociale: CDA di Talucci Maria — P.IVA 04047161007 — PEC talucci.maria@pec.it — tel. 0774 411288 — fax 0774 411120.
 - Pixel Meta collegato (ID 1274471299084547) in `js/main.js`, attivo solo dopo consenso cookie "Accetta tutti" (mai prima, verificato). Invia gli stessi eventi già tracciati su GA4 (AddToCart, InitiateCheckout, Purchase, Lead, Subscribe). Banner cookie e privacy policy aggiornati per menzionare anche i cookie di marketing, non solo statistici.
