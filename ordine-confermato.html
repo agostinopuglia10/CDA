@@ -29,6 +29,11 @@
 
 <section style="padding:80px 0;">
   <div class="container" style="max-width:560px;text-align:center;">
+    <div class="checkout-steps" style="justify-content:center;margin-bottom:24px;">
+      <div class="checkout-step done"><span class="checkout-step-num">01</span>Carrello</div>
+      <div class="checkout-step done"><span class="checkout-step-num">02</span>Pagamento</div>
+      <div class="checkout-step done current"><span class="checkout-step-num">03</span>Conferma</div>
+    </div>
     <span class="tag" style="display:block;margin-bottom:12px;">Ordine ricevuto</span>
     <h1 style="margin-bottom:18px;">Grazie per il tuo ordine!</h1>
     <p style="font-size:16px;margin-bottom:8px;">Il pagamento è andato a buon fine. Riceverai una email di conferma con tutti i dettagli a breve.</p>
@@ -36,9 +41,9 @@
 
     <div class="info-card" style="text-align:left;margin-bottom:32px;">
       <h3>Cosa succede ora</h3>
-      <div class="info-line"><span class="k">01</span><span class="v">Prepariamo il tuo ordine nella nostra sede di Tivoli</span></div>
-      <div class="info-line"><span class="k">02</span><span class="v">Ti avvisiamo quando parte la spedizione (o è pronto per il ritiro)</span></div>
-      <div class="info-line"><span class="k">03</span><span class="v">Hai un dubbio? Chiamaci al 389 547 2846</span></div>
+      <div class="info-line"><span class="k">01</span><span class="v">Inoltriamo subito il tuo ordine per la spedizione</span></div>
+      <div class="info-line"><span class="k">02</span><span class="v">Ti avvisiamo appena l'ordine parte verso il tuo indirizzo</span></div>
+      <div class="info-line"><span class="k">03</span><span class="v">Hai un dubbio? Chiamaci al 0774 411288</span></div>
     </div>
 
     <a href="shop.html" class="btn btn-primary">Torna allo Shop</a>
@@ -49,7 +54,7 @@
   <div class="container">
     <div class="footer-bottom">
       <span>© 2026 CDA — Tivoli (RM). Tutti i diritti riservati.</span>
-      <span>P.IVA da definire · <a href="privacy.html" style="color:inherit;text-decoration:underline;">Privacy</a> · <a href="termini.html" style="color:inherit;text-decoration:underline;">Termini</a></span>
+      <span>CDA di Talucci Maria · P.IVA 04047161007 · <a href="privacy.html" style="color:inherit;text-decoration:underline;">Privacy</a> · <a href="termini.html" style="color:inherit;text-decoration:underline;">Termini</a></span>
     </div>
   </div>
 </footer>
@@ -61,6 +66,21 @@
   if (sessionId) {
     document.getElementById('order-ref').textContent = 'Riferimento ordine: ' + sessionId;
   }
+
+  // Registra la conversione su GA4 usando gli articoli ancora nel carrello,
+  // PRIMA di svuotarlo.
+  try {
+    var items = JSON.parse(localStorage.getItem('cda_cart_items')) || [];
+    if (typeof trackEvent === 'function' && items.length) {
+      trackEvent('purchase', {
+        transaction_id: sessionId || 'n-d',
+        currency: 'EUR',
+        value: items.reduce(function (sum, it) { return sum + (it.price_cents * it.quantity) / 100; }, 0),
+        items: items.map(function (it) { return { item_id: it.id, item_name: it.name, quantity: it.quantity, price: it.price_cents / 100 }; })
+      });
+    }
+  } catch (e) {}
+
   // L'ordine è confermato: svuotiamo il carrello locale.
   localStorage.removeItem('cda_cart_items');
   document.querySelectorAll('.btn-cart span').forEach(function (span) { span.textContent = '(0)'; });

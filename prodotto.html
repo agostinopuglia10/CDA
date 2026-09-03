@@ -4,7 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Kit Installazione Pannello Solare — Esempio Bundle | Shop CDA Tivoli</title>
-<meta name="description" content="Kit Installazione Pannello Solare: pannello, regolatore di carica e cablaggio venduti insieme a un prezzo scontato. Spedizione in tutta Italia o ritiro a Tivoli (RM), installazione disponibile in officina.">
+<meta name="description" content="Kit Installazione Pannello Solare: pannello, regolatore di carica e cablaggio venduti insieme a un prezzo scontato. Spedizione in tutta Italia, installazione disponibile nel centro tecnico.">
 <link rel="canonical" href="https://www.cda-camper.it/prodotto.html">
 <meta property="og:type" content="product">
 <meta property="og:site_name" content="CDA">
@@ -24,7 +24,7 @@
   "itemListElement": [
     { "@type": "ListItem", "position": 1, "name": "Home", "item": "https://www.cda-camper.it/index.html" },
     { "@type": "ListItem", "position": 2, "name": "Shop Camper", "item": "https://www.cda-camper.it/shop.html" },
-    { "@type": "ListItem", "position": 3, "name": "Categoria 2", "item": "https://www.cda-camper.it/shop.html#categoria-2" },
+    { "@type": "ListItem", "position": 3, "name": "Energia", "item": "https://www.cda-camper.it/categoria.html?slug=energia" },
     { "@type": "ListItem", "position": 4, "name": "Kit Installazione Pannello Solare", "item": "https://www.cda-camper.it/prodotto.html" }
   ]
 }
@@ -34,7 +34,7 @@
   "@context": "https://schema.org",
   "@type": "ProductGroup",
   "name": "Kit Installazione Pannello Solare",
-  "category": "Categoria 2",
+  "category": "Energia",
   "description": "Pannello solare, regolatore di carica MPPT e cablaggio dedicato venduti insieme a un prezzo scontato rispetto all'acquisto separato.",
   "offers": {
     "@type": "Offer",
@@ -55,12 +55,11 @@
       <li>
         <a href="shop.html">Shop Camper</a>
         <ul class="dropdown">
-          <li><a href="shop.html#categoria-1">Categoria 1</a></li>
-          <li><a href="shop.html#categoria-2">Categoria 2</a></li>
-          <li><a href="shop.html#categoria-3">Categoria 3</a></li>
-          <li><a href="shop.html#categoria-4">Categoria 4</a></li>
-          <li><a href="shop.html#categoria-5">Categoria 5</a></li>
-          <li><a href="shop.html#categoria-6">Categoria 6</a></li>
+          <li><a href="categoria.html?slug=interni">Interni</a></li>
+          <li><a href="categoria.html?slug=esterni">Esterni</a></li>
+          <li><a href="categoria.html?slug=energia">Energia</a></li>
+          <li><a href="categoria.html?slug=acqua">Acqua</a></li>
+          <li><a href="categoria.html?slug=clima">Clima</a></li>
         </ul>
       </li>
       <li>
@@ -100,59 +99,61 @@
 
 <section style="padding:36px 0 80px;">
   <div class="container">
-    <div class="breadcrumb" style="margin-bottom:32px;">
+    <div class="breadcrumb" id="product-breadcrumb" style="margin-bottom:32px;">
       <a href="index.html">Home</a> /
       <a href="shop.html">Shop Camper</a> /
-      <a href="shop.html#categoria-2">Categoria 2</a> /
-      Kit Installazione Pannello Solare
+      <a href="categoria.html?slug=energia" id="product-breadcrumb-cat">Energia</a> /
+      <span id="product-breadcrumb-name">Kit Installazione Pannello Solare</span>
     </div>
 
     <div class="product-detail">
       <div>
-        <div class="product-detail-thumb">
+        <div class="product-detail-thumb" id="product-thumb">
           <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M14.7 6.3a5 5 0 0 0-6.9 6.9L3 18l3 3 4.8-4.8a5 5 0 0 0 6.9-6.9L14 12l-2-2 2.7-2.7z" stroke="currentColor" stroke-width="1.2" stroke-linejoin="round"/></svg>
-        </div>
-        <div class="product-detail-gallery">
-          <div>Foto 1</div>
-          <div>Foto 2</div>
-          <div>Foto 3</div>
-          <div>Foto 4</div>
         </div>
       </div>
 
       <div>
-        <span class="product-cat">Categoria 2 · Autonomia energetica</span>
-        <span class="product-badge" style="position:static;display:inline-block;margin:8px 0 0;">Kit risparmio</span>
-        <h1 style="font-size:clamp(28px,3.4vw,38px);margin-top:.15em;">Kit Installazione Pannello Solare</h1>
-        <p class="social-proof">🔧 Il kit più richiesto da chi vuole partire senza pensieri di autonomia</p>
-        <div class="product-detail-price">€ 249,00</div>
-        <p class="desc">Ricarichi le batterie anche in un'area di sosta senza corrente: tutto il necessario per installare un impianto solare funzionante, senza dover cercare e abbinare i pezzi giusti da solo. Pannello, regolatore e cablaggio sono già compatibili tra loro e pronti da montare.</p>
+        <span class="product-cat" id="product-cat">Energia · Pannelli Solari</span>
+        <span class="product-badge" id="product-badge" style="position:static;display:inline-block;margin:8px 0 0;">Kit risparmio</span>
+        <h1 id="product-name" style="font-size:clamp(28px,3.4vw,38px);margin-top:.15em;">Kit Installazione Pannello Solare</h1>
+        <div class="product-detail-price" id="product-price">€ 249,00</div>
+        <p class="desc" id="product-desc">Ricarichi le batterie anche in un'area di sosta senza corrente: tutto il necessario per installare un impianto solare funzionante, senza dover cercare e abbinare i pezzi giusti da solo. Pannello, regolatore e cablaggio sono già compatibili tra loro e pronti da montare.</p>
 
-        <div class="kit-contents">
+        <div class="kit-contents" id="kit-contents">
           <h3>Cosa include questo kit</h3>
-          <ul class="kit-items">
+          <ul class="kit-items" id="kit-items-list">
             <li><span class="kit-item-name">Pannello solare flessibile 200W</span><span class="kit-item-price">€ 189,00</span></li>
             <li><span class="kit-item-name">Regolatore di carica MPPT 20A</span><span class="kit-item-price">€ 69,00</span></li>
             <li><span class="kit-item-name">Cablaggio e connettori dedicati</span><span class="kit-item-price">€ 29,00</span></li>
           </ul>
-          <div class="kit-savings">
+          <div class="kit-savings" id="kit-savings">
             <span>Valore se acquistati singolarmente: <strong class="kit-strike">€ 287,00</strong></span>
             <span class="kit-save-badge">Risparmi € 38,00</span>
           </div>
         </div>
 
+        <div class="kit-contents" id="kit-upsell" style="display:none;">
+          <h3>Risparmia prendendolo nel kit</h3>
+          <p id="kit-upsell-text"></p>
+          <a href="#" id="kit-upsell-link" class="btn btn-primary btn-sm">Vedi il kit</a>
+        </div>
+
         <ul class="spec-list">
-          <li><span>Categoria</span><span>Autonomia energetica</span></li>
-          <li><span>Disponibilità</span><span>In sede a Tivoli</span></li>
+          <li><span>Categoria</span><span id="spec-category">Energia</span></li>
+          <li><span>Disponibilità</span><span id="spec-availability">Su ordinazione, spedizione diretta</span></li>
+          <!-- Compare solo quando "delivery_time_text" è compilato su Supabase
+               (tabella "site_settings") — vedi initDeliveryInfo() in js/main.js. -->
+          <li id="spec-delivery-row" style="display:none;"><span>Consegna</span><span id="spec-delivery"></span></li>
           <li><span>Spedizione</span><span>Tutta Italia</span></li>
-          <li><span>Installazione</span><span>Disponibile in officina</span></li>
+          <li><span>Installazione</span><span>Disponibile nel centro tecnico</span></li>
           <li><span>Reso</span><span>Entro 14 giorni</span></li>
           <li><span>Garanzia</span><span>24 mesi legali</span></li>
         </ul>
 
         <div class="compat-note">
           <strong>Verifica la compatibilità prima di ordinare.</strong>
-          Non sei sicuro che sia adatto al tuo camper? <a href="tel:+393895472846">Chiamaci al 389 547 2846</a> — rispondiamo in giornata.
+          Non sei sicuro che sia adatto al tuo camper? <a href="tel:+390774411288">Chiamaci al 0774 411288</a> — rispondiamo in giornata.
         </div>
 
         <div class="purchase-row">
@@ -161,19 +162,25 @@
             <input type="number" class="qty-input" value="1" min="1" aria-label="Quantità">
             <button type="button" class="qty-plus" aria-label="Aumenta quantità">+</button>
           </div>
-          <button class="add-btn add-btn-lg" aria-label="Aggiungi il kit al carrello">🛒 Aggiungi il kit al carrello</button>
+          <button class="add-btn add-btn-lg" id="product-add-btn" aria-label="Aggiungi il kit al carrello">🛒 Aggiungi al carrello</button>
         </div>
-        <a href="servizi.html#installazione" class="btn btn-outline btn-sm">Richiedi installazione in officina</a>
 
-        <div class="trust-strip" style="padding:24px 0 0;margin-top:28px;border-top:1px solid var(--line);border-bottom:none;justify-content:flex-start;gap:32px;">
-          <div class="trust-item">🚚 Spedizione in tutta Italia</div>
-          <div class="trust-item">🏬 Ritiro gratuito a Tivoli</div>
-          <div class="trust-item">🔒 Pagamenti sicuri</div>
+        <div class="buy-trust-row">
+          <span>🚚 Spedizione in tutta Italia</span>
+          <span>↩️ Reso 14 giorni</span>
+          <span>🔒 Pagamenti sicuri</span>
         </div>
+
+        <a href="servizi.html#installazione" class="btn btn-outline btn-sm">Richiedi installazione nel centro tecnico</a>
       </div>
     </div>
   </div>
 </section>
+
+<div class="buy-bar-sticky" id="buy-bar-sticky">
+  <span class="buy-bar-price" id="buy-bar-price"></span>
+  <button type="button" class="btn btn-primary" id="buy-bar-btn">🛒 Aggiungi al carrello</button>
+</div>
 
 <div class="road-line"><div class="rl-label"><span>—</span> POTREBBERO INTERESSARTI ANCHE <span>—</span></div></div>
 
@@ -181,18 +188,18 @@
   <div class="container">
     <div class="section-head">
       <div>
-        <span class="tag">Autonomia energetica</span>
+        <span class="tag" id="related-products-tag">Autonomia energetica</span>
         <h2>Completa il tuo impianto</h2>
       </div>
       <a href="shop.html" class="btn btn-outline btn-sm">Vedi tutto lo shop</a>
     </div>
-    <div class="product-grid">
+    <div class="product-grid" id="related-products-grid">
       <div class="product-card">
         <a class="product-link" href="prodotto.html">
           <div class="product-thumb">Foto prodotto</div>
         </a>
         <div class="product-body">
-          <span class="product-cat">Categoria 1</span>
+          <span class="product-cat">Energia</span>
           <a class="product-link" href="prodotto.html"><h4>Nome prodotto placeholder</h4></a>
           <div class="product-price"><strong>€ 00,00</strong><button class="add-btn" aria-label="Aggiungi al carrello">+</button></div>
         </div>
@@ -202,7 +209,7 @@
           <div class="product-thumb">Foto prodotto</div>
         </a>
         <div class="product-body">
-          <span class="product-cat">Categoria 1</span>
+          <span class="product-cat">Energia</span>
           <a class="product-link" href="prodotto.html"><h4>Nome prodotto placeholder</h4></a>
           <div class="product-price"><strong>€ 00,00</strong><button class="add-btn" aria-label="Aggiungi al carrello">+</button></div>
         </div>
@@ -212,7 +219,7 @@
           <div class="product-thumb">Foto prodotto</div>
         </a>
         <div class="product-body">
-          <span class="product-cat">Categoria 1</span>
+          <span class="product-cat">Energia</span>
           <a class="product-link" href="prodotto.html"><h4>Nome prodotto placeholder</h4></a>
           <div class="product-price"><strong>€ 00,00</strong><button class="add-btn" aria-label="Aggiungi al carrello">+</button></div>
         </div>
@@ -222,7 +229,7 @@
           <div class="product-thumb">Foto prodotto</div>
         </a>
         <div class="product-body">
-          <span class="product-cat">Categoria 1</span>
+          <span class="product-cat">Energia</span>
           <a class="product-link" href="prodotto.html"><h4>Nome prodotto placeholder</h4></a>
           <div class="product-price"><strong>€ 00,00</strong><button class="add-btn" aria-label="Aggiungi al carrello">+</button></div>
         </div>
@@ -234,7 +241,7 @@
 <div class="cta-band">
   <div class="container">
     <h2>Vuoi farlo installare direttamente?</h2>
-    <p>Ogni prodotto acquistato nello shop può essere montato, collegato e collaudato nella nostra officina di Tivoli.</p>
+    <p>Ogni prodotto acquistato nello shop può essere montato, collegato e collaudato nel nostro centro tecnico di Tivoli.</p>
     <a href="servizi.html#installazione" class="btn btn-outline on-dark">Prenota l'installazione</a>
   </div>
 </div>
@@ -244,14 +251,14 @@
     <div class="footer-grid">
       <div>
         <div class="footer-logo">CDA</div>
-        <p style="color:var(--steel-light);font-size:14.5px;max-width:280px;">Shop online camper, servizi di officina e lavorazioni su lamiera. Con sede a Tivoli (RM).</p>
+        <p style="color:var(--steel-light);font-size:14.5px;max-width:280px;">Shop online camper, servizi tecnici e lavorazioni su lamiera. Con sede a Tivoli (RM).</p>
       </div>
       <div>
         <h5>Shop</h5>
         <ul>
-          <li><a href="shop.html#categoria-1">Categoria 1</a></li>
-          <li><a href="shop.html#categoria-2">Categoria 2</a></li>
-          <li><a href="shop.html#categoria-3">Categoria 3</a></li>
+          <li><a href="categoria.html?slug=interni">Interni</a></li>
+          <li><a href="categoria.html?slug=esterni">Esterni</a></li>
+          <li><a href="categoria.html?slug=energia">Energia</a></li>
           <li><a href="shop.html">Vedi tutto</a></li>
         </ul>
       </div>
@@ -275,7 +282,7 @@
     </div>
     <div class="footer-bottom">
       <span>© 2026 CDA — Tivoli (RM). Tutti i diritti riservati.</span>
-      <span>P.IVA da definire · <a href="privacy.html" style="color:inherit;text-decoration:underline;">Privacy</a> · <a href="termini.html" style="color:inherit;text-decoration:underline;">Termini</a></span>
+      <span>CDA di Talucci Maria · P.IVA 04047161007 · <a href="privacy.html" style="color:inherit;text-decoration:underline;">Privacy</a> · <a href="termini.html" style="color:inherit;text-decoration:underline;">Termini</a></span>
     </div>
   </div>
 </footer>
