@@ -30,20 +30,19 @@
 //    "Feed" > "Aggiungi feed" > "Recupero pianificato".
 //
 // IMPORTANTE PRIMA DI ATTIVARE SU GOOGLE MERCHANT:
-// - Serve un sito pubblicato con dominio reale (oggi il sito non è
-//   ancora online), perché Google verifica che i link dei prodotti
-//   puntino a pagine raggiungibili.
+// - Dominio reale attivo dal 2026-09-03 (cda-camper.it) — questo blocco
+//   è risolto, i link prodotto sono raggiungibili pubblicamente.
 // - Le immagini attualmente collegate sono ospitate sui server dei
 //   fornitori (Euro Accessoires Italia / GES): verifica di avere
 //   l'autorizzazione scritta a usarle prima di metterle in un feed
-//   pubblicitario attivo, non solo sul sito.
+//   pubblicitario attivo, non solo sul sito — questo resta da fare.
 // ============================================================
 
 import { createClient } from 'jsr:@supabase/supabase-js@2';
 
 const SUPABASE_URL = Deno.env.get('SUPABASE_URL')!;
 const SERVICE_ROLE_KEY = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!;
-const SITE_URL = Deno.env.get('SITE_URL') || 'https://www.cda-camper.it';
+const SITE_URL = Deno.env.get('SITE_URL') || 'https://cda-camper.it';
 
 const CORS_HEADERS = {
   'Access-Control-Allow-Origin': '*',
