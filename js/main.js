@@ -127,7 +127,7 @@ function initShopCatalog() {
 
   return supabaseClient
     .from('products')
-    .select('id, name, price_cents, image_url, featured, is_bundle, vehicle_compatibility, brand, categories(slug, name, path)')
+    .select('id, name, price_cents, compare_at_price_cents, image_url, featured, is_bundle, vehicle_compatibility, brand, categories(slug, name, path)')
     .eq('active', true)
     .then(function (res) {
       if (res.error || !res.data || res.data.length === 0) return; // fallback silenzioso: restano i placeholder
@@ -143,10 +143,7 @@ function initShopCatalog() {
         // segmento di "path" è sempre il livello giusto per il filtro.
         var topSlug = p.categories && p.categories.path ? p.categories.path.split('.')[0] : (p.categories ? p.categories.slug : '');
         var catName = p.categories ? p.categories.name : '';
-        var priceEUR = (p.price_cents / 100).toLocaleString('it-IT', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
-        var badge = p.is_bundle
-          ? '<span class="product-badge">' + (savingsMap[p.id] ? 'Risparmi ' + formatEUR(savingsMap[p.id]) : 'Kit risparmio') + '</span>'
-          : (p.featured ? '<span class="product-badge">In evidenza</span>' : '');
+        var badge = renderCardBadge(p, savingsMap);
         var thumb = p.image_url
           ? '<img src="' + p.image_url + '" alt="' + p.name + '" style="width:100%;height:100%;object-fit:cover;">'
           : 'Foto prodotto';
@@ -164,7 +161,7 @@ function initShopCatalog() {
           '<div class="product-body">' +
             '<span class="product-cat">' + catName + '</span>' +
             '<a class="product-link" href="prodotto.html?id=' + p.id + '"><h4>' + p.name + '</h4></a>' +
-            '<div class="product-price"><strong>€ ' + priceEUR + '</strong>' +
+            '<div class="product-price">' + renderPriceHTML(p) +
               '<button class="add-btn" data-product-id="' + p.id + '" data-product-name="' + p.name + '" data-product-price="' + p.price_cents + '" aria-label="Aggiungi al carrello">+</button>' +
             '</div>' +
           '</div>';
@@ -208,7 +205,7 @@ function initFeaturedCarousel() {
 
   return supabaseClient
     .from('products')
-    .select('id, name, price_cents, image_url, featured, is_bundle, categories(slug, name)')
+    .select('id, name, price_cents, compare_at_price_cents, image_url, featured, is_bundle, categories(slug, name)')
     .eq('active', true)
     .eq('featured', true)
     .then(function (res) {
@@ -219,10 +216,7 @@ function initFeaturedCarousel() {
       track.innerHTML = '';
       res.data.forEach(function (p) {
         var catName = p.categories ? p.categories.name : '';
-        var priceEUR = (p.price_cents / 100).toLocaleString('it-IT', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
-        var badge = p.is_bundle
-          ? '<span class="product-badge">' + (savingsMap[p.id] ? 'Risparmi ' + formatEUR(savingsMap[p.id]) : 'Kit risparmio') + '</span>'
-          : '<span class="product-badge">In evidenza</span>';
+        var badge = renderCardBadge(p, savingsMap);
         var thumb = p.image_url
           ? '<img src="' + p.image_url + '" alt="' + p.name + '" style="width:100%;height:100%;object-fit:cover;">'
           : 'Foto prodotto';
@@ -236,7 +230,7 @@ function initFeaturedCarousel() {
           '<div class="product-body">' +
             '<span class="product-cat">' + catName + '</span>' +
             '<a class="product-link" href="prodotto.html?id=' + p.id + '"><h4>' + p.name + '</h4></a>' +
-            '<div class="product-price"><strong>€ ' + priceEUR + '</strong>' +
+            '<div class="product-price">' + renderPriceHTML(p) +
               '<button class="add-btn" data-product-id="' + p.id + '" data-product-name="' + p.name + '" data-product-price="' + p.price_cents + '" aria-label="Aggiungi al carrello">+</button>' +
             '</div>' +
           '</div>';
@@ -470,7 +464,7 @@ function loadCategoryFromSupabase(pathStr, subcatGrid, grid) {
 
           return supabaseClient
             .from('products')
-            .select('id, name, price_cents, image_url, featured, is_bundle, vehicle_compatibility, categories(slug, name)')
+            .select('id, name, price_cents, compare_at_price_cents, image_url, featured, is_bundle, vehicle_compatibility, categories(slug, name)')
             .eq('active', true)
             .in('category_id', categoryIds)
             .then(function (prodRes) {
@@ -482,10 +476,7 @@ function loadCategoryFromSupabase(pathStr, subcatGrid, grid) {
               prodRes.data.forEach(function (p) {
                 var subSlug = p.categories ? p.categories.slug : '';
                 var subName = p.categories ? p.categories.name : '';
-                var priceEUR = (p.price_cents / 100).toLocaleString('it-IT', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
-                var badge = p.is_bundle
-                  ? '<span class="product-badge">' + (savingsMap[p.id] ? 'Risparmi ' + formatEUR(savingsMap[p.id]) : 'Kit risparmio') + '</span>'
-                  : (p.featured ? '<span class="product-badge">In evidenza</span>' : '');
+                var badge = renderCardBadge(p, savingsMap);
                 var thumb = p.image_url
                   ? '<img src="' + p.image_url + '" alt="' + p.name + '" style="width:100%;height:100%;object-fit:cover;">'
                   : 'Foto prodotto';
@@ -502,7 +493,7 @@ function loadCategoryFromSupabase(pathStr, subcatGrid, grid) {
                   '<div class="product-body">' +
                     '<span class="product-cat">' + subName + '</span>' +
                     '<a class="product-link" href="prodotto.html?id=' + p.id + '"><h4>' + p.name + '</h4></a>' +
-                    '<div class="product-price"><strong>€ ' + priceEUR + '</strong>' +
+                    '<div class="product-price">' + renderPriceHTML(p) +
                       '<button class="add-btn" data-product-id="' + p.id + '" data-product-name="' + p.name + '" data-product-price="' + p.price_cents + '" aria-label="Aggiungi al carrello">+</button>' +
                     '</div>' +
                   '</div>';
@@ -530,7 +521,7 @@ function initProductPage() {
 
   return supabaseClient
     .from('products')
-    .select('id, name, description, price_cents, image_url, featured, is_bundle, stock, category_id, categories(name, slug, path)')
+    .select('id, name, description, price_cents, compare_at_price_cents, image_url, featured, is_bundle, stock, category_id, categories(name, slug, path)')
     .eq('id', id)
     .eq('active', true)
     .single()
@@ -560,7 +551,7 @@ function renderRelatedProducts(p) {
 
       return supabaseClient
         .from('products')
-        .select('id, name, price_cents, image_url, featured, is_bundle, categories(name)')
+        .select('id, name, price_cents, compare_at_price_cents, image_url, featured, is_bundle, categories(name)')
         .eq('active', true)
         .in('category_id', categoryIds)
         .neq('id', p.id)
@@ -572,10 +563,7 @@ function renderRelatedProducts(p) {
           return getBundleSavingsMap(bundleIds).then(function (savingsMap) {
           grid.innerHTML = '';
           res.data.forEach(function (rp) {
-            var priceEUR = formatEUR(rp.price_cents);
-            var badge = rp.is_bundle
-              ? '<span class="product-badge">' + (savingsMap[rp.id] ? 'Risparmi ' + formatEUR(savingsMap[rp.id]) : 'Kit risparmio') + '</span>'
-              : (rp.featured ? '<span class="product-badge">In evidenza</span>' : '');
+            var badge = renderCardBadge(rp, savingsMap);
             var thumb = rp.image_url
               ? '<img src="' + rp.image_url + '" alt="' + rp.name + '" style="width:100%;height:100%;object-fit:cover;">'
               : 'Foto prodotto';
@@ -589,7 +577,7 @@ function renderRelatedProducts(p) {
               '<div class="product-body">' +
                 '<span class="product-cat">' + (rp.categories ? rp.categories.name : '') + '</span>' +
                 '<a class="product-link" href="prodotto.html?id=' + rp.id + '"><h4>' + rp.name + '</h4></a>' +
-                '<div class="product-price"><strong>' + priceEUR + '</strong>' +
+                '<div class="product-price">' + renderPriceHTML(rp) +
                   '<button class="add-btn" data-product-id="' + rp.id + '" data-product-name="' + rp.name + '" data-product-price="' + rp.price_cents + '" aria-label="Aggiungi al carrello">+</button>' +
                 '</div>' +
               '</div>';
@@ -604,7 +592,6 @@ function renderProductPage(p) {
   var catName = p.categories ? p.categories.name : '';
   var topSlug = p.categories && p.categories.path ? p.categories.path.split('.')[0] : '';
   var topName = (topSlug && CATEGORIES_DATA[topSlug]) ? CATEGORIES_DATA[topSlug].name : catName;
-  var priceEUR = formatEUR(p.price_cents);
   var descText = p.description || (p.name + ' disponibile nello Shop Camper CDA. Spedizione in tutta Italia o ritiro a Tivoli (RM), installazione disponibile nel centro tecnico.');
 
   document.title = p.name + ' | Shop CDA Tivoli';
@@ -626,7 +613,7 @@ function renderProductPage(p) {
 
   if (nameField) nameField.textContent = p.name;
   if (catEl) catEl.textContent = (topName && catName && topName !== catName) ? (topName + ' · ' + catName) : catName;
-  if (priceEl) priceEl.textContent = priceEUR;
+  if (priceEl) priceEl.innerHTML = renderPriceHTML(p);
   if (descEl) descEl.textContent = descText;
   if (specCatEl) specCatEl.textContent = catName;
   if (specAvailabilityEl) {
@@ -644,7 +631,9 @@ function renderProductPage(p) {
   }
 
   if (badgeEl) {
+    var pDiscountPct = discountPercent(p);
     if (p.is_bundle) { badgeEl.textContent = 'Kit risparmio'; badgeEl.style.display = ''; }
+    else if (pDiscountPct) { badgeEl.textContent = '-' + pDiscountPct + '%'; badgeEl.style.display = ''; }
     else if (p.featured) { badgeEl.textContent = 'In evidenza'; badgeEl.style.display = ''; }
     else { badgeEl.style.display = 'none'; }
   }
@@ -868,7 +857,12 @@ function initStickyBuyBar() {
   if (!bar || !purchaseRow || !realAddBtn || typeof IntersectionObserver === 'undefined') return;
 
   var priceEl = document.getElementById('buy-bar-price');
-  if (priceEl && priceSourceEl) priceEl.textContent = priceSourceEl.textContent;
+  if (priceEl && priceSourceEl) {
+    // #product-price può contenere anche il prezzo pieno barrato (sconto
+    // reale): la barra fissa mostra solo il prezzo di vendita vero.
+    var priceStrongEl = priceSourceEl.querySelector('strong');
+    priceEl.textContent = priceStrongEl ? priceStrongEl.textContent : priceSourceEl.textContent;
+  }
 
   var barBtn = document.getElementById('buy-bar-btn');
   if (barBtn) {
@@ -1286,6 +1280,31 @@ function initProductFilters() {
 
 function formatEUR(cents) {
   return '€ ' + (cents / 100).toLocaleString('it-IT', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+}
+
+// Sconto reale su un singolo prodotto (non kit): valorizzato solo quando
+// compare_at_price_cents viene da un calcolo tracciabile (es. listino
+// rivenditore reale), mai inventato — stesso principio già usato per i kit.
+function discountPercent(p) {
+  if (!p.compare_at_price_cents || p.compare_at_price_cents <= p.price_cents) return null;
+  return Math.round((1 - p.price_cents / p.compare_at_price_cents) * 100);
+}
+
+function renderPriceHTML(p) {
+  var pct = discountPercent(p);
+  if (pct) {
+    return '<strong>' + formatEUR(p.price_cents) + '</strong> <span class="price-compare">' + formatEUR(p.compare_at_price_cents) + '</span>';
+  }
+  return '<strong>' + formatEUR(p.price_cents) + '</strong>';
+}
+
+function renderCardBadge(p, savingsMap) {
+  if (p.is_bundle) {
+    return '<span class="product-badge">' + ((savingsMap && savingsMap[p.id]) ? 'Risparmi ' + formatEUR(savingsMap[p.id]) : 'Kit risparmio') + '</span>';
+  }
+  var pct = discountPercent(p);
+  if (pct) return '<span class="product-badge product-badge-discount">-' + pct + '%</span>';
+  return p.featured ? '<span class="product-badge">In evidenza</span>' : '';
 }
 
 var FREE_SHIPPING_THRESHOLD_CENTS = 5000; // € 50,00 — soglia placeholder, da confermare
