@@ -129,6 +129,7 @@ function initShopCatalog() {
     .from('products')
     .select('id, name, price_cents, compare_at_price_cents, image_url, featured, is_bundle, vehicle_compatibility, brand, categories(slug, name, path)')
     .eq('active', true)
+    .gt('price_cents', 0) // mai mostrare in vendita un prodotto con prezzo segnaposto a 0€
     .then(function (res) {
       if (res.error || !res.data || res.data.length === 0) return; // fallback silenzioso: restano i placeholder
 
@@ -208,6 +209,7 @@ function initFeaturedCarousel() {
     .select('id, name, price_cents, compare_at_price_cents, image_url, featured, is_bundle, categories(slug, name)')
     .eq('active', true)
     .eq('featured', true)
+    .gt('price_cents', 0) // mai mostrare in vendita un prodotto con prezzo segnaposto a 0€
     .then(function (res) {
       if (res.error || !res.data || res.data.length === 0) return; // fallback silenzioso: restano i placeholder
 
@@ -466,6 +468,7 @@ function loadCategoryFromSupabase(pathStr, subcatGrid, grid) {
             .from('products')
             .select('id, name, price_cents, compare_at_price_cents, image_url, featured, is_bundle, vehicle_compatibility, categories(slug, name)')
             .eq('active', true)
+            .gt('price_cents', 0) // mai mostrare in vendita un prodotto con prezzo segnaposto a 0€
             .in('category_id', categoryIds)
             .then(function (prodRes) {
               if (prodRes.error || !prodRes.data || prodRes.data.length === 0) return; // nessun prodotto: restano i placeholder
@@ -553,6 +556,7 @@ function renderRelatedProducts(p) {
         .from('products')
         .select('id, name, price_cents, compare_at_price_cents, image_url, featured, is_bundle, categories(name)')
         .eq('active', true)
+        .gt('price_cents', 0) // mai mostrare in vendita un prodotto con prezzo segnaposto a 0€
         .in('category_id', categoryIds)
         .neq('id', p.id)
         .limit(4)
@@ -611,9 +615,11 @@ function renderProductPage(p) {
   var thumbEl = document.getElementById('product-thumb');
   var kitContentsEl = document.getElementById('kit-contents');
 
+  var priceNotSet = !p.price_cents || p.price_cents <= 0;
+
   if (nameField) nameField.textContent = p.name;
   if (catEl) catEl.textContent = (topName && catName && topName !== catName) ? (topName + ' · ' + catName) : catName;
-  if (priceEl) priceEl.innerHTML = renderPriceHTML(p);
+  if (priceEl) priceEl.innerHTML = priceNotSet ? '<span class="price-pending">Prezzo in aggiornamento</span>' : renderPriceHTML(p);
   if (descEl) descEl.textContent = descText;
   if (specCatEl) specCatEl.textContent = catName;
   if (specAvailabilityEl) {
@@ -643,10 +649,16 @@ function renderProductPage(p) {
   }
 
   if (addBtn) {
-    addBtn.setAttribute('data-product-id', p.id);
-    addBtn.setAttribute('data-product-name', p.name);
-    addBtn.setAttribute('data-product-price', p.price_cents);
-    addBtn.textContent = p.is_bundle ? '🛒 Aggiungi il kit al carrello' : '🛒 Aggiungi al carrello';
+    if (priceNotSet) {
+      addBtn.disabled = true;
+      addBtn.textContent = 'Non ancora disponibile';
+    } else {
+      addBtn.disabled = false;
+      addBtn.setAttribute('data-product-id', p.id);
+      addBtn.setAttribute('data-product-name', p.name);
+      addBtn.setAttribute('data-product-price', p.price_cents);
+      addBtn.textContent = p.is_bundle ? '🛒 Aggiungi il kit al carrello' : '🛒 Aggiungi al carrello';
+    }
   }
 
   // Il blocco "Cosa include questo kit" statico è demo: si mostra solo

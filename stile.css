@@ -396,6 +396,9 @@ section{padding:80px 0;}
   background:transparent;cursor:pointer;
 }
 .add-btn:hover{background:var(--red);border-color:var(--red);color:var(--pure-white);}
+.add-btn:disabled{cursor:not-allowed;opacity:.5;border-color:var(--steel-light);color:var(--steel-light);}
+.add-btn:disabled:hover{background:transparent;border-color:var(--steel-light);color:var(--steel-light);}
+.price-pending{font-family:var(--font-body);font-style:italic;font-size:16px;color:var(--steel);}
 .product-link{display:block;color:inherit;}
 .product-link:hover .product-thumb{background:var(--red-light);}
 .product-link:hover h4{color:var(--red-dark);}
