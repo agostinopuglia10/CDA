@@ -14,7 +14,7 @@ Fatto un giro reale del sito (home, shop, categoria, carosello in evidenza) come
 
 **Il vero limite alle vendite oggi non è però nell'UX**: Stripe è ancora in modalità **test** — nessun pagamento vero può essere incassato finché non viene sostituita la chiave con quella live (vedi sezione Dominio/Stripe più sopra). Con quello risolto e i 3 punti sopra corretti, il percorso di acquisto (home → shop → prodotto → carrello → checkout) è oggi pulito e senza altri difetti bloccanti trovati in questo giro.
 
-**Non ancora richiesto in questo giro** (segnalo, non forzato): il carosello "Selezionati per te" apre con un climatizzatore da €3.600 prima dei kit da €149-259 — un ordine diverso (kit accessibili prima, articoli premium dopo) potrebbe convertire meglio, ma è una scelta di curation/marketing, non un difetto — dimmi se vuoi che la cambi.
+- [x] **Ordine del carosello "Selezionati per te" (2026-09-08)**: apriva con un climatizzatore da €3.600 prima dei kit da €149. Aggiunto `order by price_cents ascending` alla query — ora apre con i 5 kit accessibili (€149-749) e chiude con gli articoli premium (batteria, frigorifero, climatizzatore, fino a €3.600). Verificato dal vivo nel browser.
 
 ## 🎨 Estetica/UX (ispirato ai grandi e-commerce, 2026-09-01)
 

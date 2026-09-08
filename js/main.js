@@ -210,6 +210,7 @@ function initFeaturedCarousel() {
     .eq('active', true)
     .eq('featured', true)
     .gt('price_cents', 0) // mai mostrare in vendita un prodotto con prezzo segnaposto a 0€
+    .order('price_cents', { ascending: true }) // kit/prodotti accessibili prima, articoli premium dopo — non l'ordine casuale di inserimento
     .then(function (res) {
       if (res.error || !res.data || res.data.length === 0) return; // fallback silenzioso: restano i placeholder
 
