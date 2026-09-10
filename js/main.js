@@ -257,52 +257,52 @@ var CATEGORIES_DATA = {
     name: 'Interni',
     description: "Vivi comodo, ovunque tu sia: arredamento, toilette, cucina e tutto l'occorrente per gli interni del tuo camper.",
     children: {
-      arredamento: { name: 'Arredamento', img: 'images/sottocategorie/interni-arredamento.jpg' },
-      toilette: { name: 'Toilette', img: 'images/sottocategorie/interni-toilette.jpg' },
-      cucina: { name: 'Cucina', img: 'images/sottocategorie/interni-cucina.jpg' },
-      garage: { name: 'Garage', img: 'images/sottocategorie/interni-garage.jpg' },
-      oscuranti: { name: 'Oscuranti', img: 'images/sottocategorie/interni-oscuranti.jpg' },
-      zanzariere: { name: 'Zanzariere', img: 'images/sottocategorie/interni-zanzariere.jpg' },
-      aperture: { name: 'Aperture', img: 'images/sottocategorie/interni-aperture.jpg' },
-      'cabina-guida': { name: 'Cabina Guida', img: 'images/sottocategorie/interni-cabina-guida.jpg' },
-      utensili: { name: 'Utensili', img: 'images/sottocategorie/interni-utensili.jpg' }
+      arredamento: { name: 'Arredamento', description: 'Faretti LED e plafoniere per illuminare e completare gli interni del camper.', img: 'images/sottocategorie/interni-arredamento.jpg' },
+      toilette: { name: 'Toilette', description: 'WC portatili e kit toilette da viaggio, per l\'autonomia in ogni sosta.', img: 'images/sottocategorie/interni-toilette.jpg' },
+      cucina: { name: 'Cucina', description: 'Frigoriferi a compressore per camper, in diverse capacità.', img: 'images/sottocategorie/interni-cucina.jpg' },
+      garage: { name: 'Garage', description: 'Barre, ganci e cinghie per fissare in sicurezza tutto ciò che porti nel vano garage.', img: 'images/sottocategorie/interni-garage.jpg' },
+      oscuranti: { name: 'Oscuranti', description: 'Oscuranti a rullo per privacy e riparo dal sole nell\'abitacolo.', img: 'images/sottocategorie/interni-oscuranti.jpg' },
+      zanzariere: { name: 'Zanzariere', description: 'Zanzariere su misura per porte e finestre del camper.', img: 'images/sottocategorie/interni-zanzariere.jpg' },
+      aperture: { name: 'Aperture', description: 'Fermaporta e accessori per porte e sportelli del camper.', img: 'images/sottocategorie/interni-aperture.jpg' },
+      'cabina-guida': { name: 'Cabina Guida', description: 'Oscuranti termici e accessori dedicati alla cabina di guida.', img: 'images/sottocategorie/interni-cabina-guida.jpg' },
+      utensili: { name: 'Utensili', description: 'Attrezzi e utensili per la manutenzione e le piccole riparazioni a bordo.', img: 'images/sottocategorie/interni-utensili.jpg' }
     }
   },
   esterni: {
     name: 'Esterni',
     description: "Goditi l'aria aperta ovunque ti fermi: aperture, verande e portaggio per il tuo camper.",
     children: {
-      aperture: { name: 'Aperture' },
-      verande: { name: 'Verande', img: 'images/sottocategorie/esterni-verande.jpg' },
-      portaggio: { name: 'Portaggio', img: 'images/sottocategorie/esterni-portaggio.jpg' },
-      sicurezza: { name: 'Segnaletica e Sicurezza' }
+      aperture: { name: 'Aperture', description: 'Accessori per porte, sportelli e aperture esterne del camper.' },
+      verande: { name: 'Verande', description: 'Verande e tende avvolgibili per vivere all\'aperto accanto al tuo camper.', img: 'images/sottocategorie/esterni-verande.jpg' },
+      portaggio: { name: 'Portaggio', description: 'Prese e connettori elettrici per il traino e il portaggio del camper.', img: 'images/sottocategorie/esterni-portaggio.jpg' },
+      sicurezza: { name: 'Segnaletica e Sicurezza', description: 'Catadiottri e dotazioni di sicurezza per il tuo camper.' }
     }
   },
   energia: {
     name: 'Energia',
     description: 'Autonomia senza pensieri: batterie, pannelli solari e strumentazioni per il tuo impianto elettrico.',
     children: {
-      batterie: { name: 'Batterie', img: 'images/sottocategorie/energia-batterie.jpg' },
-      'pannelli-solari': { name: 'Pannelli Solari', img: 'images/sottocategorie/energia-pannelli-solari.jpg' },
-      strumentazioni: { name: 'Strumentazioni', img: 'images/sottocategorie/energia-strumentazioni.jpg' }
+      batterie: { name: 'Batterie', description: 'Batterie al litio LiFePO4 per l\'impianto elettrico del camper, dalla dotazione base alla massima autonomia.', img: 'images/sottocategorie/energia-batterie.jpg' },
+      'pannelli-solari': { name: 'Pannelli Solari', description: 'Pannelli solari per ricaricare l\'impianto elettrico del camper in autonomia.', img: 'images/sottocategorie/energia-pannelli-solari.jpg' },
+      strumentazioni: { name: 'Strumentazioni', description: 'Strumenti di monitoraggio e connettività per l\'impianto elettrico del camper.', img: 'images/sottocategorie/energia-strumentazioni.jpg' }
     }
   },
   acqua: {
     name: 'Acqua',
     description: 'Comfort domestico in viaggio: prodotti chimici, pompe, serbatoi e rubinetteria.',
     children: {
-      'prodotti-chimici': { name: 'Prodotti Chimici', img: 'images/sottocategorie/acqua-prodotti-chimici.jpg' },
-      pompe: { name: 'Pompe', img: 'images/sottocategorie/acqua-pompe.jpg' },
-      serbatoi: { name: 'Serbatoi', img: 'images/sottocategorie/acqua-serbatoi.jpg' },
-      rubinetteria: { name: 'Rubinetteria', img: 'images/sottocategorie/acqua-rubinetteria.jpg' }
+      'prodotti-chimici': { name: 'Prodotti Chimici', description: 'Disgreganti e igienizzanti per la manutenzione dell\'impianto idrico e della toilette.', img: 'images/sottocategorie/acqua-prodotti-chimici.jpg' },
+      pompe: { name: 'Pompe', description: 'Pompe ad immersione per l\'impianto idrico del camper, in diverse portate.', img: 'images/sottocategorie/acqua-pompe.jpg' },
+      serbatoi: { name: 'Serbatoi', description: 'Serbatoi acqua e kit per l\'impianto idrico fisso del camper, in diverse capacità.', img: 'images/sottocategorie/acqua-serbatoi.jpg' },
+      rubinetteria: { name: 'Rubinetteria', description: 'Rubinetti e miscelatori per il lavello e il bagno del camper.', img: 'images/sottocategorie/acqua-rubinetteria.jpg' }
     }
   },
   clima: {
     name: 'Clima',
     description: 'A tuo agio in ogni stagione: climatizzatori e riscaldatori a gasolio e gas.',
     children: {
-      climatizzatori: { name: 'Climatizzatori', img: 'images/sottocategorie/clima-climatizzatori.jpg' },
-      'riscaldatori-gasolio-gas': { name: 'Riscaldatori a Gasolio e Gas', img: 'images/sottocategorie/clima-riscaldatori-gasolio-gas.jpg' }
+      climatizzatori: { name: 'Climatizzatori', description: 'Climatizzatori da tetto per il camper, per viaggiare freschi in ogni stagione.', img: 'images/sottocategorie/clima-climatizzatori.jpg' },
+      'riscaldatori-gasolio-gas': { name: 'Riscaldatori a Gasolio e Gas', description: 'Riscaldatori a gasolio e stufe a gas per scaldare il camper anche in inverno.', img: 'images/sottocategorie/clima-riscaldatori-gasolio-gas.jpg' }
     }
   }
 };
