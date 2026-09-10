@@ -602,6 +602,7 @@ function renderProductPage(p) {
   document.title = p.name + ' | Shop CDA Tivoli';
   var metaDesc = document.querySelector('meta[name="description"]');
   if (metaDesc) metaDesc.setAttribute('content', descText.slice(0, 300));
+  updateProductSeoTags(p, descText, topName, topSlug);
 
   var nameField = document.getElementById('product-name');
   var catEl = document.getElementById('product-cat');
@@ -665,6 +666,72 @@ function renderProductPage(p) {
   // Il blocco "Cosa include questo kit" statico è demo: si mostra solo
   // se il prodotto reale è davvero un kit (wireProductPageKit lo popola).
   if (kitContentsEl && !p.is_bundle) kitContentsEl.style.display = 'none';
+}
+
+// Aggiorna canonical/OG/Twitter/JSON-LD con i dati reali del prodotto:
+// senza questo, ogni pagina prodotto (stesso template, ?id= diverso)
+// mandava a Google/motori AI gli stessi identici dati statici del
+// prodotto di esempio, indipendentemente dal prodotto mostrato.
+function updateProductSeoTags(p, descText, topName, topSlug) {
+  var pageUrl = 'https://cda-camper.it/prodotto.html?id=' + encodeURIComponent(p.id);
+  var shortDesc = descText.slice(0, 200);
+  var imageUrl = p.image_url || 'https://cda-camper.it/images/og-cover.jpg';
+
+  var canonicalEl = document.getElementById('canonical-link');
+  if (canonicalEl) canonicalEl.setAttribute('href', pageUrl);
+  var ogTitleEl = document.getElementById('og-title');
+  if (ogTitleEl) ogTitleEl.setAttribute('content', p.name + ' | Shop CDA Tivoli');
+  var ogDescEl = document.getElementById('og-desc');
+  if (ogDescEl) ogDescEl.setAttribute('content', shortDesc);
+  var ogUrlEl = document.getElementById('og-url');
+  if (ogUrlEl) ogUrlEl.setAttribute('content', pageUrl);
+  var ogImageEl = document.getElementById('og-image');
+  if (ogImageEl) ogImageEl.setAttribute('content', imageUrl);
+  var twitterTitleEl = document.getElementById('twitter-title');
+  if (twitterTitleEl) twitterTitleEl.setAttribute('content', p.name + ' | Shop CDA Tivoli');
+  var twitterDescEl = document.getElementById('twitter-desc');
+  if (twitterDescEl) twitterDescEl.setAttribute('content', shortDesc);
+
+  var breadcrumbEl = document.getElementById('breadcrumb-ld');
+  if (breadcrumbEl) {
+    var items = [
+      { '@type': 'ListItem', position: 1, name: 'Home', item: 'https://cda-camper.it/index.html' },
+      { '@type': 'ListItem', position: 2, name: 'Shop Camper', item: 'https://cda-camper.it/shop.html' }
+    ];
+    if (topSlug && topName) {
+      items.push({ '@type': 'ListItem', position: 3, name: topName, item: 'https://cda-camper.it/categoria.html?slug=' + topSlug });
+    }
+    items.push({ '@type': 'ListItem', position: items.length + 1, name: p.name, item: pageUrl });
+    breadcrumbEl.textContent = JSON.stringify({
+      '@context': 'https://schema.org',
+      '@type': 'BreadcrumbList',
+      itemListElement: items
+    });
+  }
+
+  var productEl = document.getElementById('product-ld');
+  if (productEl) {
+    var priceNotSet = !p.price_cents || p.price_cents <= 0;
+    var productLd = {
+      '@context': 'https://schema.org',
+      '@type': 'Product',
+      name: p.name,
+      category: topName || '',
+      description: shortDesc,
+      image: imageUrl,
+      url: pageUrl
+    };
+    if (!priceNotSet) {
+      productLd.offers = {
+        '@type': 'Offer',
+        priceCurrency: 'EUR',
+        price: (p.price_cents / 100).toFixed(2),
+        availability: (p.stock && p.stock > 0) ? 'https://schema.org/InStock' : 'https://schema.org/BackOrder',
+        url: pageUrl
+      };
+    }
+    productEl.textContent = JSON.stringify(productLd);
+  }
 }
 
 function wireProductPageKit(p) {
