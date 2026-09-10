@@ -359,6 +359,7 @@ function applyCategoryData(pathStr, subcatGrid, grid) {
   if (descEl) descEl.textContent = node.description || '';
   document.title = node.name + ' — Shop Camper | CDA Tivoli';
   if (metaDesc && node.description) metaDesc.setAttribute('content', node.description);
+  updateCategorySeoTags(pathStr, node.name, node.description || '', ancestors);
 
   if (breadcrumbEl) {
     var trailHtml = '<a href="index.html">Home</a> / <a href="shop.html">Shop Camper</a>';
@@ -429,6 +430,54 @@ function applyCategoryData(pathStr, subcatGrid, grid) {
   }
 }
 
+// Aggiorna canonical/OG/Twitter/breadcrumb JSON-LD con la categoria reale:
+// senza questo, ogni categoria (stesso template, ?slug= diverso) mandava
+// a Google/motori AI sempre i dati statici di "Interni", indipendentemente
+// da quale categoria fosse davvero mostrata (stesso bug già corretto sulle
+// pagine prodotto).
+function updateCategorySeoTags(pathStr, name, description, ancestors) {
+  var pageUrl = 'https://cda-camper.it/categoria.html?slug=' + encodeURIComponent(pathStr);
+  var title = name + ' — Shop Camper | CDA Tivoli';
+
+  var canonicalEl = document.getElementById('canonical-link');
+  if (canonicalEl) canonicalEl.setAttribute('href', pageUrl);
+  var ogTitleEl = document.getElementById('og-title');
+  if (ogTitleEl) ogTitleEl.setAttribute('content', title);
+  var ogUrlEl = document.getElementById('og-url');
+  if (ogUrlEl) ogUrlEl.setAttribute('content', pageUrl);
+  var twitterTitleEl = document.getElementById('twitter-title');
+  if (twitterTitleEl) twitterTitleEl.setAttribute('content', title);
+  if (description) {
+    var ogDescEl = document.getElementById('og-description');
+    if (ogDescEl) ogDescEl.setAttribute('content', description);
+    var twitterDescEl = document.getElementById('twitter-description');
+    if (twitterDescEl) twitterDescEl.setAttribute('content', description);
+  }
+
+  var breadcrumbEl = document.getElementById('breadcrumb-jsonld');
+  if (breadcrumbEl) {
+    var items = [
+      { '@type': 'ListItem', position: 1, name: 'Home', item: 'https://cda-camper.it/index.html' },
+      { '@type': 'ListItem', position: 2, name: 'Shop Camper', item: 'https://cda-camper.it/shop.html' }
+    ];
+    var acc = '';
+    (ancestors || []).forEach(function (a) {
+      acc = acc ? acc + '.' + a.slug : a.slug;
+      items.push({
+        '@type': 'ListItem',
+        position: items.length + 1,
+        name: a.name,
+        item: 'https://cda-camper.it/categoria.html?slug=' + acc
+      });
+    });
+    breadcrumbEl.textContent = JSON.stringify({
+      '@context': 'https://schema.org',
+      '@type': 'BreadcrumbList',
+      itemListElement: items
+    });
+  }
+}
+
 function loadCategoryFromSupabase(pathStr, subcatGrid, grid) {
   return supabaseClient
     .from('categories')
@@ -446,6 +495,8 @@ function loadCategoryFromSupabase(pathStr, subcatGrid, grid) {
       if (descEl && category.description) descEl.textContent = category.description;
       document.title = category.name + ' — Shop Camper | CDA Tivoli';
       if (metaDesc && category.description) metaDesc.setAttribute('content', category.description);
+      var resolvedForSeo = resolveCategoryPath(pathStr);
+      updateCategorySeoTags(pathStr, category.name, category.description || '', resolvedForSeo ? resolvedForSeo.ancestors : []);
 
       // La struttura dell'albero (nomi, ordine, foto, profondità) resta
       // quella locale di CATEGORIES_DATA, già completa e corretta: qui
