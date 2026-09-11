@@ -13,7 +13,7 @@
 
 ## Pagine principali
 
-- Home: https://cda-camper.it/index.html
+- Home: https://cda-camper.it/
 - Shop online (catalogo completo): https://cda-camper.it/shop.html
 - Servizi camper (manutenzione, impianti, installazione, riparazioni): https://cda-camper.it/servizi.html
 - Lavorazioni speciali su lamiera: https://cda-camper.it/lavorazioni.html

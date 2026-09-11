@@ -457,7 +457,7 @@ function updateCategorySeoTags(pathStr, name, description, ancestors) {
   var breadcrumbEl = document.getElementById('breadcrumb-jsonld');
   if (breadcrumbEl) {
     var items = [
-      { '@type': 'ListItem', position: 1, name: 'Home', item: 'https://cda-camper.it/index.html' },
+      { '@type': 'ListItem', position: 1, name: 'Home', item: 'https://cda-camper.it/' },
       { '@type': 'ListItem', position: 2, name: 'Shop Camper', item: 'https://cda-camper.it/shop.html' }
     ];
     var acc = '';
@@ -746,7 +746,7 @@ function updateProductSeoTags(p, descText, topName, topSlug) {
   var breadcrumbEl = document.getElementById('breadcrumb-ld');
   if (breadcrumbEl) {
     var items = [
-      { '@type': 'ListItem', position: 1, name: 'Home', item: 'https://cda-camper.it/index.html' },
+      { '@type': 'ListItem', position: 1, name: 'Home', item: 'https://cda-camper.it/' },
       { '@type': 'ListItem', position: 2, name: 'Shop Camper', item: 'https://cda-camper.it/shop.html' }
     ];
     if (topSlug && topName) {
