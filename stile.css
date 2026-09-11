@@ -716,6 +716,31 @@ section{padding:80px 0;}
 .login-back{display:block;text-align:center;margin-top:18px;font-size:13.5px;color:var(--steel);}
 .login-back:hover{color:var(--red);}
 
+/* Dashboard ordini (admin-ordini.html) */
+.order-card{
+  background:var(--white);border:1px solid var(--line);border-left:4px solid var(--steel-light);
+  padding:22px 24px;margin-bottom:16px;
+}
+.order-card.status-paid,.order-card.status-consegnato{border-left-color:#2E7D32;}
+.order-card.status-cod_pending,.order-card.status-spedito{border-left-color:var(--red);}
+.order-card.status-annullato{border-left-color:var(--steel);opacity:.6;}
+.order-card-head{
+  display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:12px;
+  margin-bottom:16px;padding-bottom:16px;border-bottom:1px solid var(--line);
+}
+.order-card-head .order-ref{font-family:var(--font-mono, monospace);font-size:13px;color:var(--steel);}
+.order-card-head .order-date{font-size:14px;color:var(--ink);font-weight:600;}
+.order-status-select{
+  padding:8px 12px;border:1px solid var(--line);background:var(--white);
+  font-family:var(--font-display);font-size:12px;letter-spacing:.06em;text-transform:uppercase;
+}
+.order-card-body{display:grid;grid-template-columns:1fr 1fr;gap:24px;}
+.order-items-list{list-style:none;margin:10px 0 0;padding:0;font-size:14px;}
+.order-items-list li{padding:4px 0;color:var(--steel);}
+.order-total{margin-top:12px;font-family:var(--font-display);font-size:16px;font-weight:700;}
+.order-save-status{font-size:12px;margin-top:8px;color:var(--steel);}
+@media (max-width:700px){.order-card-body{grid-template-columns:1fr;}}
+
 /* CTA band */
 .cta-band{background:var(--red);color:var(--pure-white);padding:64px 0;text-align:center;}
 .cta-band h2{color:var(--pure-white);}

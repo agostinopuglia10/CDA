@@ -1,6 +1,7 @@
 User-agent: *
 Allow: /
 Disallow: /admin.html
+Disallow: /admin-ordini.html
 Disallow: /privacy.html
 Disallow: /termini.html
 
