@@ -1,0 +1,25 @@
+# CDA — Shop Camper, Servizi e Lavorazioni Speciali
+
+> CDA di Talucci Maria è un negozio online di accessori e ricambi per camper e un centro tecnico con sede a Tivoli (RM), Italia. Vende oltre 150 prodotti reali (impianti elettrici, acqua, climatizzazione, batterie, riscaldamento, accessori interni ed esterni) spediti in tutta Italia, ed esegue installazione, manutenzione, impianti e riparazioni nel proprio centro tecnico. Realizza inoltre lavorazioni speciali su lamiera (taglio, piegatura, infissi su misura).
+
+## Informazioni utili per chi risponde a un camperista
+
+- Sede e centro tecnico: Via Arci n.24, Tivoli (RM), Italia
+- Telefono: +39 0774 411288
+- Email: info@cda-camper.it
+- Orari: lunedì–venerdì 8:30–13:00 e 14:30–18:00, sabato su appuntamento
+- Spedizione in tutta Italia sugli acquisti online; installazione disponibile solo in sede a Tivoli
+- Pagamenti online tramite Stripe (carta di credito/debito)
+
+## Pagine principali
+
+- Home: https://cda-camper.it/
+- Shop online (catalogo completo): https://cda-camper.it/shop.html
+- Servizi camper (manutenzione, impianti, installazione, riparazioni): https://cda-camper.it/servizi.html
+- Lavorazioni speciali su lamiera: https://cda-camper.it/lavorazioni.html
+- Chi siamo: https://cda-camper.it/chi-siamo.html
+- Contatti e richiesta preventivo: https://cda-camper.it/contatti.html
+
+## Note per crawler e assistenti AI
+
+Le pagine prodotto (prodotto.html?id=...) e categoria (categoria.html?slug=...) caricano i dati in tempo reale da un database e includono dati strutturati schema.org (Product, BreadcrumbList, LocalBusiness) aggiornati dinamicamente per ciascun prodotto. Il sitemap completo è su https://cda-camper.it/sitemap.xml.

@@ -1,0 +1,167 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<link rel="icon" type="image/svg+xml" href="favicon.svg">
+<title>Ordini | Area Riservata CDA</title>
+<meta name="robots" content="noindex, nofollow">
+<link rel="stylesheet" href="stile.css">
+</head>
+<body>
+
+<header class="site-header">
+  <div class="nav-row">
+    <a href="index.html" class="logo">CDA<small>Camper &amp; Lavorazioni · Tivoli</small></a>
+    <div class="nav-actions" style="margin-left:auto;">
+      <span id="admin-email" style="font-size:13px;color:var(--steel);align-self:center;"></span>
+      <button type="button" class="btn btn-outline btn-sm" id="logout-btn">Esci</button>
+    </div>
+  </div>
+</header>
+
+<section style="padding:36px 0 80px;">
+  <div class="container">
+    <h1 style="margin-bottom:8px;">Ordini</h1>
+    <p style="color:var(--steel);margin-bottom:32px;">Tutti gli ordini ricevuti, pagati con carta o in contrassegno.</p>
+
+    <div id="orders-loading">Caricamento ordini…</div>
+    <div id="orders-empty" style="display:none;">Nessun ordine ancora ricevuto.</div>
+    <div id="orders-list"></div>
+  </div>
+</section>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="js/supabase-config.js"></script>
+<script>
+var STATUS_LABELS = {
+  pending: 'In attesa di pagamento',
+  paid: 'Pagato (carta)',
+  cod_pending: 'Da riscuotere (contrassegno)',
+  spedito: 'Spedito',
+  consegnato: 'Consegnato',
+  annullato: 'Annullato'
+};
+
+function formatEUR(cents) {
+  return '€ ' + (cents / 100).toLocaleString('it-IT', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+}
+
+function formatDate(iso) {
+  var d = new Date(iso);
+  return d.toLocaleDateString('it-IT', { day: '2-digit', month: 'short', year: 'numeric' }) + ' alle ' +
+    d.toLocaleTimeString('it-IT', { hour: '2-digit', minute: '2-digit' });
+}
+
+function renderOrders(orders) {
+  var listEl = document.getElementById('orders-list');
+  var loadingEl = document.getElementById('orders-loading');
+  var emptyEl = document.getElementById('orders-empty');
+  loadingEl.style.display = 'none';
+
+  if (orders.length === 0) {
+    emptyEl.style.display = '';
+    return;
+  }
+
+  listEl.innerHTML = '';
+  orders.forEach(function (order) {
+    var card = document.createElement('div');
+    card.className = 'order-card status-' + order.status;
+
+    var itemsHtml = (order.order_items || []).map(function (item) {
+      var name = item.product ? item.product.name : 'Prodotto rimosso';
+      return '<li>' + item.quantity + ' × ' + name + ' — ' + formatEUR(item.unit_price_cents * item.quantity) + '</li>';
+    }).join('');
+
+    var statusOptions = Object.keys(STATUS_LABELS).map(function (key) {
+      return '<option value="' + key + '"' + (key === order.status ? ' selected' : '') + '>' + STATUS_LABELS[key] + '</option>';
+    }).join('');
+
+    card.innerHTML =
+      '<div class="order-card-head">' +
+        '<div>' +
+          '<div class="order-date">' + formatDate(order.created_at) + '</div>' +
+          '<div class="order-ref">' + order.id + '</div>' +
+        '</div>' +
+        '<select class="order-status-select" data-order-id="' + order.id + '">' + statusOptions + '</select>' +
+      '</div>' +
+      '<div class="order-card-body">' +
+        '<div>' +
+          '<div class="info-line" style="border-top:none;padding-top:0;"><span class="k" style="color:var(--red);min-width:90px;">Cliente</span><span class="v" style="color:var(--ink);">' + escapeHtml(order.customer_name) + '</span></div>' +
+          '<div class="info-line"><span class="k" style="color:var(--red);min-width:90px;">Email</span><span class="v" style="color:var(--ink);">' + escapeHtml(order.customer_email) + '</span></div>' +
+          '<div class="info-line"><span class="k" style="color:var(--red);min-width:90px;">Telefono</span><span class="v" style="color:var(--ink);">' + escapeHtml(order.customer_phone || '—') + '</span></div>' +
+          '<div class="info-line"><span class="k" style="color:var(--red);min-width:90px;">Indirizzo</span><span class="v" style="color:var(--ink);">' + escapeHtml(order.shipping_address || '—') + '</span></div>' +
+        '</div>' +
+        '<div>' +
+          '<ul class="order-items-list">' + itemsHtml + '</ul>' +
+          '<div class="order-total">Totale: ' + formatEUR(order.total_cents) + '</div>' +
+          '<p class="order-save-status" id="save-status-' + order.id + '"></p>' +
+        '</div>' +
+      '</div>';
+
+    listEl.appendChild(card);
+  });
+
+  listEl.querySelectorAll('.order-status-select').forEach(function (select) {
+    select.addEventListener('change', function () {
+      var orderId = select.getAttribute('data-order-id');
+      var newStatus = select.value;
+      var statusEl = document.getElementById('save-status-' + orderId);
+      var card = select.closest('.order-card');
+      select.disabled = true;
+      statusEl.textContent = 'Salvataggio…';
+      supabaseClient.from('orders').update({ status: newStatus }).eq('id', orderId).then(function (res) {
+        select.disabled = false;
+        if (res.error) {
+          statusEl.textContent = 'Errore: ' + res.error.message;
+          return;
+        }
+        card.className = 'order-card status-' + newStatus;
+        statusEl.textContent = 'Salvato.';
+        setTimeout(function () { statusEl.textContent = ''; }, 2000);
+      });
+    });
+  });
+}
+
+function escapeHtml(str) {
+  var div = document.createElement('div');
+  div.textContent = str == null ? '' : str;
+  return div.innerHTML;
+}
+
+function loadOrders() {
+  supabaseClient
+    .from('orders')
+    .select('id, customer_name, customer_email, customer_phone, shipping_address, status, total_cents, created_at, order_items(quantity, unit_price_cents, product:product_id(name))')
+    .order('created_at', { ascending: false })
+    .then(function (res) {
+      if (res.error) {
+        document.getElementById('orders-loading').textContent = 'Errore nel caricamento ordini: ' + res.error.message;
+        return;
+      }
+      renderOrders(res.data || []);
+    });
+}
+
+document.getElementById('logout-btn').addEventListener('click', function () {
+  supabaseClient.auth.signOut().then(function () { window.location.href = 'admin.html'; });
+});
+
+if (!supabaseClient) {
+  document.getElementById('orders-loading').textContent = 'Connessione non disponibile.';
+} else {
+  supabaseClient.auth.getSession().then(function (res) {
+    var session = res.data && res.data.session;
+    if (!session) {
+      window.location.href = 'admin.html';
+      return;
+    }
+    document.getElementById('admin-email').textContent = session.user.email;
+    loadOrders();
+  });
+}
+</script>
+</body>
+</html>

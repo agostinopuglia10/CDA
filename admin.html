@@ -3,6 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
+<link rel="icon" type="image/svg+xml" href="favicon.svg">
 <title>Area Riservata | CDA</title>
 <meta name="robots" content="noindex, nofollow">
 <link rel="stylesheet" href="stile.css">
@@ -18,27 +19,133 @@
 <div class="login-wrap">
   <div class="login-card">
     <h1>Area Riservata</h1>
-    <p class="lead-sm">Accesso riservato al personale CDA per la gestione di ordini, prodotti e richieste.</p>
+    <p class="lead-sm">Accesso riservato al personale CDA per la gestione degli ordini.</p>
 
-    <form onsubmit="return false;">
+    <form id="login-form">
       <div class="field">
         <label for="email">Email</label>
-        <input type="email" id="email" name="email" placeholder="nome@cda-camper.it" required>
+        <input type="email" id="email" name="email" placeholder="nome@cda-camper.it" required autocomplete="username">
       </div>
       <div class="field">
         <label for="password">Password</label>
-        <input type="password" id="password" name="password" placeholder="••••••••" required>
+        <input type="password" id="password" name="password" placeholder="••••••••" required autocomplete="current-password">
       </div>
-      <button type="submit" class="btn btn-primary">Accedi</button>
+      <button type="submit" class="btn btn-primary" id="login-btn">Accedi</button>
+      <p id="login-status" class="form-status" role="status" aria-live="polite"></p>
     </form>
 
-    <div class="login-note">
-      Questa è solo l'interfaccia grafica: il modulo non è ancora collegato a un sistema di autenticazione reale. L'accesso verrà attivato collegando questa pagina a Supabase Auth (o all'area amministrativa nativa, se si opterà per Shopify).
-    </div>
+    <form id="reset-form" style="display:none;">
+      <div class="field">
+        <label for="reset-email">Email</label>
+        <input type="email" id="reset-email" name="reset-email" placeholder="nome@cda-camper.it" required autocomplete="username">
+      </div>
+      <button type="submit" class="btn btn-primary" id="reset-btn">Invia link per la password</button>
+      <p id="reset-status" class="form-status" role="status" aria-live="polite"></p>
+    </form>
 
+    <form id="set-password-form" style="display:none;">
+      <p class="lead-sm" style="margin-bottom:18px;">Imposta la tua password per completare l'accesso.</p>
+      <div class="field">
+        <label for="new-password">Nuova password</label>
+        <input type="password" id="new-password" name="new-password" placeholder="Almeno 8 caratteri" required minlength="8" autocomplete="new-password">
+      </div>
+      <button type="submit" class="btn btn-primary" id="set-password-btn">Imposta password</button>
+      <p id="set-password-status" class="form-status" role="status" aria-live="polite"></p>
+    </form>
+
+    <a href="#" id="forgot-link" class="login-back">Password dimenticata?</a>
+    <a href="#" id="back-to-login-link" class="login-back" style="display:none;">← Torna al login</a>
     <a href="index.html" class="login-back">← Torna al sito</a>
   </div>
 </div>
 
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="js/supabase-config.js"></script>
+<script>
+var loginForm = document.getElementById('login-form');
+var resetForm = document.getElementById('reset-form');
+var setPasswordForm = document.getElementById('set-password-form');
+var forgotLink = document.getElementById('forgot-link');
+var backToLoginLink = document.getElementById('back-to-login-link');
+
+function showStatus(el, message, isError) {
+  el.textContent = message;
+  el.className = 'form-status show ' + (isError ? 'error' : 'success');
+}
+
+function showOnly(formToShow) {
+  [loginForm, resetForm, setPasswordForm].forEach(function (f) { f.style.display = f === formToShow ? '' : 'none'; });
+  forgotLink.style.display = formToShow === loginForm ? '' : 'none';
+  backToLoginLink.style.display = formToShow === resetForm ? '' : 'none';
+}
+
+forgotLink.addEventListener('click', function (e) {
+  e.preventDefault();
+  showOnly(resetForm);
+});
+backToLoginLink.addEventListener('click', function (e) {
+  e.preventDefault();
+  showOnly(loginForm);
+});
+
+loginForm.addEventListener('submit', function (e) {
+  e.preventDefault();
+  if (!supabaseClient) { showStatus(document.getElementById('login-status'), 'Accesso non disponibile al momento.', true); return; }
+  var email = document.getElementById('email').value.trim();
+  var password = document.getElementById('password').value;
+  var btn = document.getElementById('login-btn');
+  btn.disabled = true;
+  supabaseClient.auth.signInWithPassword({ email: email, password: password }).then(function (res) {
+    btn.disabled = false;
+    if (res.error) {
+      showStatus(document.getElementById('login-status'), 'Email o password non corrette.', true);
+      return;
+    }
+    window.location.href = 'admin-ordini.html';
+  });
+});
+
+resetForm.addEventListener('submit', function (e) {
+  e.preventDefault();
+  if (!supabaseClient) return;
+  var email = document.getElementById('reset-email').value.trim();
+  var btn = document.getElementById('reset-btn');
+  btn.disabled = true;
+  supabaseClient.auth.resetPasswordForEmail(email, { redirectTo: window.location.origin + '/admin.html' }).then(function (res) {
+    btn.disabled = false;
+    showStatus(document.getElementById('reset-status'), 'Se l\'indirizzo è registrato, riceverai a breve un\'email con il link per impostare la password.', false);
+  });
+});
+
+setPasswordForm.addEventListener('submit', function (e) {
+  e.preventDefault();
+  if (!supabaseClient) return;
+  var newPassword = document.getElementById('new-password').value;
+  var btn = document.getElementById('set-password-btn');
+  btn.disabled = true;
+  supabaseClient.auth.updateUser({ password: newPassword }).then(function (res) {
+    btn.disabled = false;
+    if (res.error) {
+      showStatus(document.getElementById('set-password-status'), 'Errore: ' + res.error.message, true);
+      return;
+    }
+    window.location.href = 'admin-ordini.html';
+  });
+});
+
+// Il link di invito/recupero password apre questa pagina con un token
+// nell'URL: supabase-js lo intercetta da solo e genera l'evento
+// PASSWORD_RECOVERY, a cui mostriamo il modulo per impostare la password.
+if (supabaseClient) {
+  supabaseClient.auth.onAuthStateChange(function (event, session) {
+    if (event === 'PASSWORD_RECOVERY') {
+      showOnly(setPasswordForm);
+    } else if (event === 'SIGNED_IN' && session && !window.location.hash.includes('type=recovery')) {
+      // Sessione già attiva (es. tab riaperta) senza essere in flusso di recupero.
+      window.location.href = 'admin-ordini.html';
+    }
+  });
+}
+</script>
 </body>
 </html>
