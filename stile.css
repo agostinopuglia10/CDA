@@ -638,6 +638,14 @@ section{padding:80px 0;}
 }
 .field input:focus,.field textarea:focus,.field select:focus{border-color:var(--red);outline:none;}
 .field textarea{resize:vertical;min-height:120px;}
+.payment-method-choice{display:flex;flex-direction:column;gap:8px;}
+.payment-method-option{
+  display:flex;align-items:center;gap:10px;
+  border:1px solid var(--line);padding:12px 14px;cursor:pointer;
+  font-size:14px;transition:border-color .15s ease;
+}
+.payment-method-option.selected{border-color:var(--red);}
+.payment-method-option input{accent-color:var(--red);margin:0;}
 .form-status{display:none;margin-top:16px;padding:12px 16px;font-size:14px;border:1px solid transparent;}
 .form-status.show{display:block;}
 .form-status.success{background:var(--success-bg);border-color:var(--success-border);color:var(--success-text);}

@@ -37,7 +37,7 @@
     </div>
     <span class="tag" style="display:block;margin-bottom:12px;">Ordine ricevuto</span>
     <h1 style="margin-bottom:18px;">Grazie per il tuo ordine!</h1>
-    <p style="font-size:16px;margin-bottom:8px;">Il pagamento è andato a buon fine. Riceverai una email di conferma con tutti i dettagli a breve.</p>
+    <p id="order-status-msg" style="font-size:16px;margin-bottom:8px;">Il pagamento è andato a buon fine. Riceverai una email di conferma con tutti i dettagli a breve.</p>
     <p id="order-ref" style="font-family:var(--font-mono, monospace);font-size:13px;color:var(--steel);margin-bottom:32px;"></p>
 
     <div class="info-card" style="text-align:left;margin-bottom:32px;">
@@ -64,7 +64,13 @@
 <script>
   var params = new URLSearchParams(window.location.search);
   var sessionId = params.get('session_id');
-  if (sessionId) {
+  var orderId = params.get('order_id');
+  var method = params.get('method');
+
+  if (method === 'cod' && orderId) {
+    document.getElementById('order-status-msg').textContent = 'Il tuo ordine è confermato. Pagherai in contanti al corriere al momento della consegna. Riceverai una email di conferma con tutti i dettagli a breve.';
+    document.getElementById('order-ref').textContent = 'Riferimento ordine: ' + orderId;
+  } else if (sessionId) {
     document.getElementById('order-ref').textContent = 'Riferimento ordine: ' + sessionId;
   }
 

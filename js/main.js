@@ -1457,7 +1457,26 @@ function initCartPage() {
   var crossSellEl = document.getElementById('cross-sell');
   var checkoutBtn = document.getElementById('checkout-btn');
   var statusEl = document.getElementById('checkout-status');
+  var paymentRadios = document.querySelectorAll('input[name="payment-method"]');
+  var codFieldsEl = document.getElementById('cod-fields');
   if (!emptyEl || !contentEl) return;
+
+  function getPaymentMethod() {
+    var checked = document.querySelector('input[name="payment-method"]:checked');
+    return checked ? checked.value : 'stripe';
+  }
+
+  function updatePaymentMethodUI() {
+    var method = getPaymentMethod();
+    document.querySelectorAll('.payment-method-option').forEach(function (opt) {
+      opt.classList.toggle('selected', opt.querySelector('input').value === method);
+    });
+    if (codFieldsEl) codFieldsEl.style.display = method === 'cod' ? '' : 'none';
+    if (checkoutBtn) checkoutBtn.textContent = method === 'cod' ? 'Conferma ordine (pagamento alla consegna)' : 'Vai al pagamento';
+  }
+
+  paymentRadios.forEach(function (radio) { radio.addEventListener('change', updatePaymentMethodUI); });
+  updatePaymentMethodUI();
 
   function updateCartBadge() {
     var count = getCartItems().reduce(function (sum, it) { return sum + it.quantity; }, 0);
@@ -1632,6 +1651,7 @@ function initCartPage() {
     checkoutBtn.addEventListener('click', function () {
       var items = getCartItems();
       var realItems = items.filter(function (it) { return it.id.indexOf('demo:') !== 0; });
+      var method = getPaymentMethod();
 
       statusEl.className = 'form-status';
 
@@ -1651,6 +1671,47 @@ function initCartPage() {
         value: realItems.reduce(function (sum, it) { return sum + (it.price_cents * it.quantity) / 100; }, 0),
         items: realItems.map(function (it) { return { item_id: it.id, item_name: it.name, quantity: it.quantity, price: it.price_cents / 100 }; })
       });
+
+      if (method === 'cod') {
+        var codName = document.getElementById('cod-name').value.trim();
+        var codEmail = document.getElementById('cod-email').value.trim();
+        var codPhone = document.getElementById('cod-phone').value.trim();
+        var codAddress = document.getElementById('cod-address').value.trim();
+
+        if (!codName || !codEmail || !codPhone || !codAddress) {
+          statusEl.className = 'form-status show error';
+          statusEl.textContent = 'Per il contrassegno servono nome, email, telefono e indirizzo di spedizione completi.';
+          return;
+        }
+
+        checkoutBtn.disabled = true;
+        var codOriginalText = checkoutBtn.textContent;
+        checkoutBtn.textContent = 'Attendere...';
+
+        fetch(SUPABASE_URL + '/functions/v1/create-cod-order', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + SUPABASE_ANON_KEY },
+          body: JSON.stringify({
+            items: realItems.map(function (it) { return { product_id: it.id, quantity: it.quantity }; }),
+            customer: { name: codName, email: codEmail, phone: codPhone, shipping_address: codAddress }
+          })
+        })
+          .then(function (res) { return res.json(); })
+          .then(function (data) {
+            if (data.order_id) {
+              window.location.href = 'ordine-confermato.html?order_id=' + encodeURIComponent(data.order_id) + '&method=cod';
+            } else {
+              throw new Error(data.error || 'Errore sconosciuto');
+            }
+          })
+          .catch(function (err) {
+            checkoutBtn.disabled = false;
+            checkoutBtn.textContent = codOriginalText;
+            statusEl.className = 'form-status show error';
+            statusEl.textContent = 'Impossibile confermare l\'ordine (' + err.message + '). Chiamaci al 0774 411288 per completare l\'ordine.';
+          });
+        return;
+      }
 
       checkoutBtn.disabled = true;
       var originalText = checkoutBtn.textContent;
