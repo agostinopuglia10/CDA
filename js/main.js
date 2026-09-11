@@ -304,6 +304,17 @@ var CATEGORIES_DATA = {
       climatizzatori: { name: 'Climatizzatori', description: 'Climatizzatori da tetto per il camper, per viaggiare freschi in ogni stagione.', img: 'images/sottocategorie/clima-climatizzatori.jpg' },
       'riscaldatori-gasolio-gas': { name: 'Riscaldatori a Gasolio e Gas', description: 'Riscaldatori a gasolio e stufe a gas per scaldare il camper anche in inverno.', img: 'images/sottocategorie/clima-riscaldatori-gasolio-gas.jpg' }
     }
+  },
+  elettronica: {
+    name: 'Elettronica & Accessori',
+    description: "Avviatori d'emergenza, caricabatterie, monitor e telecamere, inverter e compressori per il tuo camper.",
+    children: {
+      avviatori: { name: "Avviatori d'Emergenza", description: 'Avviatori portatili con power bank e torcia integrati, per ripartire anche lontano da casa.' },
+      caricabatterie: { name: 'Carica Batterie', description: "Carica batterie switching automatici per l'impianto elettrico del camper." },
+      'monitor-telecamere': { name: 'Monitor e Telecamere', description: 'Monitor LCD, telecamere per la retromarcia e specchietti con monitor integrato.' },
+      'inverter-regolatori': { name: 'Inverter e Regolatori di Carica', description: "Inverter per convertire la corrente e regolatori di carica MPPT per l'impianto solare." },
+      compressori: { name: 'Compressori Portatili', description: 'Compressori portatili con power bank e torcia, per gonfiare le gomme ovunque tu sia.' }
+    }
   }
 };
 
