@@ -6,6 +6,7 @@ document.addEventListener('DOMContentLoaded', function () {
   initNewsletterForm();
   initCartPage();
   initCarousels();
+  initBaCardModal();
 
   // initShopCatalog/initCategoryPage possono sostituire la griglia statica
   // con prodotti reali da Supabase: carrello/filtri/quantità vanno
@@ -1813,4 +1814,60 @@ function initCarousels() {
     wrap.addEventListener('focusin', pause);
     wrap.addEventListener('focusout', resume);
   });
+}
+
+// Apre una versione ingrandita della card "prima/dopo" (servizi.html) in una
+// dialog nativa, leggendo il contenuto direttamente dalla card cliccata
+// (nessun dato duplicato da mantenere allineato).
+function initBaCardModal() {
+  var modal = document.getElementById('ba-modal');
+  var cards = document.querySelectorAll('.ba-card');
+  if (!modal || !cards.length) return;
+
+  var imgBefore = document.getElementById('ba-modal-img-before');
+  var imgAfter = document.getElementById('ba-modal-img-after');
+  var catEl = document.getElementById('ba-modal-cat');
+  var titleEl = document.getElementById('ba-modal-title');
+  var descEl = document.getElementById('ba-modal-desc');
+  var closeBtn = modal.querySelector('.ba-modal-close');
+
+  function setImage(imgEl, sourceImg) {
+    var box = imgEl.closest('.ba-modal-img-box');
+    if (sourceImg) {
+      imgEl.src = sourceImg.src;
+      imgEl.alt = sourceImg.alt || '';
+      imgEl.hidden = false;
+      box.classList.remove('is-placeholder');
+    } else {
+      imgEl.removeAttribute('src');
+      imgEl.alt = '';
+      imgEl.hidden = true;
+      box.classList.add('is-placeholder');
+    }
+  }
+
+  cards.forEach(function (card) {
+    card.addEventListener('click', function () {
+      var imgs = card.querySelectorAll('.ba-images img');
+      setImage(imgBefore, imgs[0] || null);
+      setImage(imgAfter, imgs[1] || null);
+      catEl.textContent = card.querySelector('.ba-cat') ? card.querySelector('.ba-cat').textContent : '';
+      titleEl.textContent = card.querySelector('h4') ? card.querySelector('h4').textContent : '';
+      descEl.textContent = card.querySelector('.ba-body p') ? card.querySelector('.ba-body p').textContent : '';
+      modal.showModal();
+    });
+  });
+
+  if (closeBtn) closeBtn.addEventListener('click', function () { modal.close(); });
+
+  // Fallback light-dismiss per browser senza supporto a closedby (es. Safari).
+  if (!('closedBy' in HTMLDialogElement.prototype)) {
+    modal.addEventListener('click', function (event) {
+      if (event.target !== modal) return;
+      var rect = modal.getBoundingClientRect();
+      var inside = rect.top <= event.clientY && event.clientY <= rect.top + rect.height &&
+        rect.left <= event.clientX && event.clientX <= rect.left + rect.width;
+      if (!inside) modal.close();
+    });
+  }
 }

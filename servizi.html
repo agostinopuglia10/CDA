@@ -152,7 +152,7 @@
     <div class="scroll-carousel-wrap">
       <button class="scroll-arrow prev" aria-label="Scorri indietro">‹</button>
       <div class="scroll-carousel">
-        <div class="ba-card">
+        <button class="ba-card" type="button" aria-haspopup="dialog">
           <div class="ba-images">
             <div><span class="ba-tag">Prima</span><img src="images/lavorazioni-restiling/prima-1.jpg" alt="Camper prima del restyling, carrozzeria sporca e invecchiata" loading="lazy"></div>
             <div><span class="ba-tag">Dopo</span><img src="images/lavorazioni-restiling/dopo-1.jpg" alt="Camper dopo il restyling, carrozzeria pulita e rimessa a nuovo" loading="lazy"></div>
@@ -162,8 +162,8 @@
             <h4>Restyling carrozzeria camper</h4>
             <p>Pulizia profonda e rimessa a nuovo della carrozzeria esterna: il camper torna a splendere come appena uscito dal concessionario.</p>
           </div>
-        </div>
-        <div class="ba-card">
+        </button>
+        <button class="ba-card" type="button" aria-haspopup="dialog">
           <div class="ba-images">
             <div><span class="ba-tag">Prima</span><img src="images/lavorazioni-garage/prima-1.jpg" alt="Pavimento garage camper danneggiato dall'umidità" loading="lazy"></div>
             <div><span class="ba-tag">Dopo</span><img src="images/lavorazioni-garage/dopo-1.jpg" alt="Pavimento garage camper rifatto in lamiera di alluminio" loading="lazy"></div>
@@ -173,8 +173,8 @@
             <h4>Rifacimento pavimento garage</h4>
             <p>Il vecchio fondo in legno, marcio e compromesso dall'umidità, è stato rimosso e sostituito con una lamiera di alluminio mandorlata: un pavimento solido, resistente all'usura e all'acqua.</p>
           </div>
-        </div>
-        <div class="ba-card">
+        </button>
+        <button class="ba-card" type="button" aria-haspopup="dialog">
           <div class="ba-images">
             <div><span class="ba-tag">Prima</span>Foto prima</div>
             <div><span class="ba-tag">Dopo</span>Foto dopo</div>
@@ -184,8 +184,8 @@
             <h4>Rifacimento impianto elettrico</h4>
             <p>Nuovo impianto a norma con quadro comandi aggiornato.</p>
           </div>
-        </div>
-        <div class="ba-card">
+        </button>
+        <button class="ba-card" type="button" aria-haspopup="dialog">
           <div class="ba-images">
             <div><span class="ba-tag">Prima</span>Foto prima</div>
             <div><span class="ba-tag">Dopo</span>Foto dopo</div>
@@ -195,8 +195,8 @@
             <h4>Installazione impianto gas</h4>
             <p>Sostituzione completa con collaudo e certificazione.</p>
           </div>
-        </div>
-        <div class="ba-card">
+        </button>
+        <button class="ba-card" type="button" aria-haspopup="dialog">
           <div class="ba-images">
             <div><span class="ba-tag">Prima</span>Foto prima</div>
             <div><span class="ba-tag">Dopo</span>Foto dopo</div>
@@ -206,23 +206,25 @@
             <h4>Manutenzione impianto idraulico</h4>
             <p>Individuata e risolta una perdita, tubazioni sostituite.</p>
           </div>
-        </div>
-        <div class="ba-card">
-          <div class="ba-images">
-            <div><span class="ba-tag">Prima</span>Foto prima</div>
-            <div><span class="ba-tag">Dopo</span>Foto dopo</div>
-          </div>
-          <div class="ba-body">
-            <span class="ba-cat">Installazione</span>
-            <h4>Montaggio pannello solare</h4>
-            <p>Pannello acquistato nello shop, installato e collaudato.</p>
-          </div>
-        </div>
+        </button>
       </div>
       <button class="scroll-arrow next" aria-label="Scorri avanti">›</button>
     </div>
   </div>
 </section>
+
+<dialog id="ba-modal" class="ba-modal" closedby="any" aria-labelledby="ba-modal-title">
+  <button type="button" class="ba-modal-close" aria-label="Chiudi">✕</button>
+  <div class="ba-modal-images">
+    <div class="ba-modal-img-box"><span class="ba-tag">Prima</span><img id="ba-modal-img-before" src="" alt=""></div>
+    <div class="ba-modal-img-box"><span class="ba-tag">Dopo</span><img id="ba-modal-img-after" src="" alt=""></div>
+  </div>
+  <div class="ba-modal-body">
+    <span class="ba-cat" id="ba-modal-cat"></span>
+    <h3 id="ba-modal-title"></h3>
+    <p id="ba-modal-desc"></p>
+  </div>
+</dialog>
 
 <div class="road-line"><div class="rl-label"><span>—</span> I NOSTRI SERVIZI <span>—</span></div></div>
 

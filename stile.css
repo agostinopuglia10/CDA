@@ -824,6 +824,45 @@ section{padding:80px 0;}
 .ba-body h4{font-size:15.5px;margin:.3em 0 .2em;text-transform:none;letter-spacing:0;}
 .ba-body p{font-size:13px;color:var(--steel);margin:0;}
 
+button.ba-card{
+  padding:0;font:inherit;text-align:left;color:inherit;cursor:pointer;
+  -webkit-appearance:none;appearance:none;transition:transform .15s ease,box-shadow .15s ease;
+}
+button.ba-card:focus-visible{outline:2px solid var(--red);outline-offset:2px;}
+@media (hover:hover){
+  button.ba-card:hover{transform:translateY(-3px);box-shadow:0 8px 20px rgba(0,0,0,.12);}
+}
+
+/* Modale "Prima e dopo" ingrandita (servizi.html) */
+.ba-modal{
+  border:1px solid var(--line);padding:0;max-width:720px;width:calc(100% - 40px);
+  background:var(--white);color:var(--ink);box-shadow:0 20px 50px rgba(0,0,0,.25);
+}
+.ba-modal::backdrop{background:rgba(0,0,0,.6);backdrop-filter:blur(2px);}
+.ba-modal-close{
+  position:absolute;top:12px;right:12px;width:36px;height:36px;
+  background:var(--charcoal);color:var(--pure-white);border:none;
+  font-size:16px;cursor:pointer;display:flex;align-items:center;justify-content:center;z-index:2;
+}
+.ba-modal-close:hover{background:var(--red);}
+.ba-modal-images{display:grid;grid-template-columns:1fr 1fr;}
+.ba-modal-img-box{aspect-ratio:4/3;background:var(--img-bg);position:relative;overflow:hidden;}
+.ba-modal-img-box:first-child{border-right:1px solid var(--line);}
+.ba-modal-img-box img{width:100%;height:100%;object-fit:cover;display:block;}
+.ba-modal-img-box img[hidden]{display:none;}
+.ba-modal-img-box.is-placeholder{display:flex;align-items:center;justify-content:center;color:var(--steel-light);font-family:var(--font-display);font-size:13px;letter-spacing:.05em;}
+.ba-modal-img-box.is-placeholder:first-child::after{content:"Foto prima";}
+.ba-modal-img-box.is-placeholder:last-child::after{content:"Foto dopo";}
+.ba-modal-body{padding:22px 26px 26px;}
+.ba-modal-body .ba-cat{font-size:11px;letter-spacing:.1em;color:var(--red);text-transform:uppercase;font-family:var(--font-display);font-weight:700;}
+.ba-modal-body h3{font-size:22px;margin:.3em 0 .4em;text-transform:none;letter-spacing:0;}
+.ba-modal-body p{font-size:15px;line-height:1.6;color:var(--steel);margin:0;}
+@media (max-width:600px){
+  .ba-modal-images{grid-template-columns:1fr;}
+  .ba-modal-img-box:first-child{border-right:none;border-bottom:1px solid var(--line);}
+  .ba-modal-body{padding:18px 18px 22px;}
+}
+
 /* Vehicle compatibility filter (shop) */
 .vehicle-filter{
   display:flex;align-items:center;gap:12px;flex-wrap:wrap;
