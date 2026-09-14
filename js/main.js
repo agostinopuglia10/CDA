@@ -1826,6 +1826,8 @@ function initBaCardModal() {
 
   var imgBefore = document.getElementById('ba-modal-img-before');
   var imgAfter = document.getElementById('ba-modal-img-after');
+  var tagBefore = document.getElementById('ba-modal-tag-before');
+  var tagAfter = document.getElementById('ba-modal-tag-after');
   var catEl = document.getElementById('ba-modal-cat');
   var titleEl = document.getElementById('ba-modal-title');
   var descEl = document.getElementById('ba-modal-desc');
@@ -1849,8 +1851,11 @@ function initBaCardModal() {
   cards.forEach(function (card) {
     card.addEventListener('click', function () {
       var imgs = card.querySelectorAll('.ba-images img');
+      var tags = card.querySelectorAll('.ba-images .ba-tag');
       setImage(imgBefore, imgs[0] || null);
       setImage(imgAfter, imgs[1] || null);
+      tagBefore.textContent = tags[0] ? tags[0].textContent : 'Prima';
+      tagAfter.textContent = tags[1] ? tags[1].textContent : 'Dopo';
       catEl.textContent = card.querySelector('.ba-cat') ? card.querySelector('.ba-cat').textContent : '';
       titleEl.textContent = card.querySelector('h4') ? card.querySelector('h4').textContent : '';
       descEl.textContent = card.querySelector('.ba-body p') ? card.querySelector('.ba-body p').textContent : '';
