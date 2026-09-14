@@ -770,6 +770,7 @@ section{padding:80px 0;}
 .compact-head-row h1{font-size:clamp(24px,3vw,32px);margin:0;}
 .compact-head-row p{margin:0;font-size:14px;color:var(--steel);max-width:480px;}
 .compact-head-row .tier-badge{margin:0;}
+.cat-grid-compact{grid-template-columns:repeat(3,1fr);}
 .cat-grid-compact .cat-card{min-height:260px;padding:24px 26px;}
 .cat-grid-compact .cat-card h3{font-size:22px;margin-bottom:.15em;}
 .cat-grid-compact .cat-card p{font-size:13.5px;}
