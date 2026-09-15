@@ -22,10 +22,10 @@ Il sito è **live, vendibile e funzionante**: cda-camper.it, ~245 prodotti reali
 **Ancora aperto, in ordine di urgenza:**
 
 🟠 **In corso, non serve altro da parte mia:**
-- Indicizzazione Google/Bing: home già indicizzata, il resto (prodotti/categorie) è in corso — tempistica non garantibile, normale per un dominio giovane.
+- **Indicizzazione Google/Bing — ricontrollato il 2026-09-15**: non ho più accesso diretto a Search Console in questa sessione (serve il login Google), ma ho verificato tutto ciò che dipende dal sito: `sitemap.xml` valida e completa (41 URL, tutte le categorie/sottocategorie incluse), `robots.txt` non blocca nulla, canonical e meta robots della home corretti. Da parte nostra non c'è nulla che impedisca l'indicizzazione — lo stato reale (quante pagine sono già indicizzate) va controllato direttamente in Search Console.
 - Icona del sito nei risultati Google: mostra ancora il globo generico invece del favicon — è già corretto lato sito, Google deve solo aggiornare la cache (giorni, non è un bug nostro).
 - Scheda Google Business Profile: richiesta di rivendicazione inviata (13/9), in attesa che la titolare la convalidi (telefonata/SMS) — poi va corretta categoria (oggi "Ferramenta"), telefono (oggi sbagliato), aggiunto il sito.
-- SMTP Resend per il reset password della dashboard admin: ancora non funzionante ("Authentication credentials invalid"), da riprovare ora che il dominio Resend è verificato — non blocca nulla (esiste un metodo alternativo già funzionante).
+- **SMTP Resend per il reset password della dashboard admin — riprovato il 2026-09-15**: ancora rotto, **stesso identico errore di prima** (`535 "Authentication credentials invalid"`, verificato negli auth log con un test reale). Il dominio Resend resta verificato e l'invio via API HTTP funziona benissimo (le notifiche preventivo arrivano regolarmente) — il problema è isolato al campo password SMTP in Supabase Dashboard → Authentication → SMTP Settings, che evidentemente non contiene la stessa chiave valida usata altrove e va reinserito manualmente (non sincronizzato automaticamente col secret `RESEND_API_KEY`). Non blocca nulla: il login admin funziona comunque tramite il link di recupero diretto già in uso.
 
 🔴 **Bloccati su dati reali che solo l'utente può fornire:**
 - Costo di spedizione (checkout non lo calcola ancora) — serve il dato dal corriere/GES.
