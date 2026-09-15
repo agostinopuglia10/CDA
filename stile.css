@@ -402,7 +402,7 @@ section{padding:80px 0;}
   display:flex;justify-content:space-between;align-items:center;margin-top:10px;
 }
 .product-price strong{font-family:var(--font-display);font-size:20px;color:var(--red);}
-.price-compare{font-family:var(--font-display);font-size:13.5px;text-decoration:line-through;color:var(--steel-light);margin-left:6px;}
+.price-compare{font-family:var(--font-display);font-size:15px;font-weight:600;text-decoration:line-through;color:var(--steel);margin-left:6px;}
 .add-btn{
   width:34px;height:34px;border:2px solid var(--ink);
   display:flex;align-items:center;justify-content:center;font-size:18px;font-weight:700;
@@ -435,7 +435,7 @@ section{padding:80px 0;}
 .product-detail-price{
   font-family:var(--font-display);font-size:34px;color:var(--red);font-weight:700;margin:.2em 0 .6em;
 }
-.product-detail-price .price-compare{font-size:19px;margin-left:10px;font-weight:500;}
+.product-detail-price .price-compare{font-size:21px;margin-left:10px;font-weight:700;}
 .compat-note{
   background:var(--red-light);border:1px solid var(--red-light-border);padding:14px 16px;
   font-size:14px;color:var(--ink);margin-bottom:22px;
@@ -461,7 +461,7 @@ section{padding:80px 0;}
   display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:10px;
   font-size:13.5px;color:var(--steel);
 }
-.kit-strike{font-family:var(--font-display);text-decoration:line-through;color:var(--steel-light);}
+.kit-strike{font-family:var(--font-display);text-decoration:line-through;color:var(--steel);font-size:15px;font-weight:600;}
 .kit-save-badge{
   background:var(--red);color:var(--pure-white);font-family:var(--font-display);
   font-size:12.5px;font-weight:700;padding:5px 12px;letter-spacing:.03em;white-space:nowrap;
