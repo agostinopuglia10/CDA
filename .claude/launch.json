@@ -3,8 +3,8 @@
   "configurations": [
     {
       "name": "cda-static",
-      "runtimeExecutable": "python",
-      "runtimeArgs": ["-m", "http.server", "8642"],
+      "runtimeExecutable": "node",
+      "runtimeArgs": ["scripts/dev-server.js"],
       "port": 8642
     }
   ]

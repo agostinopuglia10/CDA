@@ -1,0 +1,7 @@
+[build]
+  # TODO.md è solo un diario di lavoro interno, non fa parte del sito pubblicato:
+  # se un commit tocca solo quel file, non serve consumare un deploy (15 crediti)
+  # per ripubblicare pagine identiche. "git diff --quiet" esce con 0 (= nessuna
+  # differenza rilevante = salta il build) quando l'unico file cambiato è TODO.md,
+  # ed esce con 1 (= build normale) per qualsiasi altra modifica.
+  ignore = "git diff --quiet $CACHED_COMMIT_REF $COMMIT_REF -- . ':!TODO.md'"
