@@ -686,7 +686,7 @@ function renderProductPage(p) {
   if (nameField) nameField.textContent = p.name;
   if (catEl) catEl.textContent = (topName && catName && topName !== catName) ? (topName + ' · ' + catName) : catName;
   if (priceEl) priceEl.innerHTML = priceNotSet ? '<span class="price-pending">Prezzo in aggiornamento</span>' : renderPriceHTML(p);
-  if (descEl) descEl.textContent = descText;
+  if (descEl) descEl.innerHTML = renderDescriptionWithWarning(descText);
   if (specCatEl) specCatEl.textContent = catName;
   if (specAvailabilityEl) {
     // La maggior parte dei prodotti non è tenuta a magazzino: si spedisce
@@ -1107,6 +1107,14 @@ function escapeHtmlText(value) {
     .replace(/&/g, '&amp;')
     .replace(/</g, '&lt;')
     .replace(/>/g, '&gt;');
+}
+
+// Evidenzia "Attenzione:" nella descrizione prodotto con un riquadro rosso,
+// per i pochi prodotti (kit/riscaldatori senza pannello incluso) che hanno
+// un avviso importante da non far passare inosservato nel testo normale.
+function renderDescriptionWithWarning(text) {
+  var escaped = escapeHtmlText(text || '');
+  return escaped.replace(/Attenzione:/g, '<span class="desc-warning">Attenzione</span>');
 }
 
 function initCookieBanner() {
