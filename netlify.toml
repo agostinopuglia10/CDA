@@ -5,3 +5,19 @@
   # differenza rilevante = salta il build) quando l'unico file cambiato è TODO.md,
   # ed esce con 1 (= build normale) per qualsiasi altra modifica.
   ignore = "git diff --quiet $CACHED_COMMIT_REF $COMMIT_REF -- . ':!TODO.md'"
+
+# Header di sicurezza HTTP standard, mancavano tutti tranne HSTS (di
+# default su Netlify). Il dominio consentito per script/connessioni
+# riflette i servizi esterni davvero usati dal sito: Supabase (dati),
+# jsdelivr (libreria Supabase), Google Tag Manager/Analytics e Meta
+# Pixel (tracciamento), Google Fonts (font). Le immagini restano aperte
+# a "https:" perché le foto prodotto sono ospitate su più siti fornitore
+# diversi (GES International e altri), non solo su Supabase.
+[[headers]]
+  for = "/*"
+  [headers.values]
+    X-Frame-Options = "DENY"
+    X-Content-Type-Options = "nosniff"
+    Referrer-Policy = "strict-origin-when-cross-origin"
+    Permissions-Policy = "camera=(), microphone=(), geolocation=(), payment=()"
+    Content-Security-Policy = "default-src 'self'; script-src 'self' 'unsafe-inline' https://cdn.jsdelivr.net https://www.googletagmanager.com https://connect.facebook.net; connect-src 'self' https://udynqqqxjcyhdeygqumi.supabase.co https://www.google-analytics.com https://analytics.google.com https://*.google-analytics.com https://www.facebook.com; img-src 'self' https: data:; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com data:; frame-ancestors 'none'; base-uri 'self'; object-src 'none'; form-action 'self'"

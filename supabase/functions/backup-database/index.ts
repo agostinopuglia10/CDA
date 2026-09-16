@@ -19,6 +19,16 @@
 // JSON più recente prima del problema. Contiene un array per ogni
 // tabella con tutte le righe di quel momento — da reinserire a mano
 // (o chiedendo aiuto) se mai serve un ripristino.
+//
+// SICUREZZA:
+// Questa funzione va chiamata solo dal cron interno (migrazione 017),
+// mai da fuori: senza un controllo, chiunque conoscesse l'indirizzo
+// potrebbe farla girare a raffica e sprecare lo spazio/le risorse
+// gratuite del piano. Il cron manda un codice segreto interno
+// nell'header "x-cron-secret", verificato contro il valore conservato
+// in Supabase Vault (mai scritto qui nel codice, per non finire nella
+// cronologia git): chi non lo manda (o lo sbaglia) riceve solo un 401,
+// nessun dato viene toccato.
 // ============================================================
 
 import { createClient } from 'jsr:@supabase/supabase-js@2';
@@ -42,10 +52,21 @@ const TABLES = [
 
 const KEEP_LAST = 8;
 
-Deno.serve(async () => {
-  try {
-    const supabase = createClient(SUPABASE_URL, SERVICE_ROLE_KEY);
+Deno.serve(async (req: Request) => {
+  const supabase = createClient(SUPABASE_URL, SERVICE_ROLE_KEY);
 
+  const providedSecret = req.headers.get('x-cron-secret') || '';
+  const { data: isValid, error: authError } = await supabase.rpc('verify_backup_cron_secret', {
+    p_secret: providedSecret,
+  });
+  if (authError || !isValid) {
+    return new Response(JSON.stringify({ error: 'Non autorizzato' }), {
+      status: 401,
+      headers: { 'Content-Type': 'application/json' },
+    });
+  }
+
+  try {
     const snapshot: Record<string, unknown> = { created_at: new Date().toISOString() };
     for (const table of TABLES) {
       const { data, error } = await supabase.from(table).select('*');
