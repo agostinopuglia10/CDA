@@ -375,7 +375,7 @@ function applyCategoryData(pathStr, subcatGrid, grid) {
   updateCategorySeoTags(pathStr, node.name, node.description || '', ancestors);
 
   if (breadcrumbEl) {
-    var trailHtml = '<a href="index.html">Home</a> / <a href="shop.html">Shop Camper</a>';
+    var trailHtml = '<a href="/">Home</a> / <a href="shop.html">Shop Camper</a>';
     var acc = '';
     ancestors.forEach(function (a, i) {
       acc = acc ? acc + '.' + a.slug : a.slug;
