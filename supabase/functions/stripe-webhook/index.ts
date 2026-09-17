@@ -61,9 +61,26 @@ Deno.serve(async (req) => {
 
       if (orderId) {
         const supabase = createClient(SUPABASE_URL, SERVICE_ROLE_KEY);
+
+        // Stripe raccoglie nome/email/telefono/indirizzo durante il suo checkout
+        // (create-checkout-session lo richiede con shipping_address_collection e
+        // phone_number_collection): il sito non li chiede mai da solo per chi paga
+        // con carta, quindi li salviamo qui, ora che il pagamento è confermato.
+        const details = session.customer_details;
+        const addr = details?.address;
+        const formattedAddress = [addr?.line1, addr?.line2, addr?.postal_code, addr?.city, addr?.state, addr?.country]
+          .filter(Boolean)
+          .join(', ');
+
+        const updatePayload: Record<string, unknown> = { status: 'paid' };
+        if (details?.name) updatePayload.customer_name = details.name;
+        if (details?.email) updatePayload.customer_email = details.email;
+        if (details?.phone) updatePayload.customer_phone = details.phone;
+        if (formattedAddress) updatePayload.shipping_address = formattedAddress;
+
         const { error } = await supabase
           .from('orders')
-          .update({ status: 'paid' })
+          .update(updatePayload)
           .eq('id', orderId);
 
         if (error) {
