@@ -31,7 +31,7 @@ Il sito è **live, vendibile e funzionante**: cda-camper.it, ~245 prodotti reali
 
 🔴 **Bloccati su dati reali che solo l'utente può fornire:**
 - Costo di spedizione (checkout non lo calcola ancora) — serve il dato dal corriere/GES.
-- Foto reale per le anteprime social (`og-cover.jpg`, ancora 404).
+- [x] **Foto reale per le anteprime social (2026-09-17)**: `og-cover.jpg` creata (1200×630) — foto vera del restyling carrozzeria (già pubblicata su servizi.html) + logo CDA + headline, nei colori del brand. Generata via composizione HTML/CSS renderizzata a risoluzione esatta, nessuna foto nuova scattata. Le 8 pagine che la referenziano come anteprima social (index, shop, servizi, lavorazioni, contatti, chi-siamo, categoria, prodotto come fallback) ora mostrano un'anteprima vera invece di un link rotto.
 - Recensioni clienti reali, tempi di consegna — meccanismi già pronti, si attivano da soli appena c'è il dato vero (vedi sezione 🟡 sotto).
 - Autorizzazione scritta immagini fornitori; revisione legale di privacy/termini.
 - Pagina Facebook/Instagram (blocca solo social/marketing, non le vendite).
