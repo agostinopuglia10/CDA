@@ -1558,9 +1558,12 @@ function initCartPage() {
 
     var html = '<h3>Aggiungi anche</h3>';
     filtered.forEach(function (s) {
+      var thumb = s.image_url
+        ? '<img src="' + s.image_url + '" alt="' + escapeHtmlText(s.name) + '" style="width:100%;height:100%;object-fit:cover;">'
+        : 'Foto';
       html +=
         '<div class="cross-sell-item">' +
-          '<div class="cross-sell-thumb">Foto</div>' +
+          '<div class="cross-sell-thumb">' + thumb + '</div>' +
           '<div class="cross-sell-name">' + s.name + '</div>' +
           '<div class="cross-sell-price">' + formatEUR(s.price_cents) + '</div>' +
           '<button type="button" class="cross-sell-add" data-suggestion-id="' + s.id + '" aria-label="Aggiungi ' + s.name + '">+</button>' +
@@ -1574,7 +1577,7 @@ function initCartPage() {
         if (!suggestion) return;
         var items = getCartItems();
         var existing = items.filter(function (it) { return it.id === suggestion.id; })[0];
-        if (existing) { existing.quantity += 1; } else { items.push({ id: suggestion.id, name: suggestion.name, price_cents: suggestion.price_cents, quantity: 1 }); }
+        if (existing) { existing.quantity += 1; } else { items.push({ id: suggestion.id, name: suggestion.name, price_cents: suggestion.price_cents, image_url: suggestion.image_url || '', quantity: 1 }); }
         saveCartItems(items);
         updateCartBadge();
         render();
@@ -1607,7 +1610,7 @@ function initCartPage() {
 
         return supabaseClient
           .from('bundle_items')
-          .select('bundle_id, component:component_product_id(id, name, price_cents)')
+          .select('bundle_id, component:component_product_id(id, name, price_cents, image_url)')
           .in('bundle_id', bundleIds)
           .then(function (compRes) {
             if (compRes.error || !compRes.data) { paintCrossSell(CROSS_SELL_SUGGESTIONS, currentIds); return; }
@@ -1617,7 +1620,7 @@ function initCartPage() {
               var c = row.component;
               if (!c || realIds.indexOf(c.id) !== -1 || seen[c.id]) return;
               seen[c.id] = true;
-              suggestions.push({ id: c.id, name: c.name, price_cents: c.price_cents });
+              suggestions.push({ id: c.id, name: c.name, price_cents: c.price_cents, image_url: c.image_url });
             });
             paintCrossSell(suggestions.length > 0 ? suggestions : CROSS_SELL_SUGGESTIONS, currentIds);
           });
