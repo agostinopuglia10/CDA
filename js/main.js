@@ -164,7 +164,7 @@ function initShopCatalog() {
             '<span class="product-cat">' + catName + '</span>' +
             '<a class="product-link" href="prodotto.html?id=' + p.id + '"><h4>' + p.name + '</h4></a>' +
             '<div class="product-price">' + renderPriceHTML(p) +
-              '<button class="add-btn" data-product-id="' + p.id + '" data-product-name="' + p.name + '" data-product-price="' + p.price_cents + '" aria-label="Aggiungi al carrello">+</button>' +
+              '<button class="add-btn" data-product-id="' + p.id + '" data-product-name="' + p.name + '" data-product-price="' + p.price_cents + '" data-product-image="' + (p.image_url || '') + '" aria-label="Aggiungi al carrello">+</button>' +
             '</div>' +
           '</div>';
         grid.appendChild(card);
@@ -235,7 +235,7 @@ function initFeaturedCarousel() {
             '<span class="product-cat">' + catName + '</span>' +
             '<a class="product-link" href="prodotto.html?id=' + p.id + '"><h4>' + p.name + '</h4></a>' +
             '<div class="product-price">' + renderPriceHTML(p) +
-              '<button class="add-btn" data-product-id="' + p.id + '" data-product-name="' + p.name + '" data-product-price="' + p.price_cents + '" aria-label="Aggiungi al carrello">+</button>' +
+              '<button class="add-btn" data-product-id="' + p.id + '" data-product-name="' + p.name + '" data-product-price="' + p.price_cents + '" data-product-image="' + (p.image_url || '') + '" aria-label="Aggiungi al carrello">+</button>' +
             '</div>' +
           '</div>';
         track.appendChild(card);
@@ -562,7 +562,7 @@ function loadCategoryFromSupabase(pathStr, subcatGrid, grid) {
                     '<span class="product-cat">' + subName + '</span>' +
                     '<a class="product-link" href="prodotto.html?id=' + p.id + '"><h4>' + p.name + '</h4></a>' +
                     '<div class="product-price">' + renderPriceHTML(p) +
-                      '<button class="add-btn" data-product-id="' + p.id + '" data-product-name="' + p.name + '" data-product-price="' + p.price_cents + '" aria-label="Aggiungi al carrello">+</button>' +
+                      '<button class="add-btn" data-product-id="' + p.id + '" data-product-name="' + p.name + '" data-product-price="' + p.price_cents + '" data-product-image="' + (p.image_url || '') + '" aria-label="Aggiungi al carrello">+</button>' +
                     '</div>' +
                   '</div>';
                 grid.appendChild(card);
@@ -647,7 +647,7 @@ function renderRelatedProducts(p) {
                 '<span class="product-cat">' + (rp.categories ? rp.categories.name : '') + '</span>' +
                 '<a class="product-link" href="prodotto.html?id=' + rp.id + '"><h4>' + rp.name + '</h4></a>' +
                 '<div class="product-price">' + renderPriceHTML(rp) +
-                  '<button class="add-btn" data-product-id="' + rp.id + '" data-product-name="' + rp.name + '" data-product-price="' + rp.price_cents + '" aria-label="Aggiungi al carrello">+</button>' +
+                  '<button class="add-btn" data-product-id="' + rp.id + '" data-product-name="' + rp.name + '" data-product-price="' + rp.price_cents + '" data-product-image="' + (rp.image_url || '') + '" aria-label="Aggiungi al carrello">+</button>' +
                 '</div>' +
               '</div>';
             grid.appendChild(card);
@@ -723,6 +723,7 @@ function renderProductPage(p) {
       addBtn.setAttribute('data-product-id', p.id);
       addBtn.setAttribute('data-product-name', p.name);
       addBtn.setAttribute('data-product-price', p.price_cents);
+      addBtn.setAttribute('data-product-image', p.image_url || '');
       addBtn.textContent = p.is_bundle ? '🛒 Aggiungi il kit al carrello' : '🛒 Aggiungi al carrello';
     }
   }
@@ -973,6 +974,7 @@ function getProductInfoFromButton(btn) {
   var id = btn.getAttribute('data-product-id');
   var name = btn.getAttribute('data-product-name');
   var priceCents = parseInt(btn.getAttribute('data-product-price'), 10);
+  var image = btn.getAttribute('data-product-image') || '';
 
   if (!id) {
     // Prodotto placeholder statico (demo, non ancora collegato a Supabase):
@@ -985,7 +987,7 @@ function getProductInfoFromButton(btn) {
     priceCents = Math.round(parseFloat(priceText || '0') * 100);
     id = 'demo:' + name;
   }
-  return { id: id, name: name, priceCents: priceCents || 0 };
+  return { id: id, name: name, priceCents: priceCents || 0, image: image };
 }
 
 // Barra fissa in fondo allo schermo su mobile (prodotto.html): compare
@@ -1047,7 +1049,7 @@ function initCart() {
       if (existing) {
         existing.quantity += qty;
       } else {
-        items.push({ id: info.id, name: info.name, price_cents: info.priceCents, quantity: qty });
+        items.push({ id: info.id, name: info.name, price_cents: info.priceCents, image_url: info.image, quantity: qty });
       }
       saveCartItems(items);
       updateCartDisplay();
@@ -1638,10 +1640,14 @@ function initCartPage() {
     items.forEach(function (item) {
       subtotal += item.price_cents * item.quantity;
 
+      var thumb = item.image_url
+        ? '<img src="' + item.image_url + '" alt="' + escapeHtmlText(item.name) + '" style="width:100%;height:100%;object-fit:cover;">'
+        : 'Foto';
+
       var row = document.createElement('div');
       row.className = 'cart-row';
       row.innerHTML =
-        '<div class="cart-thumb">Foto</div>' +
+        '<div class="cart-thumb">' + thumb + '</div>' +
         '<div>' +
           '<div class="cart-name">' + item.name + '</div>' +
           '<div class="cart-unit-price">' + formatEUR(item.price_cents) + ' cad.</div>' +
