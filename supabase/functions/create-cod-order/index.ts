@@ -24,6 +24,9 @@ import { createClient } from 'jsr:@supabase/supabase-js@2';
 
 const SUPABASE_URL = Deno.env.get('SUPABASE_URL')!;
 const SERVICE_ROLE_KEY = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!;
+const RESEND_API_KEY = Deno.env.get('RESEND_API_KEY');
+const NOTIFY_EMAIL = Deno.env.get('NOTIFY_EMAIL') || 'talucci.maria@alice.it';
+const FROM_EMAIL = Deno.env.get('FROM_EMAIL') || 'CDA Sito <onboarding@resend.dev>';
 
 const CORS_HEADERS = {
   'Access-Control-Allow-Origin': '*',
@@ -97,6 +100,9 @@ Deno.serve(async (req) => {
       }))
     );
 
+    // Avviso via email: mai far fallire l'ordine se l'email non parte.
+    await notifyNewOrder(order, lineItems, 'Contrassegno').catch(() => {});
+
     return new Response(JSON.stringify({ order_id: order.id }), {
       headers: { ...CORS_HEADERS, 'Content-Type': 'application/json' },
     });
@@ -110,4 +116,53 @@ function jsonError(message: string, status: number) {
     status,
     headers: { ...CORS_HEADERS, 'Content-Type': 'application/json' },
   });
+}
+
+// Manda un avviso email al negozio ogni volta che arriva un ordine vero
+// (contrassegno qui, pagamento confermato in stripe-webhook per la carta),
+// così non serve controllare la dashboard admin a mano per accorgersene.
+async function notifyNewOrder(
+  order: { id: string; customer_name: string; customer_email: string; customer_phone: string; shipping_address: string; total_cents: number },
+  lineItems: { product: { name: string; price_cents: number }; quantity: number }[],
+  paymentLabel: string
+) {
+  if (!RESEND_API_KEY) return; // secret non ancora configurato: nessun avviso, nessun errore
+
+  const itemsHtml = lineItems
+    .map((li) => `<li>${escapeHtml(li.product.name)} × ${li.quantity} — ${(li.product.price_cents / 100).toFixed(2)} €</li>`)
+    .join('');
+
+  const html = `
+    <h2>Nuovo ordine (${escapeHtml(paymentLabel)})</h2>
+    <p><strong>Totale:</strong> ${(order.total_cents / 100).toFixed(2)} €</p>
+    <p><strong>Cliente:</strong> ${escapeHtml(order.customer_name) || '-'}</p>
+    <p><strong>Email:</strong> ${escapeHtml(order.customer_email) || '-'}</p>
+    <p><strong>Telefono:</strong> ${escapeHtml(order.customer_phone) || '-'}</p>
+    <p><strong>Indirizzo di spedizione:</strong> ${escapeHtml(order.shipping_address) || '-'}</p>
+    <p><strong>Articoli:</strong></p>
+    <ul>${itemsHtml}</ul>
+    <hr>
+    <p style="color:#888;font-size:12px;">Gestisci l'ordine dalla dashboard admin del sito.</p>
+  `;
+
+  await fetch('https://api.resend.com/emails', {
+    method: 'POST',
+    headers: { Authorization: `Bearer ${RESEND_API_KEY}`, 'Content-Type': 'application/json' },
+    body: JSON.stringify({
+      from: FROM_EMAIL,
+      to: NOTIFY_EMAIL,
+      subject: `Nuovo ordine (${paymentLabel}) — ${(order.total_cents / 100).toFixed(2)} €`,
+      html,
+    }),
+  });
+}
+
+function escapeHtml(value: unknown): string {
+  if (value === null || value === undefined) return '';
+  return String(value)
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;')
+    .replace(/'/g, '&#39;');
 }

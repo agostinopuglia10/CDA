@@ -33,6 +33,9 @@ const STRIPE_SECRET_KEY = Deno.env.get('STRIPE_SECRET_KEY')!;
 const STRIPE_WEBHOOK_SECRET = Deno.env.get('STRIPE_WEBHOOK_SECRET')!;
 const SUPABASE_URL = Deno.env.get('SUPABASE_URL')!;
 const SERVICE_ROLE_KEY = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!;
+const RESEND_API_KEY = Deno.env.get('RESEND_API_KEY');
+const NOTIFY_EMAIL = Deno.env.get('NOTIFY_EMAIL') || 'talucci.maria@alice.it';
+const FROM_EMAIL = Deno.env.get('FROM_EMAIL') || 'CDA Sito <onboarding@resend.dev>';
 
 const stripe = new Stripe(STRIPE_SECRET_KEY, {
   apiVersion: '2024-06-20',
@@ -78,14 +81,19 @@ Deno.serve(async (req) => {
         if (details?.phone) updatePayload.customer_phone = details.phone;
         if (formattedAddress) updatePayload.shipping_address = formattedAddress;
 
-        const { error } = await supabase
+        const { data: updatedOrder, error } = await supabase
           .from('orders')
           .update(updatePayload)
-          .eq('id', orderId);
+          .eq('id', orderId)
+          .select()
+          .single();
 
         if (error) {
           return new Response('Errore aggiornamento ordine: ' + error.message, { status: 500 });
         }
+
+        // Avviso via email: mai far fallire la conferma del pagamento se l'email non parte.
+        await notifyNewOrder(updatedOrder, orderId).catch(() => {});
       }
     }
 
@@ -97,3 +105,58 @@ Deno.serve(async (req) => {
     return new Response(err instanceof Error ? err.message : 'Errore sconosciuto', { status: 500 });
   }
 });
+
+// Manda un avviso email al negozio ogni volta che un pagamento con carta
+// va a buon fine, così non serve controllare la dashboard admin a mano.
+async function notifyNewOrder(
+  order: { customer_name: string; customer_email: string; customer_phone: string; shipping_address: string; total_cents: number },
+  orderId: string
+) {
+  if (!RESEND_API_KEY) return; // secret non ancora configurato: nessun avviso, nessun errore
+
+  const supabase = createClient(SUPABASE_URL, SERVICE_ROLE_KEY);
+  const { data: items } = await supabase
+    .from('order_items')
+    .select('quantity, unit_price_cents, product:product_id(name)')
+    .eq('order_id', orderId);
+
+  const itemsHtml = (items || [])
+    .map((li: { quantity: number; unit_price_cents: number; product: { name: string } | null }) =>
+      `<li>${escapeHtml(li.product?.name || 'Prodotto')} × ${li.quantity} — ${(li.unit_price_cents / 100).toFixed(2)} €</li>`
+    )
+    .join('');
+
+  const html = `
+    <h2>Nuovo ordine (Carta di credito)</h2>
+    <p><strong>Totale:</strong> ${(order.total_cents / 100).toFixed(2)} €</p>
+    <p><strong>Cliente:</strong> ${escapeHtml(order.customer_name) || '-'}</p>
+    <p><strong>Email:</strong> ${escapeHtml(order.customer_email) || '-'}</p>
+    <p><strong>Telefono:</strong> ${escapeHtml(order.customer_phone) || '-'}</p>
+    <p><strong>Indirizzo di spedizione:</strong> ${escapeHtml(order.shipping_address) || '-'}</p>
+    <p><strong>Articoli:</strong></p>
+    <ul>${itemsHtml}</ul>
+    <hr>
+    <p style="color:#888;font-size:12px;">Gestisci l'ordine dalla dashboard admin del sito.</p>
+  `;
+
+  await fetch('https://api.resend.com/emails', {
+    method: 'POST',
+    headers: { Authorization: `Bearer ${RESEND_API_KEY}`, 'Content-Type': 'application/json' },
+    body: JSON.stringify({
+      from: FROM_EMAIL,
+      to: NOTIFY_EMAIL,
+      subject: `Nuovo ordine (Carta) — ${(order.total_cents / 100).toFixed(2)} €`,
+      html,
+    }),
+  });
+}
+
+function escapeHtml(value: unknown): string {
+  if (value === null || value === undefined) return '';
+  return String(value)
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;')
+    .replace(/'/g, '&#39;');
+}
