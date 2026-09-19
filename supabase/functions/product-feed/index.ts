@@ -72,6 +72,11 @@ Deno.serve(async (req) => {
     const items = (products || [])
       .map((p) => {
         const link = `${SITE_URL}/prodotto.html?id=${p.id}`;
+        // Le foto caricate in locale (es. batterie/climatizzatori Ultimatron)
+        // hanno un percorso relativo nel database (images/prodotti/...);
+        // Google Merchant richiede sempre un URL assoluto, altrimenti scarta
+        // il prodotto dal feed.
+        const imageLink = p.image_url.startsWith('http') ? p.image_url : `${SITE_URL}/${p.image_url}`;
         const priceEUR = (p.price_cents / 100).toFixed(2);
         const currency = (p.currency || 'EUR').toUpperCase();
         const availability = p.stock && p.stock > 0 ? 'in stock' : 'in stock'; // drop-ship: si spedisce dal fornitore alla ricezione dell'ordine
@@ -84,7 +89,7 @@ Deno.serve(async (req) => {
     <title>${escapeXml(truncate(p.name, 150))}</title>
     <description>${escapeXml(truncate(p.description || p.name, 5000))}</description>
     <link>${escapeXml(link)}</link>
-    <g:image_link>${escapeXml(p.image_url)}</g:image_link>
+    <g:image_link>${escapeXml(imageLink)}</g:image_link>
     <g:availability>${availability}</g:availability>
     <g:price>${priceEUR} ${currency}</g:price>
     <g:condition>new</g:condition>
