@@ -104,6 +104,11 @@ Deno.serve(async (req) => {
     stripeBody.set('cancel_url', `${SITE_URL}/shop.html`);
     stripeBody.set('client_reference_id', order.id);
     if (customer?.email) stripeBody.set('customer_email', customer.email);
+    // Chiediamo indirizzo e telefono direttamente a Stripe durante il pagamento:
+    // oggi il sito non li raccoglie affatto per chi paga con carta (vedi stripe-webhook,
+    // che li salva sull'ordine appena il pagamento va a buon fine).
+    stripeBody.set('shipping_address_collection[allowed_countries][0]', 'IT');
+    stripeBody.set('phone_number_collection[enabled]', 'true');
 
     lineItems.forEach((li: { product: { name: string; price_cents: number; currency: string }; quantity: number }, idx: number) => {
       stripeBody.set(`line_items[${idx}][price_data][currency]`, (li.product.currency || 'eur').toLowerCase());
