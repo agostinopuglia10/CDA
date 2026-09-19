@@ -36,6 +36,7 @@ const SERVICE_ROLE_KEY = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!;
 const RESEND_API_KEY = Deno.env.get('RESEND_API_KEY');
 const NOTIFY_EMAIL = Deno.env.get('NOTIFY_EMAIL') || 'talucci.maria@alice.it';
 const FROM_EMAIL = Deno.env.get('FROM_EMAIL') || 'CDA Sito <onboarding@resend.dev>';
+const NTFY_TOPIC = Deno.env.get('NTFY_TOPIC') || 'cda-camper-ordini-tvl24k';
 
 const stripe = new Stripe(STRIPE_SECRET_KEY, {
   apiVersion: '2024-06-20',
@@ -149,6 +150,15 @@ async function notifyNewOrder(
       html,
     }),
   });
+
+  // Notifica push istantanea sul telefono (app ntfy, nessun account):
+  // l'email su Aruba/iPhone arriva solo a intervalli, non in push vero.
+  // Header HTTP: solo ASCII (niente €/accenti), il resto va nel body.
+  await fetch(`https://ntfy.sh/${NTFY_TOPIC}`, {
+    method: 'POST',
+    headers: { Title: `Nuovo ordine - ${(order.total_cents / 100).toFixed(2)} EUR`, Priority: 'high' },
+    body: `Carta di credito (gia' incassato, accredito Stripe) - ${order.customer_name || 'Cliente'} - ${(items || []).map((li: { product: { name: string } | null }) => li.product?.name || 'Prodotto').join(', ')}`,
+  }).catch(() => {});
 }
 
 function escapeHtml(value: unknown): string {

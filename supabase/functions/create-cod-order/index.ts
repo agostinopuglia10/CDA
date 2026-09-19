@@ -27,6 +27,10 @@ const SERVICE_ROLE_KEY = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!;
 const RESEND_API_KEY = Deno.env.get('RESEND_API_KEY');
 const NOTIFY_EMAIL = Deno.env.get('NOTIFY_EMAIL') || 'talucci.maria@alice.it';
 const FROM_EMAIL = Deno.env.get('FROM_EMAIL') || 'CDA Sito <onboarding@resend.dev>';
+// Nome pubblico ma "difficile da indovinare": chiunque lo conosca potrebbe
+// mandare notifiche finte, ma non leggere quelle vere (ntfy.sh e' solo push,
+// nessun dato sensibile transita qui oltre a nome cliente e articoli).
+const NTFY_TOPIC = Deno.env.get('NTFY_TOPIC') || 'cda-camper-ordini-tvl24k';
 
 const CORS_HEADERS = {
   'Access-Control-Allow-Origin': '*',
@@ -155,6 +159,15 @@ async function notifyNewOrder(
       html,
     }),
   });
+
+  // Notifica push istantanea sul telefono (app ntfy, nessun account):
+  // l'email su Aruba/iPhone arriva solo a intervalli, non in push vero.
+  // Header HTTP: solo ASCII (niente €/accenti), il resto va nel body.
+  await fetch(`https://ntfy.sh/${NTFY_TOPIC}`, {
+    method: 'POST',
+    headers: { Title: `Nuovo ordine - ${(order.total_cents / 100).toFixed(2)} EUR`, Priority: 'high' },
+    body: `${paymentLabel} (da riscuotere al corriere alla consegna) - ${order.customer_name || 'Cliente'} - ${lineItems.map((li) => li.product.name).join(', ')}`,
+  }).catch(() => {});
 }
 
 function escapeHtml(value: unknown): string {
