@@ -728,6 +728,18 @@ function renderProductPage(p) {
     }
   }
 
+  // Visualizzazione prodotto: senza questo evento GA4/Meta non sanno chi ha
+  // visto quale prodotto, quindi il retargeting dinamico (mostra a chi ha
+  // guardato X un annuncio con X) non può funzionare. Solo se il prezzo è
+  // reale (mai tracciare un prodotto ancora a prezzo segnaposto).
+  if (!priceNotSet) {
+    trackEvent('view_item', {
+      currency: 'EUR',
+      value: p.price_cents / 100,
+      items: [{ item_id: p.id, item_name: p.name, quantity: 1, price: p.price_cents / 100 }]
+    });
+  }
+
   // Il blocco "Cosa include questo kit" statico è demo: si mostra solo
   // se il prodotto reale è davvero un kit (wireProductPageKit lo popola).
   if (kitContentsEl && !p.is_bundle) kitContentsEl.style.display = 'none';
@@ -1194,6 +1206,7 @@ function loadAnalytics() {
 // così ogni chiamata a trackEvent() invia il dato a entrambi senza dover
 // toccare i punti del codice dove viene chiamata.
 var META_EVENT_MAP = {
+  view_item: 'ViewContent',
   add_to_cart: 'AddToCart',
   begin_checkout: 'InitiateCheckout',
   purchase: 'Purchase',
