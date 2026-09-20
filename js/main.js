@@ -1476,12 +1476,6 @@ function renderCardBadge(p, savingsMap) {
 
 var FREE_SHIPPING_THRESHOLD_CENTS = 5000; // € 50,00 — soglia placeholder, da confermare
 
-var CROSS_SELL_SUGGESTIONS = [
-  { id: 'demo:cross-1', name: 'Prolunga cavo solare 5m', price_cents: 1490 },
-  { id: 'demo:cross-2', name: 'Portafusibili impermeabile', price_cents: 890 },
-  { id: 'demo:cross-3', name: 'Monitor di carica batteria', price_cents: 3490 }
-];
-
 function initCartPage() {
   var emptyEl = document.getElementById('cart-empty');
   var contentEl = document.getElementById('cart-content');
@@ -1559,7 +1553,7 @@ function initCartPage() {
     }
   }
 
-  var lastCrossSellSuggestions = CROSS_SELL_SUGGESTIONS;
+  var lastCrossSellSuggestions = [];
 
   function paintCrossSell(suggestions, currentIds) {
     lastCrossSellSuggestions = suggestions;
@@ -1603,20 +1597,19 @@ function initCartPage() {
     var currentIds = getCartItems().map(function (it) { return it.id; });
     var realIds = currentIds.filter(function (id) { return id.indexOf('demo:') !== 0; });
 
-    // Se in carrello c'è un pezzo che fa parte di un kit, suggerisce gli
-    // altri componenti dello stesso kit (upsell mirato) invece dei
-    // suggerimenti generici — solo per prodotti reali collegati a Supabase.
     if (realIds.length === 0 || typeof supabaseClient === 'undefined' || !supabaseClient) {
-      paintCrossSell(CROSS_SELL_SUGGESTIONS, currentIds);
+      crossSellEl.innerHTML = '';
       return;
     }
 
+    // 1. Se in carrello c'è un pezzo che fa parte di un kit, suggerisce gli
+    // altri componenti dello stesso kit — l'upsell più mirato possibile.
     supabaseClient
       .from('bundle_items')
       .select('bundle_id')
       .in('component_product_id', realIds)
       .then(function (res) {
-        if (res.error || !res.data || res.data.length === 0) { paintCrossSell(CROSS_SELL_SUGGESTIONS, currentIds); return; }
+        if (res.error || !res.data || res.data.length === 0) { renderCategoryFallback(); return; }
         var bundleIds = res.data
           .map(function (r) { return r.bundle_id; })
           .filter(function (v, i, arr) { return arr.indexOf(v) === i; });
@@ -1626,7 +1619,7 @@ function initCartPage() {
           .select('bundle_id, component:component_product_id(id, name, price_cents, image_url)')
           .in('bundle_id', bundleIds)
           .then(function (compRes) {
-            if (compRes.error || !compRes.data) { paintCrossSell(CROSS_SELL_SUGGESTIONS, currentIds); return; }
+            if (compRes.error || !compRes.data) { renderCategoryFallback(); return; }
             var seen = {};
             var suggestions = [];
             compRes.data.forEach(function (row) {
@@ -1635,10 +1628,63 @@ function initCartPage() {
               seen[c.id] = true;
               suggestions.push({ id: c.id, name: c.name, price_cents: c.price_cents, image_url: c.image_url });
             });
-            paintCrossSell(suggestions.length > 0 ? suggestions : CROSS_SELL_SUGGESTIONS, currentIds);
+            if (suggestions.length > 0) { paintCrossSell(suggestions, currentIds); } else { renderCategoryFallback(); }
           });
       })
-      .catch(function () { paintCrossSell(CROSS_SELL_SUGGESTIONS, currentIds); });
+      .catch(function () { renderCategoryFallback(); });
+
+    // 2. Nessun componente di kit in carrello: suggerisce prodotti veri della
+    // stessa area del catalogo (stessa categoria di primo livello) e con un
+    // prezzo vicino a quello già in carrello — mai un climatizzatore da
+    // migliaia di euro accanto a un accessorio da pochi euro, o viceversa.
+    // Ordinati per vicinanza di prezzo alla media del carrello.
+    function renderCategoryFallback() {
+      supabaseClient
+        .from('products')
+        .select('id, price_cents, categories(path)')
+        .in('id', realIds)
+        .then(function (res) {
+          if (res.error || !res.data || res.data.length === 0) { crossSellEl.innerHTML = ''; return; }
+
+          var topSlugs = res.data
+            .map(function (p) { return p.categories && p.categories.path ? p.categories.path.split('.')[0] : null; })
+            .filter(function (v, i, arr) { return v && arr.indexOf(v) === i; });
+          if (topSlugs.length === 0) { crossSellEl.innerHTML = ''; return; }
+
+          var prices = res.data.map(function (p) { return p.price_cents; });
+          var avgPrice = prices.reduce(function (a, b) { return a + b; }, 0) / prices.length;
+          var minPrice = Math.round(avgPrice * 0.3);
+          var maxPrice = Math.round(avgPrice * 3);
+
+          var orFilter = topSlugs.map(function (slug) { return 'path.eq.' + slug + ',path.like.' + slug + '.%'; }).join(',');
+          supabaseClient
+            .from('categories')
+            .select('id')
+            .or(orFilter)
+            .then(function (catRes) {
+              var categoryIds = (catRes.data || []).map(function (c) { return c.id; });
+              if (categoryIds.length === 0) { crossSellEl.innerHTML = ''; return; }
+
+              supabaseClient
+                .from('products')
+                .select('id, name, price_cents, image_url')
+                .eq('active', true)
+                .gt('price_cents', 0)
+                .gte('price_cents', minPrice)
+                .lte('price_cents', maxPrice)
+                .in('category_id', categoryIds)
+                .then(function (prodRes) {
+                  if (prodRes.error || !prodRes.data) { crossSellEl.innerHTML = ''; return; }
+                  var suggestions = prodRes.data
+                    .filter(function (p) { return realIds.indexOf(p.id) === -1; })
+                    .sort(function (a, b) { return Math.abs(a.price_cents - avgPrice) - Math.abs(b.price_cents - avgPrice); })
+                    .slice(0, 3)
+                    .map(function (p) { return { id: p.id, name: p.name, price_cents: p.price_cents, image_url: p.image_url }; });
+                  paintCrossSell(suggestions, currentIds);
+                });
+            });
+        });
+    }
   }
 
   function render() {
