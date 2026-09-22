@@ -1474,7 +1474,62 @@ function renderCardBadge(p, savingsMap) {
   return p.featured ? '<span class="product-badge">In evidenza</span>' : '';
 }
 
-var FREE_SHIPPING_THRESHOLD_CENTS = 5000; // € 50,00 — soglia placeholder, da confermare
+var FREE_SHIPPING_THRESHOLD_CENTS = 150000; // € 1.500,00 — soglia reale confermata dall'utente il 19/09/2026
+
+// Calcola il costo di spedizione reale interrogando peso/pallet/pacco-lungo dei
+// prodotti in carrello e le fasce in shipping_rate_bands. È solo una stima per
+// la UI: il prezzo definitivo addebitato viene sempre ricalcolato lato server
+// (create-checkout-session / create-cod-order), mai fidandosi di un valore
+// mandato dal browser — stessa logica già usata per price_cents.
+function calculateShippingEstimate(items, subtotalCents, zona) {
+  if (subtotalCents >= FREE_SHIPPING_THRESHOLD_CENTS) {
+    return Promise.resolve({ shippingCents: 0, needsZone: false });
+  }
+  var realIds = items.map(function (it) { return it.id; }).filter(function (id) { return id.indexOf('demo:') !== 0; });
+  if (realIds.length === 0 || typeof supabaseClient === 'undefined' || !supabaseClient) {
+    return Promise.resolve({ shippingCents: null, needsZone: false });
+  }
+
+  return supabaseClient
+    .from('products')
+    .select('id, weight_kg, ships_on_pallet, long_package, shipping_included')
+    .in('id', realIds)
+    .then(function (res) {
+      if (res.error || !res.data) return { shippingCents: null, needsZone: false };
+
+      var qtyById = {};
+      items.forEach(function (it) { qtyById[it.id] = it.quantity; });
+
+      var anyPallet = false, anyLong = false, totalWeight = 0;
+      res.data.forEach(function (p) {
+        if (p.shipping_included) return; // spedizione già inclusa nel prezzo del prodotto
+        var qty = qtyById[p.id] || 1;
+        if (p.ships_on_pallet) anyPallet = true;
+        if (p.long_package) anyLong = true;
+        var w = (p.weight_kg !== null && p.weight_kg !== undefined) ? Number(p.weight_kg) : 0.5;
+        totalWeight += w * qty;
+      });
+
+      var packageType = anyPallet ? 'pallet' : (anyLong ? 'lungo' : 'normale');
+      var neededZone = anyPallet;
+      if (neededZone && !zona) return { shippingCents: null, needsZone: true };
+
+      var zonaFilter = packageType === 'pallet' ? (zona || 'italia') : 'tutte';
+
+      return supabaseClient
+        .from('shipping_rate_bands')
+        .select('weight_min_kg, weight_max_kg, price_cents')
+        .eq('package_type', packageType)
+        .eq('zona', zonaFilter)
+        .lte('weight_min_kg', totalWeight)
+        .order('weight_min_kg', { ascending: false })
+        .limit(1)
+        .then(function (bandRes) {
+          if (bandRes.error || !bandRes.data || bandRes.data.length === 0) return { shippingCents: null, needsZone: neededZone };
+          return { shippingCents: bandRes.data[0].price_cents, needsZone: neededZone };
+        });
+    });
+}
 
 function initCartPage() {
   var emptyEl = document.getElementById('cart-empty');
@@ -1484,11 +1539,14 @@ function initCartPage() {
   var totalEl = document.getElementById('cart-total');
   var shippingEl = document.getElementById('cart-shipping');
   var shippingProgressEl = document.getElementById('shipping-progress');
+  var deliveryZoneFieldEl = document.getElementById('delivery-zone-field');
+  var deliveryZoneEl = document.getElementById('delivery-zone');
   var crossSellEl = document.getElementById('cross-sell');
   var checkoutBtn = document.getElementById('checkout-btn');
   var statusEl = document.getElementById('checkout-status');
   var paymentRadios = document.querySelectorAll('input[name="payment-method"]');
   var codFieldsEl = document.getElementById('cod-fields');
+  var lastShippingEstimate = { shippingCents: null, needsZone: false };
   if (!emptyEl || !contentEl) return;
 
   function getPaymentMethod() {
@@ -1533,7 +1591,7 @@ function initCartPage() {
     render();
   }
 
-  function renderShippingProgress(subtotal) {
+  function renderShippingProgress(subtotal, items) {
     if (!shippingProgressEl) return;
     var remaining = FREE_SHIPPING_THRESHOLD_CENTS - subtotal;
     var pct = Math.min(100, Math.round((subtotal / FREE_SHIPPING_THRESHOLD_CENTS) * 100));
@@ -1544,13 +1602,36 @@ function initCartPage() {
         '<div class="shipping-progress-label">🎉 <strong>Hai la spedizione gratuita!</strong></div>' +
         '<div class="shipping-progress-bar"><div class="shipping-progress-bar-fill" style="width:100%"></div></div>';
       if (shippingEl) shippingEl.textContent = 'Gratuita';
-    } else {
-      shippingProgressEl.className = 'shipping-progress';
-      shippingProgressEl.innerHTML =
-        '<div class="shipping-progress-label">Ti mancano <strong>' + formatEUR(remaining) + '</strong> alla spedizione gratuita</div>' +
-        '<div class="shipping-progress-bar"><div class="shipping-progress-bar-fill" style="width:' + pct + '%"></div></div>';
-      if (shippingEl) shippingEl.textContent = 'Calcolata al passo successivo';
+      if (deliveryZoneFieldEl) deliveryZoneFieldEl.style.display = 'none';
+      lastShippingEstimate = { shippingCents: 0, needsZone: false };
+      totalEl.textContent = formatEUR(subtotal);
+      return;
     }
+
+    shippingProgressEl.className = 'shipping-progress';
+    shippingProgressEl.innerHTML =
+      '<div class="shipping-progress-label">Ti mancano <strong>' + formatEUR(remaining) + '</strong> alla spedizione gratuita</div>' +
+      '<div class="shipping-progress-bar"><div class="shipping-progress-bar-fill" style="width:' + pct + '%"></div></div>';
+    if (shippingEl) shippingEl.textContent = 'Calcolo in corso...';
+
+    var zona = deliveryZoneEl ? deliveryZoneEl.value : '';
+    calculateShippingEstimate(items, subtotal, zona).then(function (result) {
+      lastShippingEstimate = result;
+      if (deliveryZoneFieldEl) deliveryZoneFieldEl.style.display = result.needsZone ? '' : 'none';
+
+      if (result.needsZone && !zona) {
+        if (shippingEl) shippingEl.textContent = 'Seleziona la zona di consegna';
+        totalEl.textContent = formatEUR(subtotal);
+        return;
+      }
+      if (result.shippingCents === null) {
+        if (shippingEl) shippingEl.textContent = 'Calcolata al passo successivo';
+        totalEl.textContent = formatEUR(subtotal);
+        return;
+      }
+      if (shippingEl) shippingEl.textContent = formatEUR(result.shippingCents);
+      totalEl.textContent = formatEUR(subtotal + result.shippingCents);
+    });
   }
 
   var lastCrossSellSuggestions = [];
@@ -1732,8 +1813,16 @@ function initCartPage() {
 
     subtotalEl.textContent = formatEUR(subtotal);
     totalEl.textContent = formatEUR(subtotal);
-    renderShippingProgress(subtotal);
+    renderShippingProgress(subtotal, items);
     renderCrossSell();
+  }
+
+  if (deliveryZoneEl) {
+    deliveryZoneEl.addEventListener('change', function () {
+      var items = getCartItems();
+      var subtotal = items.reduce(function (sum, it) { return sum + it.price_cents * it.quantity; }, 0);
+      renderShippingProgress(subtotal, items);
+    });
   }
 
   if (checkoutBtn) {
@@ -1752,6 +1841,14 @@ function initCartPage() {
       if (typeof supabaseClient === 'undefined' || !supabaseClient) {
         statusEl.className = 'form-status show error';
         statusEl.textContent = 'Il pagamento online non è ancora collegato. Contattaci per completare l\'ordine.';
+        return;
+      }
+
+      var zona = deliveryZoneEl ? deliveryZoneEl.value : '';
+      if (lastShippingEstimate.needsZone && !zona) {
+        statusEl.className = 'form-status show error';
+        statusEl.textContent = 'Seleziona la zona di consegna per calcolare la spedizione prima di procedere.';
+        if (deliveryZoneEl) deliveryZoneEl.focus();
         return;
       }
 
@@ -1782,7 +1879,8 @@ function initCartPage() {
           headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + SUPABASE_ANON_KEY },
           body: JSON.stringify({
             items: realItems.map(function (it) { return { product_id: it.id, quantity: it.quantity }; }),
-            customer: { name: codName, email: codEmail, phone: codPhone, shipping_address: codAddress }
+            customer: { name: codName, email: codEmail, phone: codPhone, shipping_address: codAddress },
+            zona: zona || 'italia'
           })
         })
           .then(function (res) { return res.json(); })
@@ -1810,7 +1908,8 @@ function initCartPage() {
         method: 'POST',
         headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + SUPABASE_ANON_KEY },
         body: JSON.stringify({
-          items: realItems.map(function (it) { return { product_id: it.id, quantity: it.quantity }; })
+          items: realItems.map(function (it) { return { product_id: it.id, quantity: it.quantity }; }),
+          zona: zona || 'italia'
         })
       })
         .then(function (res) { return res.json(); })

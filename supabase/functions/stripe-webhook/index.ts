@@ -110,7 +110,7 @@ Deno.serve(async (req) => {
 // Manda un avviso email al negozio ogni volta che un pagamento con carta
 // va a buon fine, così non serve controllare la dashboard admin a mano.
 async function notifyNewOrder(
-  order: { customer_name: string; customer_email: string; customer_phone: string; shipping_address: string; total_cents: number },
+  order: { customer_name: string; customer_email: string; customer_phone: string; shipping_address: string; total_cents: number; shipping_cents?: number },
   orderId: string
 ) {
   if (!RESEND_API_KEY) return; // secret non ancora configurato: nessun avviso, nessun errore
@@ -127,9 +127,14 @@ async function notifyNewOrder(
     )
     .join('');
 
+  const shippingLine = order.shipping_cents
+    ? `<p><strong>Spedizione:</strong> ${(order.shipping_cents / 100).toFixed(2)} € — ricordarsi la sponda idraulica per i pallet a domicilio privato (gratuita ma va richiesta a mano nell'ordine al corriere)</p>`
+    : `<p><strong>Spedizione:</strong> gratuita</p>`;
+
   const html = `
     <h2>Nuovo ordine (Carta di credito)</h2>
     <p><strong>Totale:</strong> ${(order.total_cents / 100).toFixed(2)} €</p>
+    ${shippingLine}
     <p><strong>Cliente:</strong> ${escapeHtml(order.customer_name) || '-'}</p>
     <p><strong>Email:</strong> ${escapeHtml(order.customer_email) || '-'}</p>
     <p><strong>Telefono:</strong> ${escapeHtml(order.customer_phone) || '-'}</p>

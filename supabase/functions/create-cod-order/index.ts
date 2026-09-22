@@ -43,9 +43,10 @@ Deno.serve(async (req) => {
   }
 
   try {
-    const { items, customer } = await req.json();
+    const { items, customer, zona } = await req.json();
     // items atteso: [{ product_id: 'uuid', quantity: 2 }, ...]
     // customer atteso: { name, email, phone, shipping_address }
+    // zona atteso: 'italia' | 'isole' (rilevante solo per articoli su pallet)
 
     if (!Array.isArray(items) || items.length === 0) {
       return jsonError('Carrello vuoto', 400);
@@ -60,7 +61,7 @@ Deno.serve(async (req) => {
     const productIds = items.map((i: { product_id: string }) => i.product_id);
     const { data: products, error: productsError } = await supabase
       .from('products')
-      .select('id, name, price_cents, currency, stock, active')
+      .select('id, name, price_cents, currency, stock, active, weight_kg, ships_on_pallet, long_package, shipping_included')
       .in('id', productIds);
 
     if (productsError) return jsonError('Errore nel recupero prodotti: ' + productsError.message, 500);
@@ -73,10 +74,13 @@ Deno.serve(async (req) => {
       return { product, quantity: Math.max(1, item.quantity | 0) };
     });
 
-    const totalCents = lineItems.reduce(
+    const subtotalCents = lineItems.reduce(
       (sum: number, li: { product: { price_cents: number }; quantity: number }) => sum + li.product.price_cents * li.quantity,
       0
     );
+
+    const shippingCents = await calculateShippingCents(supabase, lineItems, subtotalCents, zona);
+    const totalCents = subtotalCents + shippingCents;
 
     // 2. Crea l'ordine con status 'cod_pending': da riscuotere alla consegna,
     // nessuna sessione Stripe collegata.
@@ -89,6 +93,7 @@ Deno.serve(async (req) => {
         shipping_address: customer.shipping_address,
         status: 'cod_pending',
         total_cents: totalCents,
+        shipping_cents: shippingCents,
       })
       .select()
       .single();
@@ -122,11 +127,59 @@ function jsonError(message: string, status: number) {
   });
 }
 
+const FREE_SHIPPING_THRESHOLD_CENTS = 150000; // € 1.500,00
+
+// Calcola la spedizione reale sommando il peso degli articoli non esclusi
+// (shipping_included = spedizione già nel prezzo, es. batterie Ultimatron ULM)
+// e cercando la fascia giusta in shipping_rate_bands. Se in carrello c'è
+// almeno un articolo su pallet, usa le fasce pallet (con zona); se c'è un
+// pacco lungo (>150cm, es. barre portapacchi), usa la fascia fissa "lungo";
+// altrimenti la fascia "normale" a peso.
+async function calculateShippingCents(
+  supabase: ReturnType<typeof createClient>,
+  lineItems: {
+    product: { weight_kg: number | null; ships_on_pallet: boolean; long_package: boolean; shipping_included: boolean };
+    quantity: number;
+  }[],
+  subtotalCents: number,
+  zona?: string
+): Promise<number> {
+  if (subtotalCents >= FREE_SHIPPING_THRESHOLD_CENTS) return 0;
+
+  let anyPallet = false;
+  let anyLong = false;
+  let totalWeight = 0;
+  for (const li of lineItems) {
+    if (li.product.shipping_included) continue;
+    if (li.product.ships_on_pallet) anyPallet = true;
+    if (li.product.long_package) anyLong = true;
+    const w = li.product.weight_kg != null ? Number(li.product.weight_kg) : 0.5; // fallback prudente per i pochi prodotti senza peso confermato
+    totalWeight += w * li.quantity;
+  }
+
+  if (totalWeight === 0) return 0; // tutto shipping_included, niente da spedire a parte
+
+  const packageType = anyPallet ? 'pallet' : anyLong ? 'lungo' : 'normale';
+  const zonaFilter = packageType === 'pallet' ? (zona === 'isole' ? 'isole' : 'italia') : 'tutte';
+
+  const { data: bands, error } = await supabase
+    .from('shipping_rate_bands')
+    .select('price_cents')
+    .eq('package_type', packageType)
+    .eq('zona', zonaFilter)
+    .lte('weight_min_kg', totalWeight)
+    .order('weight_min_kg', { ascending: false })
+    .limit(1);
+
+  if (error || !bands || bands.length === 0) return 0; // non blocchiamo mai un ordine per questo
+  return bands[0].price_cents;
+}
+
 // Manda un avviso email al negozio ogni volta che arriva un ordine vero
 // (contrassegno qui, pagamento confermato in stripe-webhook per la carta),
 // così non serve controllare la dashboard admin a mano per accorgersene.
 async function notifyNewOrder(
-  order: { id: string; customer_name: string; customer_email: string; customer_phone: string; shipping_address: string; total_cents: number },
+  order: { id: string; customer_name: string; customer_email: string; customer_phone: string; shipping_address: string; total_cents: number; shipping_cents?: number },
   lineItems: { product: { name: string; price_cents: number }; quantity: number }[],
   paymentLabel: string
 ) {
@@ -136,9 +189,14 @@ async function notifyNewOrder(
     .map((li) => `<li>${escapeHtml(li.product.name)} × ${li.quantity} — ${(li.product.price_cents / 100).toFixed(2)} €</li>`)
     .join('');
 
+  const shippingLine = order.shipping_cents
+    ? `<p><strong>Spedizione:</strong> ${(order.shipping_cents / 100).toFixed(2)} € — ricordarsi la sponda idraulica per i pallet a domicilio privato (gratuita ma va richiesta a mano nell'ordine al corriere)</p>`
+    : `<p><strong>Spedizione:</strong> gratuita</p>`;
+
   const html = `
     <h2>Nuovo ordine (${escapeHtml(paymentLabel)})</h2>
     <p><strong>Totale:</strong> ${(order.total_cents / 100).toFixed(2)} €</p>
+    ${shippingLine}
     <p><strong>Cliente:</strong> ${escapeHtml(order.customer_name) || '-'}</p>
     <p><strong>Email:</strong> ${escapeHtml(order.customer_email) || '-'}</p>
     <p><strong>Telefono:</strong> ${escapeHtml(order.customer_phone) || '-'}</p>
