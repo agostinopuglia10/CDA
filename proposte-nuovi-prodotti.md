@@ -28,7 +28,7 @@ Preparate il 2026-09-21, dopo ricerca di mercato (trend RV/camper 2026, Italia +
 **Categoria suggerita**: Energia → Batterie (o nuova voce "Power Station")
 **Modello reale su GES**: Cod. PWS130 — EcoFlow RIVER 3 Max, Power Station portatile — €520,00 (pubblico). Esiste anche batteria aggiuntiva (BTT1031, serie Delta 3, €620) e pannello dedicato (PNL922, 220W, €420) per un eventuale kit.
 
-**⚠️ ATTENZIONE — sconsigliato per ora**: costo reale €325,00 (margine potenziale ottimo, €159,63 / 42%), MA il prodotto risulta **"ad esaurimento" su GES** (il fornitore lo sta dismettendo). Rischio concreto: venderlo come "novità stabile a catalogo" e poi non riuscire a riordinarlo quando finisce lo stock del fornitore — pessima esperienza per un cliente che magari torna per il pannello/batteria aggiuntivi. Da riproporre con un modello EcoFlow più recente non in dismissione, o da valutare solo se GES conferma disponibilità duratura.
+**⚠️ ATTENZIONE — sconsigliato per ora**: costo reale €325,00, margine ricalcolato con la formula concordata (vendita/1,22 − costo) **€101,23 / 24%** — corretto un errore di calcolo precedente che lo indicava come €159,63/42% (il migliore di tutti): con la formula giusta è invece **il margine più basso tra le 8 proposte**. Il prodotto risulta inoltre **"ad esaurimento" su GES** (il fornitore lo sta dismettendo). Rischio concreto: venderlo come "novità stabile a catalogo" e poi non riuscire a riordinarlo quando finisce lo stock del fornitore — pessima esperienza per un cliente che magari torna per il pannello/batteria aggiuntivi. Doppio motivo per scartarlo, non solo il rischio di dismissione. Da riproporre con un modello EcoFlow più recente non in dismissione, o da valutare solo se GES conferma disponibilità duratura.
 
 ## 3. Rilevatore fughe gas / CO
 **Perché**: CDA vende bombole e impianto gas ma zero dispositivi di sicurezza collegati — gap sia commerciale che di sicurezza reale per i clienti.
@@ -75,13 +75,13 @@ Preparate il 2026-09-21, dopo ricerca di mercato (trend RV/camper 2026, Italia +
 |---|---|---|---|---|
 | Kit Level Up Jumbo Grey (CUN09G) | €38,70 | €67,40 | €16,55 | 30% |
 | Cuneo scalare RAPTOR (CUN03) | €14,00 | €28,00 | €8,95 | 39% |
-| ~~EcoFlow RIVER 3 Max (PWS130)~~ | ~~€325,00~~ | ~~€520,00~~ | ~~€159,63~~ | ~~42% — ma AD ESAURIMENTO, sconsigliato~~ |
+| ~~EcoFlow RIVER 3 Max (PWS130)~~ | ~~€325,00~~ | ~~€520,00~~ | ~~€101,23~~ | ~~24% — margine più basso di tutti, e AD ESAURIMENTO: sconsigliato~~ |
 | Rilevatore fughe gas (FUG115) | €22,00 | €37,00 | €8,33 | 27% |
 | Rilevatore CO (FUG119) | €104,00 | €177,00 | €41,08 | 28% |
-| Carry-Bike e-bike V Class (PBC1729) | €638,00 | €1120,00 | €280,03 | 30% |
+| Carry-Bike e-bike V Class (PBC1729) | €638,00 | €1120,00 | €280,03 | 31% |
 | Kit Upgrade E-Bike per Ducato (PBC9143) | €161,60 | €263,00 | €53,97 | 25% |
 | Spoiler oblò (AER200) | €14,50 | €29,00 | €9,27 | 39% |
 
-Margini tutti sani (25-39%), in linea con gli altri prodotti GES già a catalogo — solo la power station EcoFlow va scartata o rimandata per il rischio di dismissione dal fornitore, non per il margine (che sarebbe il migliore di tutti).
+Margini tutti sani (25-39%) per le 7 proposte valide, in linea con gli altri prodotti GES già a catalogo — la power station EcoFlow va scartata per due motivi: il rischio di dismissione dal fornitore E il margine più basso di tutte le proposte (24%, corretto da un errore di calcolo precedente che lo indicava al 42%).
 
 **Prossimo passo**: nessun prezzo ancora impostato sul sito — in attesa di conferma da Maria su quali aggiungere davvero.
