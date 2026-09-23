@@ -1348,6 +1348,62 @@ function initQtySelector() {
   });
 }
 
+// Toglie gli accenti per confronti testuali più tolleranti (es. "societa" trova "società").
+function normalizeSearchText(s) {
+  return (s || '').normalize('NFD').replace(/[̀-ͯ]/g, '').toLowerCase();
+}
+
+// Coppie di parole che i clienti usano come sinonimi ma che nel catalogo
+// compaiono solo con uno dei due nomi a seconda del prodotto (verificato sui
+// nomi reali: 10 prodotti dicono "climatizzatore", 5 "condizionatore"; 3 "WC", 4 "toilette").
+var SEARCH_SYNONYMS = {
+  climatizzatore: ['condizionatore'],
+  condizionatore: ['climatizzatore'],
+  wc: ['toilette'],
+  toilette: ['wc']
+};
+
+// Distanza di Levenshtein, con uscita anticipata: usata solo per capire se e'
+// "circa 1 lettera diversa", non serve calcolarla per intero se le lunghezze
+// divergono già troppo.
+function levenshteinAtMost1(a, b) {
+  if (Math.abs(a.length - b.length) > 1) return false;
+  if (a === b) return true;
+  var m = a.length, n = b.length;
+  var dp = [];
+  for (var i = 0; i <= m; i++) { dp.push([i]); }
+  for (var j = 0; j <= n; j++) { dp[0][j] = j; }
+  for (i = 1; i <= m; i++) {
+    for (j = 1; j <= n; j++) {
+      dp[i][j] = a[i - 1] === b[j - 1] ? dp[i - 1][j - 1] : 1 + Math.min(dp[i - 1][j], dp[i][j - 1], dp[i - 1][j - 1]);
+    }
+  }
+  return dp[m][n] <= 1;
+}
+
+// Ricerca tollerante: prova prima la sottostringa esatta (comportamento di
+// sempre, gestisce bene le frasi), poi parola per parola prova sinonimi noti
+// e un piccolo refuso (1 lettera) solo su parole di almeno 5 lettere, per non
+// far scattare corrispondenze a caso su parole corte tipo "wc" o "led".
+function textMatchesSearchQuery(normalizedCardText, rawQuery) {
+  var q = normalizeSearchText(rawQuery).trim();
+  if (!q) return true;
+  if (normalizedCardText.indexOf(q) !== -1) return true;
+
+  var queryWords = q.split(/\s+/).filter(Boolean);
+  var textWords = normalizedCardText.split(/[^a-z0-9]+/).filter(Boolean);
+
+  return queryWords.every(function (qw) {
+    if (normalizedCardText.indexOf(qw) !== -1) return true;
+    var alternatives = SEARCH_SYNONYMS[qw] || [];
+    if (alternatives.some(function (alt) { return normalizedCardText.indexOf(alt) !== -1; })) return true;
+    if (qw.length >= 5) {
+      return textWords.some(function (tw) { return levenshteinAtMost1(qw, tw); });
+    }
+    return false;
+  });
+}
+
 function initProductFilters() {
   var grid = document.querySelector('.product-grid');
   var filterBar = document.querySelector('.filter-bar');
@@ -1378,8 +1434,7 @@ function initProductFilters() {
       var vehicle = card.getAttribute('data-vehicle') || 'universale';
       var matchesVehicle = currentVehicle === 'all' || vehicle === 'universale' || vehicle === currentVehicle;
       var matchesBrand = currentBrand === 'all' || card.getAttribute('data-brand') === currentBrand;
-      var text = card.textContent.toLowerCase();
-      var matchesQuery = !currentQuery || text.indexOf(currentQuery) !== -1;
+      var matchesQuery = textMatchesSearchQuery(normalizeSearchText(card.textContent), currentQuery);
       var show = matchesCat && matchesVehicle && matchesBrand && matchesQuery;
       card.style.display = show ? '' : 'none';
       if (show) visibleCount++;
