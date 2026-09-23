@@ -59,7 +59,7 @@ Deno.serve(async (req) => {
 
     const { data: products, error } = await supabase
       .from('products')
-      .select('id, slug, name, description, price_cents, currency, image_url, brand, stock, is_bundle, categories(name, path)')
+      .select('id, slug, name, description, price_cents, currency, image_url, brand, stock, is_bundle, long_package, ships_on_pallet, weight_kg, categories(name, path)')
       .eq('active', true)
       .gt('price_cents', 0)
       .not('image_url', 'is', null)
@@ -83,6 +83,18 @@ Deno.serve(async (req) => {
         const productType = p.categories?.path
           ? p.categories.path.split('.').map((s: string) => capitalize(s.replace(/-/g, ' '))).join(' > ')
           : '';
+        // Etichetta usata in Google Merchant Center per applicare la norma di
+        // spedizione giusta a ogni prodotto (Prodotti specifici > per etichetta):
+        // "pallet" e "lungo" hanno un costo di spedizione diverso da quello a
+        // peso standard, calcolato allo stesso modo del checkout del sito
+        // (vedi products.ships_on_pallet / products.long_package).
+        const shippingLabel = p.ships_on_pallet ? 'pallet' : p.long_package ? 'lungo' : 'normale';
+        // Richiesto da Google Merchant per calcolare/approvare la spedizione
+        // (senza questo campo il prodotto risulta "Non approvato": Peso del
+        // pacco mancante [shipping_weight]). weight_kg è nullo per 12/169
+        // prodotti (dato non ancora reperito, vedi ricerca-pesi-dimensioni-
+        // prodotti.csv) — per quelli il tag resta omesso, non inventiamo pesi.
+        const shippingWeight = p.weight_kg ? `<g:shipping_weight>${p.weight_kg} kg</g:shipping_weight>` : '';
 
         return `  <item>
     <g:id>${escapeXml(p.id)}</g:id>
@@ -94,6 +106,8 @@ Deno.serve(async (req) => {
     <g:price>${priceEUR} ${currency}</g:price>
     <g:condition>new</g:condition>
     <g:identifier_exists>no</g:identifier_exists>
+    <g:shipping_label>${escapeXml(shippingLabel)}</g:shipping_label>
+    ${shippingWeight}
     ${p.brand ? `<g:brand>${escapeXml(p.brand)}</g:brand>` : ''}
     ${productType ? `<g:product_type>${escapeXml(productType)}</g:product_type>` : ''}
   </item>`;
