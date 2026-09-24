@@ -4,6 +4,7 @@ document.addEventListener('DOMContentLoaded', function () {
   initCookieBanner();
   initContactForm();
   initNewsletterForm();
+  initNewsletterPopup();
   initCartPage();
   initCarousels();
   initBaCardModal();
@@ -66,30 +67,85 @@ function initTestimonials() {
 
   return supabaseClient
     .from('testimonials')
-    .select('customer_name, review_text')
+    .select('customer_name, review_text, rating, review_date_label')
     .eq('active', true)
     .order('sort_order')
     .then(function (res) {
       if (res.error || !res.data || res.data.length === 0) return; // nessuna recensione vera ancora: sezione nascosta
       grid.innerHTML = '';
-      res.data.forEach(function (t) {
+
+      // Palette avatar in stile Google (colore scelto in modo stabile dal
+      // nome, così ogni recensore ha sempre lo stesso colore).
+      var avatarColors = ['#D93025', '#1A73E8', '#188038', '#F9AB00', '#8430CE', '#E52592', '#12B5CB', '#E8710A'];
+      function colorForName(name) {
+        var sum = 0;
+        for (var i = 0; i < name.length; i++) sum += name.charCodeAt(i);
+        return avatarColors[sum % avatarColors.length];
+      }
+
+      var googleGSvg = '<svg viewBox="0 0 48 48" width="14" height="14" aria-hidden="true">' +
+        '<path fill="#4285F4" d="M45.12 24.5c0-1.56-.14-3.06-.4-4.5H24v8.51h11.84c-.51 2.75-2.06 5.08-4.39 6.64v5.52h7.11c4.16-3.83 6.56-9.47 6.56-16.17z"/>' +
+        '<path fill="#34A853" d="M24 46c5.94 0 10.92-1.97 14.56-5.33l-7.11-5.52c-1.97 1.32-4.49 2.1-7.45 2.1-5.73 0-10.58-3.87-12.31-9.07H4.34v5.7C7.96 41.07 15.4 46 24 46z"/>' +
+        '<path fill="#FBBC05" d="M11.69 28.18C11.25 26.86 11 25.45 11 24s.25-2.86.69-4.18v-5.7H4.34C2.85 17.09 2 20.45 2 24s.85 6.91 2.34 9.88l7.35-5.7z"/>' +
+        '<path fill="#EA4335" d="M24 10.75c3.23 0 6.13 1.11 8.41 3.29l6.31-6.31C34.91 4.18 29.93 2 24 2 15.4 2 7.96 6.93 4.34 14.12l7.35 5.7c1.73-5.2 6.58-9.07 12.31-9.07z"/>' +
+        '</svg>';
+      var starSvg = '<svg viewBox="0 0 24 24" width="13" height="13" aria-hidden="true"><path fill="#FBBC04" d="M12 2l2.9 6.6 7.1.6-5.4 4.8 1.7 7-6.3-3.8L5.7 21l1.7-7-5.4-4.8 7.1-.6z"/></svg>';
+
+      function buildCard(t) {
         var card = document.createElement('div');
-        card.className = 'cat-card';
-        card.style.cursor = 'default';
+        card.className = 'testi-card';
 
-        var quote = document.createElement('p');
-        quote.style.fontStyle = 'italic';
-        quote.style.marginBottom = '12px';
-        quote.textContent = '"' + t.review_text + '"';
+        var head = document.createElement('div');
+        head.className = 'testi-head';
 
-        var name = document.createElement('h3');
-        name.style.fontSize = '16px';
+        var avatar = document.createElement('div');
+        avatar.className = 'testi-avatar';
+        avatar.style.background = colorForName(t.customer_name);
+        avatar.textContent = t.customer_name.charAt(0).toUpperCase();
+
+        var who = document.createElement('div');
+        who.className = 'testi-who';
+
+        var name = document.createElement('div');
+        name.className = 'testi-name';
         name.textContent = t.customer_name;
 
+        var meta = document.createElement('div');
+        meta.className = 'testi-meta';
+        var stars = document.createElement('span');
+        stars.className = 'testi-stars';
+        stars.innerHTML = starSvg.repeat(Math.max(1, Math.min(5, t.rating || 5)));
+        var date = document.createElement('span');
+        date.className = 'testi-date';
+        date.textContent = t.review_date_label || '';
+        meta.appendChild(stars);
+        if (t.review_date_label) meta.appendChild(date);
+
+        who.appendChild(name);
+        who.appendChild(meta);
+        head.appendChild(avatar);
+        head.appendChild(who);
+
+        var quote = document.createElement('p');
+        quote.className = 'testi-text';
+        quote.textContent = t.review_text;
+
+        var badge = document.createElement('div');
+        badge.className = 'testi-google-badge';
+        badge.innerHTML = googleGSvg + '<span>Recensione pubblicata su Google</span>';
+
+        card.appendChild(head);
         card.appendChild(quote);
-        card.appendChild(name);
-        grid.appendChild(card);
-      });
+        card.appendChild(badge);
+        return card;
+      }
+
+      // Striscia raddoppiata: la animazione trasla del 50% (cioè di un set
+      // intero) prima di ripartire da capo, così il loop appare continuo
+      // invece di "saltare" quando arriva alla fine.
+      res.data.forEach(function (t) { grid.appendChild(buildCard(t)); });
+      res.data.forEach(function (t) { grid.appendChild(buildCard(t)); });
+
       section.style.display = '';
     })
     .catch(function () { /* connessione assente o errore: sezione nascosta */ });
@@ -1287,11 +1343,9 @@ function initContactForm() {
   });
 }
 
-function initNewsletterForm() {
-  var form = document.getElementById('newsletter-form');
-  if (!form) return;
-
-  var status = document.getElementById('newsletter-status');
+// Logica di iscrizione condivisa tra il modulo statico in home e il popup.
+// onSuccess viene chiamato dopo un'iscrizione riuscita (usato dal popup per chiudersi).
+function wireNewsletterForm(form, status, onSuccess) {
   var button = form.querySelector('button[type="submit"]');
 
   form.addEventListener('submit', function (e) {
@@ -1317,13 +1371,112 @@ function initNewsletterForm() {
           if (status) status.textContent = result.error.code === '23505'
             ? 'Sei già iscritto con questa email.'
             : 'Si è verificato un errore, riprova.';
+          if (result.error.code === '23505' && onSuccess) onSuccess();
         } else {
           if (status) status.textContent = 'Iscrizione confermata, grazie!';
           trackEvent('newsletter_signup', { source_page: window.location.pathname.split('/').pop() });
           form.reset();
+          if (onSuccess) onSuccess();
         }
       });
   });
+}
+
+function initNewsletterForm() {
+  var form = document.getElementById('newsletter-form');
+  if (!form) return;
+  wireNewsletterForm(form, document.getElementById('newsletter-status'));
+}
+
+// Popup newsletter site-wide: appare una volta per visitatore, dopo un ritardo
+// o quando scorre oltre metà pagina (quel che arriva prima). Non ricompare per
+// 30 giorni se chiuso, mai più se si iscrive. Aspetta che il banner cookie sia
+// stato risolto, per non sovrapporre due dialoghi insieme.
+function initNewsletterPopup() {
+  var STORAGE_KEY = 'cda_newsletter_popup';
+  var stored = localStorage.getItem(STORAGE_KEY);
+  if (stored) {
+    try {
+      var data = JSON.parse(stored);
+      if (data.status === 'subscribed') return;
+      if (data.status === 'dismissed') {
+        var THIRTY_DAYS_MS = 30 * 24 * 60 * 60 * 1000;
+        if (Date.now() - data.date < THIRTY_DAYS_MS) return;
+      }
+    } catch (e) { return; }
+  }
+
+  if (!localStorage.getItem('cda_cookie_consent')) return;
+
+  var shown = false;
+
+  function save(status) {
+    localStorage.setItem(STORAGE_KEY, JSON.stringify({ status: status, date: Date.now() }));
+  }
+
+  function show() {
+    if (shown) return;
+    shown = true;
+
+    var backdrop = document.createElement('div');
+    backdrop.className = 'newsletter-popup-backdrop';
+
+    var popup = document.createElement('div');
+    popup.className = 'newsletter-popup';
+    popup.setAttribute('role', 'dialog');
+    popup.setAttribute('aria-label', 'Iscriviti alla newsletter');
+    popup.innerHTML =
+      '<button type="button" class="newsletter-popup-close" aria-label="Chiudi">&times;</button>' +
+      '<p class="newsletter-popup-eyebrow">CDA Tivoli</p>' +
+      '<h3>Offerte e novità, prima degli altri</h3>' +
+      '<p class="newsletter-popup-body">Iscriviti alla newsletter: sconti, nuovi arrivi e consigli per il tuo camper. Niente spam.</p>' +
+      '<form class="newsletter-popup-form">' +
+        '<input type="email" name="email" required placeholder="La tua email" aria-label="Email">' +
+        '<button type="submit" class="btn btn-primary">Iscriviti</button>' +
+      '</form>' +
+      '<p class="newsletter-popup-status"></p>';
+
+    document.body.appendChild(backdrop);
+    document.body.appendChild(popup);
+    requestAnimationFrame(function () {
+      backdrop.classList.add('show');
+      popup.classList.add('show');
+    });
+
+    function close() {
+      backdrop.classList.remove('show');
+      popup.classList.remove('show');
+      setTimeout(function () { backdrop.remove(); popup.remove(); }, 250);
+    }
+
+    popup.querySelector('.newsletter-popup-close').addEventListener('click', function () {
+      save('dismissed');
+      close();
+    });
+    backdrop.addEventListener('click', function () {
+      save('dismissed');
+      close();
+    });
+
+    wireNewsletterForm(
+      popup.querySelector('.newsletter-popup-form'),
+      popup.querySelector('.newsletter-popup-status'),
+      function () {
+        save('subscribed');
+        setTimeout(close, 1200);
+      }
+    );
+  }
+
+  var timer = setTimeout(show, 20000);
+  window.addEventListener('scroll', function onScroll() {
+    var scrolled = window.scrollY / (document.documentElement.scrollHeight - window.innerHeight);
+    if (scrolled > 0.5) {
+      clearTimeout(timer);
+      window.removeEventListener('scroll', onScroll);
+      show();
+    }
+  }, { passive: true });
 }
 
 function initQtySelector() {
