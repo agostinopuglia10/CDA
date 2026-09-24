@@ -1237,9 +1237,9 @@ function loadAnalytics() {
     script.src = 'https://www.googletagmanager.com/gtag/js?id=' + GA_MEASUREMENT_ID;
     document.head.appendChild(script);
     window.dataLayer = window.dataLayer || [];
-    function gtag(){ dataLayer.push(arguments); }
-    gtag('js', new Date());
-    gtag('config', GA_MEASUREMENT_ID);
+    window.gtag = window.gtag || function(){ window.dataLayer.push(arguments); };
+    window.gtag('js', new Date());
+    window.gtag('config', GA_MEASUREMENT_ID);
   }
 
   var META_PIXEL_ID = '1274471299084547';
@@ -1275,8 +1275,8 @@ var META_EVENT_MAP = {
 function trackEvent(name, params) {
   params = params || {};
 
-  if (window.__gaLoaded && window.dataLayer) {
-    window.dataLayer.push(['event', name, params]);
+  if (window.__gaLoaded && window.gtag) {
+    window.gtag('event', name, params);
   }
 
   if (window.__metaLoaded && typeof fbq === 'function') {
