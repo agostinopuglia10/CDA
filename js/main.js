@@ -12,19 +12,26 @@ document.addEventListener('DOMContentLoaded', function () {
   // initShopCatalog/initCategoryPage possono sostituire la griglia statica
   // con prodotti reali da Supabase: carrello/filtri/quantità vanno
   // inizializzati DOPO, così si agganciano sempre al DOM finale (dinamico o statico).
-  Promise.all([
+  var pageInit = Promise.all([
     Promise.resolve(initShopCatalog()),
     Promise.resolve(initCategoryPage()),
     Promise.resolve(initFeaturedCarousel()),
     Promise.resolve(initProductPage()),
     Promise.resolve(initTestimonials()),
     Promise.resolve(initDeliveryInfo())
-  ]).then(function () {
+  ]);
+  pageInit.then(function () {
     initCart();
     initProductFilters();
     initQtySelector();
     initStickyBuyBar();
   });
+
+  // Prodotto e categoria ricevono il titolo reale da Supabase: la page_view
+  // di GA4 parte solo a caricamento finito (vedi sendPageViewOnce). Il timeout
+  // copre una rete lenta: meglio un titolo generico che nessuna visita.
+  pageInit.then(markPageReady, markPageReady);
+  setTimeout(markPageReady, 4000);
 });
 
 // Calcola il risparmio (in centesimi) di ogni kit rispetto alla somma dei
@@ -1228,6 +1235,25 @@ function initCookieBanner() {
   });
 }
 
+// La page_view parte una sola volta, quando sono vere entrambe le condizioni:
+// consenso dato (GA4 caricato) e pagina pronta col titolo definitivo.
+// L'ordine tra le due non è fisso: il consenso può arrivare prima o dopo.
+var pageViewState = { ready: false, analytics: false, sent: false };
+
+function markPageReady() {
+  pageViewState.ready = true;
+  sendPageViewOnce();
+}
+
+function sendPageViewOnce() {
+  if (pageViewState.sent || !pageViewState.ready || !pageViewState.analytics || !window.gtag) return;
+  pageViewState.sent = true;
+  window.gtag('event', 'page_view', {
+    page_title: document.title,
+    page_location: window.location.href
+  });
+}
+
 function loadAnalytics() {
   var GA_MEASUREMENT_ID = 'G-H2W2W8FGY6';
   if (!window.__gaLoaded) {
@@ -1239,7 +1265,12 @@ function loadAnalytics() {
     window.dataLayer = window.dataLayer || [];
     window.gtag = window.gtag || function(){ window.dataLayer.push(arguments); };
     window.gtag('js', new Date());
-    window.gtag('config', GA_MEASUREMENT_ID);
+    // page_view inviata a mano da sendPageViewOnce, non in automatico:
+    // l'invio automatico partiva prima che prodotto/categoria impostassero
+    // il titolo reale, e GA4 registrava tutte le schede con lo stesso titolo.
+    window.gtag('config', GA_MEASUREMENT_ID, { send_page_view: false });
+    pageViewState.analytics = true;
+    sendPageViewOnce();
   }
 
   var META_PIXEL_ID = '1274471299084547';
