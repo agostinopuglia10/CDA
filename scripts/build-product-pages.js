@@ -149,7 +149,15 @@ async function main() {
     const { relPath, html } = buildPage(template, p);
     fs.writeFileSync(path.join(ROOT, relPath), html, 'utf8');
     generatedFiles.push(relPath);
-    redirectLines.push('/prodotto.html?id=' + p.id + '  /' + relPath + '  301');
+    // Sintassi Netlify per un redirect basato su query string: il
+    // parametro va in un campo separato ("id=<uuid>"), NON appeso al
+    // percorso con "?" (Netlify non lo interpreta come match sulla
+    // query). "301!" (col punto esclamativo) forza il redirect anche
+    // se esiste un file reale a quel percorso — prodotto.html esiste
+    // davvero, senza "!" Netlify servirebbe quel file invece di
+    // reindirizzare (shadowing). Bug trovato e spiegato da "Data
+    // Analyst CDA" il 28/09/2026 con un test curl in produzione.
+    redirectLines.push('/prodotto.html  id=' + p.id + '  /' + relPath + '  301!');
     sitemapUrls.push(
       '  <url>\n' +
       '    <loc>' + SITE_URL + '/' + relPath + '</loc>\n' +
@@ -166,7 +174,7 @@ async function main() {
   const redirectsPath = path.join(ROOT, '_redirects');
   const existingLines = fs.existsSync(redirectsPath)
     ? fs.readFileSync(redirectsPath, 'utf8').split('\n').filter(function (l) {
-        return l.trim() && l.indexOf('/prodotto.html?id=') !== 0;
+        return l.trim() && l.indexOf('/prodotto.html') !== 0;
       })
     : [];
   fs.writeFileSync(redirectsPath, existingLines.concat(redirectLines).join('\n') + '\n', 'utf8');
