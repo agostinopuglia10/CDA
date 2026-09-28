@@ -59,7 +59,7 @@ Deno.serve(async (req) => {
 
     const { data: products, error } = await supabase
       .from('products')
-      .select('id, slug, name, description, price_cents, currency, image_url, brand, stock, is_bundle, long_package, ships_on_pallet, weight_kg, google_product_category, categories(name, path)')
+      .select('id, slug, name, description, price_cents, currency, image_url, brand, stock, is_bundle, long_package, ships_on_pallet, weight_kg, google_product_category, gtin, categories(name, path)')
       .eq('active', true)
       .gt('price_cents', 0)
       .not('image_url', 'is', null)
@@ -108,7 +108,7 @@ Deno.serve(async (req) => {
     <g:availability>${availability}</g:availability>
     <g:price>${priceEUR} ${currency}</g:price>
     <g:condition>new</g:condition>
-    <g:identifier_exists>no</g:identifier_exists>
+    ${p.gtin ? `<g:gtin>${escapeXml(p.gtin)}</g:gtin>` : `<g:identifier_exists>no</g:identifier_exists>`}
     <g:shipping_label>${escapeXml(shippingLabel)}</g:shipping_label>
     ${p.google_product_category ? `<g:google_product_category>${escapeXml(p.google_product_category)}</g:google_product_category>` : ''}
     ${shippingWeight}
