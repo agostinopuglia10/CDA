@@ -391,16 +391,22 @@
 
 <!-- Recensioni reali: caricate da Supabase (tabella "testimonials"). Finché
      non ce n'è nessuna attiva, questa sezione resta nascosta di proposito
-     invece di mostrare testi finti — vedi initTestimonials() in js/main.js. -->
+     invece di mostrare testi finti — vedi initTestimonials() in js/main.js.
+     Le recensioni raccolte finora parlano dell'officina fisica (32+ anni di
+     attività), non ancora dello shop online appena nato: titolo e sottotitolo
+     lo dicono chiaramente per non far sembrare il sito una facciata. -->
 <section id="testimonials-section" style="display:none;">
   <div class="container">
     <div class="section-head">
       <div>
-        <span class="tag">Recensioni</span>
-        <h2>Cosa dicono i clienti</h2>
+        <span class="tag">Chi c'è dietro lo shop</span>
+        <h2>L'officina dietro lo shop</h2>
+        <p style="max-width:60ch;color:var(--steel);margin-top:8px;">Lo stesso team, lo stesso indirizzo a Tivoli: le recensioni Google raccontano l'officina che c'è dietro questo shop appena nato.</p>
       </div>
     </div>
-    <div class="cat-grid" id="testimonials-grid" style="grid-template-columns:repeat(auto-fit, minmax(240px, 1fr));"></div>
+    <div class="testi-marquee-wrap">
+      <div class="testi-marquee" id="testimonials-grid"></div>
+    </div>
   </div>
 </section>
 
