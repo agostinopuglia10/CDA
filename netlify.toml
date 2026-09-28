@@ -5,6 +5,10 @@
   # differenza rilevante = salta il build) quando l'unico file cambiato è TODO.md,
   # ed esce con 1 (= build normale) per qualsiasi altra modifica.
   ignore = "git diff --quiet $CACHED_COMMIT_REF $COMMIT_REF -- . ':!TODO.md'"
+  # Rigenera le pagine statiche prodotto (prodotto-<slug>.html) da
+  # Supabase ad ogni deploy, così restano sempre allineate al catalogo
+  # reale — vedi scripts/build-product-pages.js per il motivo.
+  command = "node scripts/build-product-pages.js"
 
 # Header di sicurezza HTTP standard, mancavano tutti tranne HSTS (di
 # default su Netlify). Il dominio consentito per script/connessioni

@@ -191,7 +191,7 @@ function initShopCatalog() {
 
   return supabaseClient
     .from('products')
-    .select('id, name, price_cents, compare_at_price_cents, image_url, featured, is_bundle, vehicle_compatibility, brand, categories(slug, name, path)')
+    .select('id, slug, name, price_cents, compare_at_price_cents, image_url, featured, is_bundle, vehicle_compatibility, brand, categories(slug, name, path)')
     .eq('active', true)
     .gt('price_cents', 0) // mai mostrare in vendita un prodotto con prezzo segnaposto a 0€
     .then(function (res) {
@@ -219,13 +219,14 @@ function initShopCatalog() {
         card.setAttribute('data-bundle', p.is_bundle ? 'true' : 'false');
         card.setAttribute('data-vehicle', p.vehicle_compatibility || 'universale');
         card.setAttribute('data-brand', p.brand || '');
+        var href = productUrl(p);
         card.innerHTML =
-          '<a class="product-link" href="prodotto.html?id=' + p.id + '">' +
+          '<a class="product-link" href="' + href + '">' +
             '<div class="product-thumb">' + badge + thumb + '</div>' +
           '</a>' +
           '<div class="product-body">' +
             '<span class="product-cat">' + catName + '</span>' +
-            '<a class="product-link" href="prodotto.html?id=' + p.id + '"><h4>' + p.name + '</h4></a>' +
+            '<a class="product-link" href="' + href + '"><h4>' + p.name + '</h4></a>' +
             '<div class="product-price">' + renderPriceHTML(p) +
               '<button class="add-btn" data-product-id="' + p.id + '" data-product-name="' + p.name + '" data-product-price="' + p.price_cents + '" data-product-image="' + (p.image_url || '') + '" aria-label="Aggiungi al carrello">+</button>' +
             '</div>' +
@@ -270,7 +271,7 @@ function initFeaturedCarousel() {
 
   return supabaseClient
     .from('products')
-    .select('id, name, price_cents, compare_at_price_cents, image_url, featured, is_bundle, categories(slug, name)')
+    .select('id, slug, name, price_cents, compare_at_price_cents, image_url, featured, is_bundle, categories(slug, name)')
     .eq('active', true)
     .eq('featured', true)
     .gt('price_cents', 0) // mai mostrare in vendita un prodotto con prezzo segnaposto a 0€
@@ -290,13 +291,14 @@ function initFeaturedCarousel() {
 
         var card = document.createElement('div');
         card.className = 'product-card promo-card';
+        var href = productUrl(p);
         card.innerHTML =
-          '<a class="product-link" href="prodotto.html?id=' + p.id + '">' +
+          '<a class="product-link" href="' + href + '">' +
             '<div class="product-thumb">' + badge + thumb + '</div>' +
           '</a>' +
           '<div class="product-body">' +
             '<span class="product-cat">' + catName + '</span>' +
-            '<a class="product-link" href="prodotto.html?id=' + p.id + '"><h4>' + p.name + '</h4></a>' +
+            '<a class="product-link" href="' + href + '"><h4>' + p.name + '</h4></a>' +
             '<div class="product-price">' + renderPriceHTML(p) +
               '<button class="add-btn" data-product-id="' + p.id + '" data-product-name="' + p.name + '" data-product-price="' + p.price_cents + '" data-product-image="' + (p.image_url || '') + '" aria-label="Aggiungi al carrello">+</button>' +
             '</div>' +
@@ -594,7 +596,7 @@ function loadCategoryFromSupabase(pathStr, subcatGrid, grid) {
 
           return supabaseClient
             .from('products')
-            .select('id, name, price_cents, compare_at_price_cents, image_url, featured, is_bundle, vehicle_compatibility, categories(slug, name)')
+            .select('id, slug, name, price_cents, compare_at_price_cents, image_url, featured, is_bundle, vehicle_compatibility, categories(slug, name)')
             .eq('active', true)
             .gt('price_cents', 0) // mai mostrare in vendita un prodotto con prezzo segnaposto a 0€
             .in('category_id', categoryIds)
@@ -617,13 +619,14 @@ function loadCategoryFromSupabase(pathStr, subcatGrid, grid) {
                 card.setAttribute('data-subcat', subSlug);
                 card.setAttribute('data-bundle', p.is_bundle ? 'true' : 'false');
                 card.setAttribute('data-vehicle', p.vehicle_compatibility || 'universale');
+                var href = productUrl(p);
                 card.innerHTML =
-                  '<a class="product-link" href="prodotto.html?id=' + p.id + '">' +
+                  '<a class="product-link" href="' + href + '">' +
                     '<div class="product-thumb">' + badge + thumb + '</div>' +
                   '</a>' +
                   '<div class="product-body">' +
                     '<span class="product-cat">' + subName + '</span>' +
-                    '<a class="product-link" href="prodotto.html?id=' + p.id + '"><h4>' + p.name + '</h4></a>' +
+                    '<a class="product-link" href="' + href + '"><h4>' + p.name + '</h4></a>' +
                     '<div class="product-price">' + renderPriceHTML(p) +
                       '<button class="add-btn" data-product-id="' + p.id + '" data-product-name="' + p.name + '" data-product-price="' + p.price_cents + '" data-product-image="' + (p.image_url || '') + '" aria-label="Aggiungi al carrello">+</button>' +
                     '</div>' +
@@ -646,13 +649,19 @@ function initProductPage() {
   var nameEl = document.getElementById('product-name');
   if (!nameEl) return; // non siamo su prodotto.html
 
+  // Le pagine generate in build (prodotto-<slug>.html, vedi
+  // scripts/build-product-pages.js) iniettano window.CDA_PRODUCT_ID
+  // prima di questo script: è la fonte preferita, perché la pagina
+  // reale non ha più bisogno di ?id= nell'URL. Il parametro resta come
+  // fallback solo per il template condiviso prodotto.html (usato
+  // finché il prodotto non è ancora passato da una build).
   var params = new URLSearchParams(window.location.search);
-  var id = params.get('id');
+  var id = (typeof window.CDA_PRODUCT_ID !== 'undefined' && window.CDA_PRODUCT_ID) ? window.CDA_PRODUCT_ID : params.get('id');
   if (!id || typeof supabaseClient === 'undefined' || !supabaseClient) return;
 
   return supabaseClient
     .from('products')
-    .select('id, name, description, price_cents, compare_at_price_cents, image_url, featured, is_bundle, stock, category_id, categories(name, slug, path)')
+    .select('id, slug, name, description, price_cents, compare_at_price_cents, image_url, featured, is_bundle, stock, category_id, categories(name, slug, path)')
     .eq('id', id)
     .eq('active', true)
     .single()
@@ -682,7 +691,7 @@ function renderRelatedProducts(p) {
 
       return supabaseClient
         .from('products')
-        .select('id, name, price_cents, compare_at_price_cents, image_url, featured, is_bundle, categories(name)')
+        .select('id, slug, name, price_cents, compare_at_price_cents, image_url, featured, is_bundle, categories(name)')
         .eq('active', true)
         .gt('price_cents', 0) // mai mostrare in vendita un prodotto con prezzo segnaposto a 0€
         .in('category_id', categoryIds)
@@ -702,13 +711,14 @@ function renderRelatedProducts(p) {
 
             var card = document.createElement('div');
             card.className = 'product-card';
+            var href = productUrl(rp);
             card.innerHTML =
-              '<a class="product-link" href="prodotto.html?id=' + rp.id + '">' +
+              '<a class="product-link" href="' + href + '">' +
                 '<div class="product-thumb">' + badge + thumb + '</div>' +
               '</a>' +
               '<div class="product-body">' +
                 '<span class="product-cat">' + (rp.categories ? rp.categories.name : '') + '</span>' +
-                '<a class="product-link" href="prodotto.html?id=' + rp.id + '"><h4>' + rp.name + '</h4></a>' +
+                '<a class="product-link" href="' + href + '"><h4>' + rp.name + '</h4></a>' +
                 '<div class="product-price">' + renderPriceHTML(rp) +
                   '<button class="add-btn" data-product-id="' + rp.id + '" data-product-name="' + rp.name + '" data-product-price="' + rp.price_cents + '" data-product-image="' + (rp.image_url || '') + '" aria-label="Aggiungi al carrello">+</button>' +
                 '</div>' +
@@ -813,9 +823,15 @@ function renderProductPage(p) {
 // mandava a Google/motori AI gli stessi identici dati statici del
 // prodotto di esempio, indipendentemente dal prodotto mostrato.
 function updateProductSeoTags(p, descText, topName, topSlug) {
-  var pageUrl = 'https://cda-camper.it/prodotto.html?id=' + encodeURIComponent(p.id);
+  var pageUrl = 'https://cda-camper.it/' + productUrl(p);
   var shortDesc = descText.slice(0, 200);
-  var imageUrl = p.image_url || 'https://cda-camper.it/images/og-cover.jpg';
+  // image_url è quasi sempre assoluto, ma alcune foto caricate a mano
+  // (Ultimatron) sono salvate come percorso relativo — senza questo
+  // og:image sarebbe non risolvibile per chi legge solo il link (i
+  // bot di anteprima non hanno un "sito corrente" da cui completarlo).
+  var imageUrl = p.image_url
+    ? (/^https?:\/\//i.test(p.image_url) ? p.image_url : 'https://cda-camper.it/' + p.image_url.replace(/^\//, ''))
+    : 'https://cda-camper.it/images/og-cover.jpg';
 
   var canonicalEl = document.getElementById('canonical-link');
   if (canonicalEl) canonicalEl.setAttribute('href', pageUrl);
@@ -911,7 +927,7 @@ function wireProductPageKit(p) {
   // Prodotto singolo: verifica se fa parte di un kit esistente, per l'upsell.
   return supabaseClient
     .from('bundle_items')
-    .select('bundle_id, bundle:bundle_id(id, name, price_cents, active, is_bundle)')
+    .select('bundle_id, bundle:bundle_id(id, slug, name, price_cents, active, is_bundle)')
     .eq('component_product_id', p.id)
     .then(function (res) {
       if (res.error || !res.data || res.data.length === 0) return;
@@ -936,7 +952,7 @@ function wireProductPageKit(p) {
           var linkEl = document.getElementById('kit-upsell-link');
           if (upsellEl && textEl && linkEl) {
             textEl.textContent = 'Lo trovi anche nel kit "' + bundle.name + '" e risparmi ' + formatEUR(savings) + '.';
-            linkEl.setAttribute('href', 'prodotto.html?id=' + bundle.id);
+            linkEl.setAttribute('href', productUrl(bundle));
             upsellEl.style.display = '';
           }
         });
@@ -1686,6 +1702,16 @@ function initProductFilters() {
 
 function formatEUR(cents) {
   return '€ ' + (cents / 100).toLocaleString('it-IT', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+}
+
+// URL della pagina prodotto: usa il file statico generato in build
+// (scripts/build-product-pages.js) quando lo slug è disponibile — è
+// una pagina vera con titolo/meta già corretti, non il template
+// condiviso. Il fallback su ?id= resta solo per query che non hanno
+// ancora selezionato "slug" o per righe senza slug (non dovrebbe
+// succedere, lo slug è obbligatorio sul catalogo attivo).
+function productUrl(p) {
+  return p.slug ? 'prodotto-' + p.slug + '.html' : 'prodotto.html?id=' + p.id;
 }
 
 // Sconto reale su un singolo prodotto (non kit): valorizzato solo quando

@@ -71,7 +71,10 @@ Deno.serve(async (req) => {
 
     const items = (products || [])
       .map((p) => {
-        const link = `${SITE_URL}/prodotto.html?id=${p.id}`;
+        // Pagina statica reale generata in build (scripts/build-product-pages.js),
+        // non più il template condiviso con ?id= — Google Shopping preferisce
+        // un URL diretto piuttosto che seguire un redirect ad ogni lettura feed.
+        const link = `${SITE_URL}/prodotto-${p.slug}.html`;
         // Le foto caricate in locale (es. batterie/climatizzatori Ultimatron)
         // hanno un percorso relativo nel database (images/prodotti/...);
         // Google Merchant richiede sempre un URL assoluto, altrimenti scarta
