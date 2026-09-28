@@ -2194,7 +2194,41 @@ function initCartPage() {
     });
   }
 
-  render();
+  // Il carrello salva image_url (e name) nel localStorage nel momento in
+  // cui il prodotto viene aggiunto: se la foto cambia dopo (es. spostata
+  // in locale, corretta perché rotta), un articolo già in carrello da
+  // prima resta con il riferimento vecchio finché non lo si aggiunge di
+  // nuovo. Prima del primo render, riallinea silenziosamente ogni
+  // articolo ai dati reali attuali su Supabase — mai bloccare il
+  // render sul carrello per questo: se la query fallisce o manca
+  // connessione, si procede comunque con i dati già salvati.
+  function refreshCartItemsFromDb(callback) {
+    var items = getCartItems();
+    var realIds = items.map(function (it) { return it.id; }).filter(function (id) { return typeof id === 'string' && id.indexOf('demo:') !== 0; });
+    if (!supabaseClient || realIds.length === 0) { callback(); return; }
+
+    supabaseClient
+      .from('products')
+      .select('id, name, image_url')
+      .in('id', realIds)
+      .then(function (res) {
+        if (res.error || !res.data) { callback(); return; }
+        var byId = {};
+        res.data.forEach(function (p) { byId[p.id] = p; });
+        var changed = false;
+        items.forEach(function (item) {
+          var fresh = byId[item.id];
+          if (!fresh) return;
+          if (item.image_url !== (fresh.image_url || '')) { item.image_url = fresh.image_url || ''; changed = true; }
+          if (item.name !== fresh.name) { item.name = fresh.name; changed = true; }
+        });
+        if (changed) saveCartItems(items);
+        callback();
+      })
+      .catch(function () { callback(); });
+  }
+
+  refreshCartItemsFromDb(render);
 }
 
 function initCarousels() {
