@@ -369,7 +369,8 @@ var CATEGORIES_DATA = {
     description: 'A tuo agio in ogni stagione: climatizzatori e riscaldatori a gasolio e gas.',
     children: {
       climatizzatori: { name: 'Climatizzatori', description: 'Climatizzatori da tetto per il camper, per viaggiare freschi in ogni stagione.', img: 'images/sottocategorie/clima-climatizzatori.jpg' },
-      'riscaldatori-gasolio-gas': { name: 'Riscaldatori a Gasolio e Gas', description: 'Riscaldatori a gasolio e stufe a gas per scaldare il camper anche in inverno.', img: 'images/sottocategorie/clima-riscaldatori-gasolio-gas.jpg' }
+      'riscaldatori-gasolio-gas': { name: 'Riscaldatori a Gasolio e Gas', description: 'Riscaldatori a gasolio e stufe a gas per scaldare il camper anche in inverno.', img: 'images/sottocategorie/clima-riscaldatori-gasolio-gas.jpg' },
+      'bombole-gpl': { name: 'Bombole e Serbatoi GPL', description: 'Bombola GPL con valvola automotive per il rifornimento dal benzinaio, e tutti i pezzi per installarla e collegarla all\'impianto del mezzo.', img: 'images/sottocategorie/clima-bombole-gpl.jpg' }
     }
   },
   elettronica: {
@@ -661,7 +662,7 @@ function initProductPage() {
 
   return supabaseClient
     .from('products')
-    .select('id, slug, name, description, price_cents, compare_at_price_cents, image_url, featured, is_bundle, stock, category_id, categories(name, slug, path)')
+    .select('id, slug, name, description, price_cents, compare_at_price_cents, image_url, featured, is_bundle, stock, category_id, datasheet_url, categories(name, slug, path)')
     .eq('id', id)
     .eq('active', true)
     .single()
@@ -768,6 +769,16 @@ function renderProductPage(p) {
     specAvailabilityEl.textContent = (p.stock && p.stock > 0)
       ? 'Disponibile, spedizione immediata'
       : 'Su ordinazione, spedizione diretta';
+  }
+  var datasheetRow = document.getElementById('spec-datasheet-row');
+  var datasheetLink = document.getElementById('spec-datasheet-link');
+  if (datasheetRow && datasheetLink) {
+    if (p.datasheet_url) {
+      datasheetLink.setAttribute('href', p.datasheet_url);
+      datasheetRow.style.display = '';
+    } else {
+      datasheetRow.style.display = 'none';
+    }
   }
   if (breadcrumbNameEl) breadcrumbNameEl.textContent = p.name;
   if (breadcrumbCatEl && topSlug) {

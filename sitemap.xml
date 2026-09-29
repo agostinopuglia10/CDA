@@ -821,6 +821,26 @@
     <priority>0.5</priority>
   </url>
   <url>
+    <loc>https://cda-camper.it/prodotto-cda-0180-bombola-gpl-prakto-valvola-automotive-26-3-l.html</loc>
+    <changefreq>weekly</changefreq>
+    <priority>0.5</priority>
+  </url>
+  <url>
+    <loc>https://cda-camper.it/prodotto-cda-0181-staffe-bombola-prakto-26-3-l.html</loc>
+    <changefreq>weekly</changefreq>
+    <priority>0.5</priority>
+  </url>
+  <url>
+    <loc>https://cda-camper.it/prodotto-cda-0182-kit-riempimento-eur-maxi-s6.html</loc>
+    <changefreq>weekly</changefreq>
+    <priority>0.5</priority>
+  </url>
+  <url>
+    <loc>https://cda-camper.it/prodotto-cda-0183-raccordo-gas-italia-germania.html</loc>
+    <changefreq>weekly</changefreq>
+    <priority>0.5</priority>
+  </url>
+  <url>
     <loc>https://cda-camper.it/prodotto-cda-bundle-0001-kit-toilette-da-viaggio.html</loc>
     <changefreq>weekly</changefreq>
     <priority>0.5</priority>
@@ -847,6 +867,11 @@
   </url>
   <url>
     <loc>https://cda-camper.it/prodotto-cda-bundle-0006-kit-veranda-motorizzata.html</loc>
+    <changefreq>weekly</changefreq>
+    <priority>0.5</priority>
+  </url>
+  <url>
+    <loc>https://cda-camper.it/prodotto-cda-bundle-0007-kit-bombola-gpl-automotive-montaggio.html</loc>
     <changefreq>weekly</changefreq>
     <priority>0.5</priority>
   </url>
@@ -1046,6 +1071,9 @@
     <priority>0.5</priority>
   </url>
 </urlset>
+
+
+
 
 
 
