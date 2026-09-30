@@ -99,9 +99,9 @@ function welcomeEmailHtml(unsubscribeUrl: string | null): string {
   <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="background:#F7F5F2;padding:24px 0;">
     <tr><td align="center">
       <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="max-width:520px;background:#ffffff;border:1px solid #E4E1DB;">
-        <tr><td style="background:#1B1B1D;padding:28px 32px;">
-          <span style="font-family:Arial,sans-serif;font-weight:800;font-size:22px;letter-spacing:.04em;color:#ffffff;">CDA</span>
-          <div style="font-size:11px;letter-spacing:.12em;text-transform:uppercase;color:#C9CDD0;margin-top:4px;">Camper &amp; Lavorazioni · Tivoli</div>
+        <tr><td align="center" style="background:#1B1B1D;padding:24px 32px 20px;">
+          <img src="https://cda-camper.it/images/logo-email.png" width="60" height="60" alt="CDA" style="display:block;width:60px;height:60px;border-radius:50%;margin:0 auto 10px;">
+          <div style="font-size:11px;letter-spacing:.12em;text-transform:uppercase;color:#C9CDD0;">Camper &amp; Lavorazioni · Tivoli</div>
         </td></tr>
         <tr><td style="padding:36px 32px 8px;">
           <p style="margin:0 0 6px;font-size:12px;letter-spacing:.1em;text-transform:uppercase;color:#D2131A;font-weight:bold;">Iscrizione confermata</p>
