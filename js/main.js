@@ -1329,10 +1329,45 @@ var META_EVENT_MAP = {
   newsletter_signup: 'Subscribe'
 };
 
+// Id anonimo di visita (solo per la scheda corrente: sparisce alla chiusura,
+// non è un cookie, non incrocia mai identità). Serve solo a collegare tra loro
+// i passaggi del funnel (vista → carrello → checkout) di chi guarda di nascosto.
+function getVisitId() {
+  try {
+    var id = sessionStorage.getItem('cda_visit_id');
+    if (!id) {
+      id = 'v_' + Date.now().toString(36) + '_' + Math.random().toString(36).slice(2, 10);
+      sessionStorage.setItem('cda_visit_id', id);
+    }
+    return id;
+  } catch (e) {
+    return 'v_nostorage_' + Math.random().toString(36).slice(2, 10);
+  }
+}
+
+// Registra i passaggi chiave del funnel lato server, SEMPRE (non dipende dal
+// consenso cookie che carica GA4/Meta solo dopo "Accetta tutti" — senza questo
+// la maggior parte delle sessioni reali risultava invisibile nel funnel GA4).
+// Nessun dato personale, mai un errore qui deve bloccare l'esperienza utente.
+var FUNNEL_LOG_EVENTS = { view_item: 1, add_to_cart: 1, begin_checkout: 1 };
+function logFunnelEvent(name, params) {
+  if (!FUNNEL_LOG_EVENTS[name]) return;
+  try {
+    var productId = (params && Array.isArray(params.items) && params.items[0]) ? params.items[0].item_id : null;
+    fetch(SUPABASE_URL + '/functions/v1/log-funnel-event', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + SUPABASE_ANON_KEY },
+      body: JSON.stringify({ event_name: name, visit_id: getVisitId(), product_id: productId }),
+      keepalive: true
+    }).catch(function () {});
+  } catch (e) {}
+}
+
 // Invia un evento a GA4 e al Pixel Meta, solo se il consenso è stato dato
 // (loadAnalytics imposta i due flag qui sotto). Se il consenso non c'è, non fa nulla.
 function trackEvent(name, params) {
   params = params || {};
+  logFunnelEvent(name, params);
 
   if (window.__gaLoaded && window.gtag) {
     window.gtag('event', name, params);
