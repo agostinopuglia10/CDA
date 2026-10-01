@@ -35,7 +35,21 @@
       "Bash(curl -s -X POST https://udynqqqxjcyhdeygqumi.supabase.co/functions/v1/sync-newsletter-signup -H 'Content-Type: application/json' -d '{\"record\":{\"email\":\"test-verifica-cda@example.com\",\"source_page\":\"test-manuale\"}}' -w '\\\\nHTTP_STATUS:%{http_code}\\\\n')",
       "mcp__644d751a-d090-4aaf-b985-fde3bf2ccc4d__apply_migration",
       "mcp__visualize__read_me",
-      "mcp__visualize__show_widget"
+      "mcp__visualize__show_widget",
+      "mcp__644d751a-d090-4aaf-b985-fde3bf2ccc4d__list_projects",
+      "mcp__claude-in-chrome__list_connected_browsers",
+      "mcp__claude-in-chrome__switch_browser",
+      "mcp__claude-in-chrome__browser_batch",
+      "mcp__claude-in-chrome__tabs_close_mcp",
+      "Bash(cat >> *)",
+      "PowerShell(Get-ChildItem \"C:\\\\Users\\\\PC\\\\Desktop\\\\CDA,Ecom\\\\images\" -File | Where-Object { $_.LastWriteTime -gt \\(Get-Date \"2026-09-26\"\\) -and $_.Name -notmatch '^prodotti' } | Select-Object Name, LastWriteTime | Format-Table -AutoSize | Out-String -Width 200; Get-ChildItem \"C:\\\\Users\\\\PC\\\\Desktop\\\\CDA,Ecom\\\\images\" -Directory | Select-Object Name, LastWriteTime)",
+      "PowerShell($d=\"C:\\\\Users\\\\PC\\\\Desktop\\\\CDA,Ecom\\\\marketing\\\\social\"; New-Item -ItemType Directory -Force \"$d\\\\post-installazioni\\\\story\" | Out-Null; & \"$d\\\\render-story-slide.ps1\" -BgPath \"C:\\\\Users\\\\PC\\\\Desktop\\\\CDA,Ecom\\\\images\\\\lavorazioni-tetto-1.jpg\" -OutPath \"$d\\\\post-installazioni\\\\story\\\\story-1.png\" -Kicker \"NUOVO POST\" -Headline1 \"LO COMPRI.\" -Headline2A \"TE LO\" -Headline2B \"MONTIAMO NOI.\" -CtaText \"GUARDA IL POST\" -FocalX 0.7 -FocalY 0.5)",
+      "PowerShell(Add-Type -AssemblyName System.Drawing; $d=\"C:\\\\Users\\\\PC\\\\Desktop\\\\CDA,Ecom\\\\marketing\\\\social\"; $src=[System.Drawing.Image]::FromFile\\(\"C:\\\\Users\\\\PC\\\\Desktop\\\\CDA,Ecom\\\\images\\\\lavorazioni-tetto-1.jpg\"\\); $h=740; $bmp=[System.Drawing.Bitmap]::new\\($src.Width,$h\\); $g=[System.Drawing.Graphics]::FromImage\\($bmp\\); $g.DrawImage\\($src,[System.Drawing.Rectangle]::new\\(0,0,$src.Width,$h\\),[System.Drawing.Rectangle]::new\\(0,0,$src.Width,$h\\),[System.Drawing.GraphicsUnit]::Pixel\\); $out=\"$d\\\\post-installazioni\\\\story\\\\tetto-1-cleaned.jpg\"; $bmp.Save\\($out,[System.Drawing.Imaging.ImageFormat]::Jpeg\\); $g.Dispose\\(\\); $bmp.Dispose\\(\\); $src.Dispose\\(\\); & \"$d\\\\render-story-slide.ps1\" -BgPath $out -OutPath \"$d\\\\post-installazioni\\\\story\\\\story-1.png\" -Kicker \"NUOVO POST\" -Headline1 \"LO COMPRI.\" -Headline2A \"TE LO\" -Headline2B \"MONTIAMO NOI.\" -CtaText \"GUARDA IL POST\" -FocalX 0.7 -FocalY 0.5)",
+      "mcp__claude-in-chrome__javascript_tool",
+      "Read(//c/Users/PC/AppData/Local/Temp/claude/C--Users-PC-Desktop-CDA-Ecom/b2fade08-2cf4-48c0-a671-ddda51b090cf/scratchpad/**)",
+      "Bash(curl -s \"https://udynqqqxjcyhdeygqumi.supabase.co/functions/v1/product-feed\" -o feed.xml)",
+      "Bash(node feed.js)",
+      "Bash(node --check js/main.js)"
     ]
   }
 }
