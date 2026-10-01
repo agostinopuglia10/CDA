@@ -27,11 +27,12 @@ document.addEventListener('DOMContentLoaded', function () {
     initStickyBuyBar();
   });
 
-  // Prodotto e categoria ricevono il titolo reale da Supabase: la page_view
-  // di GA4 parte solo a caricamento finito (vedi sendPageViewOnce). Il timeout
-  // copre una rete lenta: meglio un titolo generico che nessuna visita.
-  pageInit.then(markPageReady, markPageReady);
-  setTimeout(markPageReady, 4000);
+  // La page_view parte subito: le pagine prodotto sono statiche con il titolo
+  // reale già nell'HTML e initCategoryPage imposta il titolo della categoria in
+  // modo sincrono (applyCategoryData). Aspettare i caricamenti da Supabase
+  // faceva perdere la page_view a chi usciva prima, e GA4 classificava quelle
+  // sessioni come "Unassigned".
+  markPageReady();
 });
 
 // Calcola il risparmio (in centesimi) di ogni kit rispetto alla somma dei
