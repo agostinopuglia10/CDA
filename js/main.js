@@ -1858,6 +1858,7 @@ function initCartPage() {
   var statusEl = document.getElementById('checkout-status');
   var paymentRadios = document.querySelectorAll('input[name="payment-method"]');
   var codFieldsEl = document.getElementById('cod-fields');
+  var stripeEmailFieldEl = document.getElementById('stripe-email-field');
   var lastShippingEstimate = { shippingCents: null, needsZone: false };
   if (!emptyEl || !contentEl) return;
 
@@ -1872,6 +1873,7 @@ function initCartPage() {
       opt.classList.toggle('selected', opt.querySelector('input').value === method);
     });
     if (codFieldsEl) codFieldsEl.style.display = method === 'cod' ? '' : 'none';
+    if (stripeEmailFieldEl) stripeEmailFieldEl.style.display = method === 'cod' ? 'none' : '';
     if (checkoutBtn) checkoutBtn.textContent = method === 'cod' ? 'Conferma ordine (pagamento alla consegna)' : 'Vai al pagamento';
   }
 
@@ -2216,12 +2218,16 @@ function initCartPage() {
       var originalText = checkoutBtn.textContent;
       checkoutBtn.textContent = 'Attendere...';
 
+      var stripeEmailEl = document.getElementById('stripe-email');
+      var stripeEmail = stripeEmailEl ? stripeEmailEl.value.trim() : '';
+
       fetch(SUPABASE_URL + '/functions/v1/create-checkout-session', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + SUPABASE_ANON_KEY },
         body: JSON.stringify({
           items: realItems.map(function (it) { return { product_id: it.id, quantity: it.quantity }; }),
-          zona: zona || 'italia'
+          zona: zona || 'italia',
+          customer: stripeEmail ? { email: stripeEmail } : undefined
         })
       })
         .then(function (res) { return res.json(); })
