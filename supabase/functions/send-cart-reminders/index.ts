@@ -111,7 +111,7 @@ Deno.serve(async (req: Request) => {
           <p style="margin:0 0 24px;font-size:13.5px;line-height:1.6;color:#6E7276;">Domande sul prodotto o sulla spedizione? Rispondi pure a questa email, oppure chiamaci al 348 990 5455.</p>
         </td></tr>
         <tr><td style="padding:20px 32px 28px;border-top:1px solid #E4E1DB;">
-          <p style="margin:0;font-size:12.5px;color:#6E7276;">CDA di Talucci Maria · Via Arci 24, Tivoli (RM) · P.IVA 04047161007</p>
+          <p style="margin:0;font-size:12.5px;color:#6E7276;">CDA di Talucci Maria · Strada Arci 24, Tivoli (RM) · P.IVA 04047161007</p>
         </td></tr>
       </table>
     </td></tr>

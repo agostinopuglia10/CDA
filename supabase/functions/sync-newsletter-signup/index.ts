@@ -119,7 +119,7 @@ function welcomeEmailHtml(unsubscribeUrl: string | null): string {
           </table>
         </td></tr>
         <tr><td style="padding:20px 32px 28px;border-top:1px solid #E4E1DB;">
-          <p style="margin:0 0 6px;font-size:12.5px;color:#6E7276;">CDA di Talucci Maria · Via Arci 24, Tivoli (RM) · P.IVA 04047161007</p>
+          <p style="margin:0 0 6px;font-size:12.5px;color:#6E7276;">CDA di Talucci Maria · Strada Arci 24, Tivoli (RM) · P.IVA 04047161007</p>
           <p style="margin:0;font-size:12.5px;color:#6E7276;">
             ${unsubscribeUrl ? `<a href="${unsubscribeUrl}" style="color:#6E7276;">Annulla iscrizione</a>` : 'Puoi annullare l\'iscrizione in qualsiasi momento.'}
           </p>
