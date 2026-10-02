@@ -40,9 +40,10 @@ Deno.serve(async (req) => {
   }
 
   try {
-    const { items, customer } = await req.json();
+    const { items, customer, zona } = await req.json();
     // items atteso: [{ product_id: 'uuid', quantity: 2 }, ...]
     // customer atteso: { name, email, phone, shipping_address }
+    // zona atteso: 'italia' | 'isole' (rilevante solo per articoli su pallet)
 
     if (!Array.isArray(items) || items.length === 0) {
       return jsonError('Carrello vuoto', 400);
@@ -54,7 +55,7 @@ Deno.serve(async (req) => {
     const productIds = items.map((i: { product_id: string }) => i.product_id);
     const { data: products, error: productsError } = await supabase
       .from('products')
-      .select('id, name, price_cents, currency, stock, active')
+      .select('id, name, price_cents, currency, stock, active, weight_kg, ships_on_pallet, long_package, shipping_included')
       .in('id', productIds);
 
     if (productsError) return jsonError('Errore nel recupero prodotti: ' + productsError.message, 500);
@@ -67,10 +68,13 @@ Deno.serve(async (req) => {
       return { product, quantity: Math.max(1, item.quantity | 0) };
     });
 
-    const totalCents = lineItems.reduce(
+    const subtotalCents = lineItems.reduce(
       (sum: number, li: { product: { price_cents: number }; quantity: number }) => sum + li.product.price_cents * li.quantity,
       0
     );
+
+    const shippingCents = await calculateShippingCents(supabase, lineItems, subtotalCents, zona);
+    const totalCents = subtotalCents + shippingCents;
 
     // 2. Crea l'ordine "pending" nel database
     const { data: order, error: orderError } = await supabase
@@ -82,6 +86,7 @@ Deno.serve(async (req) => {
         shipping_address: customer?.shipping_address || '',
         status: 'pending',
         total_cents: totalCents,
+        shipping_cents: shippingCents,
       })
       .select()
       .single();
@@ -104,6 +109,11 @@ Deno.serve(async (req) => {
     stripeBody.set('cancel_url', `${SITE_URL}/shop.html`);
     stripeBody.set('client_reference_id', order.id);
     if (customer?.email) stripeBody.set('customer_email', customer.email);
+    // Chiediamo indirizzo e telefono direttamente a Stripe durante il pagamento:
+    // oggi il sito non li raccoglie affatto per chi paga con carta (vedi stripe-webhook,
+    // che li salva sull'ordine appena il pagamento va a buon fine).
+    stripeBody.set('shipping_address_collection[allowed_countries][0]', 'IT');
+    stripeBody.set('phone_number_collection[enabled]', 'true');
 
     lineItems.forEach((li: { product: { name: string; price_cents: number; currency: string }; quantity: number }, idx: number) => {
       stripeBody.set(`line_items[${idx}][price_data][currency]`, (li.product.currency || 'eur').toLowerCase());
@@ -111,6 +121,14 @@ Deno.serve(async (req) => {
       stripeBody.set(`line_items[${idx}][price_data][unit_amount]`, String(li.product.price_cents));
       stripeBody.set(`line_items[${idx}][quantity]`, String(li.quantity));
     });
+
+    if (shippingCents > 0) {
+      const shipIdx = lineItems.length;
+      stripeBody.set(`line_items[${shipIdx}][price_data][currency]`, 'eur');
+      stripeBody.set(`line_items[${shipIdx}][price_data][product_data][name]`, 'Spedizione');
+      stripeBody.set(`line_items[${shipIdx}][price_data][unit_amount]`, String(shippingCents));
+      stripeBody.set(`line_items[${shipIdx}][quantity]`, '1');
+    }
 
     const stripeRes = await fetch('https://api.stripe.com/v1/checkout/sessions', {
       method: 'POST',
@@ -140,4 +158,52 @@ function jsonError(message: string, status: number) {
     status,
     headers: { ...CORS_HEADERS, 'Content-Type': 'application/json' },
   });
+}
+
+const FREE_SHIPPING_THRESHOLD_CENTS = 150000; // € 1.500,00
+
+// Calcola la spedizione reale sommando il peso degli articoli non esclusi
+// (shipping_included = spedizione già nel prezzo, es. batterie Ultimatron ULM)
+// e cercando la fascia giusta in shipping_rate_bands. Se in carrello c'è
+// almeno un articolo su pallet, usa le fasce pallet (con zona); se c'è un
+// pacco lungo (>150cm, es. barre portapacchi), usa la fascia fissa "lungo";
+// altrimenti la fascia "normale" a peso.
+async function calculateShippingCents(
+  supabase: ReturnType<typeof createClient>,
+  lineItems: {
+    product: { weight_kg: number | null; ships_on_pallet: boolean; long_package: boolean; shipping_included: boolean };
+    quantity: number;
+  }[],
+  subtotalCents: number,
+  zona?: string
+): Promise<number> {
+  if (subtotalCents >= FREE_SHIPPING_THRESHOLD_CENTS) return 0;
+
+  let anyPallet = false;
+  let anyLong = false;
+  let totalWeight = 0;
+  for (const li of lineItems) {
+    if (li.product.shipping_included) continue;
+    if (li.product.ships_on_pallet) anyPallet = true;
+    if (li.product.long_package) anyLong = true;
+    const w = li.product.weight_kg != null ? Number(li.product.weight_kg) : 0.5; // fallback prudente per i pochi prodotti senza peso confermato
+    totalWeight += w * li.quantity;
+  }
+
+  if (totalWeight === 0) return 0; // tutto shipping_included, niente da spedire a parte
+
+  const packageType = anyPallet ? 'pallet' : anyLong ? 'lungo' : 'normale';
+  const zonaFilter = packageType === 'pallet' ? (zona === 'isole' ? 'isole' : 'italia') : 'tutte';
+
+  const { data: bands, error } = await supabase
+    .from('shipping_rate_bands')
+    .select('price_cents')
+    .eq('package_type', packageType)
+    .eq('zona', zonaFilter)
+    .lte('weight_min_kg', totalWeight)
+    .order('weight_min_kg', { ascending: false })
+    .limit(1);
+
+  if (error || !bands || bands.length === 0) return 0; // non blocchiamo mai un ordine per questo
+  return bands[0].price_cents;
 }
