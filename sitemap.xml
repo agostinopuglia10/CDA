@@ -36,172 +36,177 @@
     <priority>0.5</priority>
   </url>
   <url>
-    <loc>https://cda-camper.it/categoria.html?slug=interni</loc>
+    <loc>https://cda-camper.it/categoria-interni.html</loc>
     <changefreq>weekly</changefreq>
-    <priority>0.7</priority>
+    <priority>0.8</priority>
   </url>
   <url>
-    <loc>https://cda-camper.it/categoria.html?slug=interni.arredamento</loc>
-    <changefreq>weekly</changefreq>
-    <priority>0.6</priority>
-  </url>
-  <url>
-    <loc>https://cda-camper.it/categoria.html?slug=interni.toilette</loc>
+    <loc>https://cda-camper.it/categoria-interni-arredamento.html</loc>
     <changefreq>weekly</changefreq>
     <priority>0.6</priority>
   </url>
   <url>
-    <loc>https://cda-camper.it/categoria.html?slug=interni.cucina</loc>
+    <loc>https://cda-camper.it/categoria-interni-toilette.html</loc>
     <changefreq>weekly</changefreq>
     <priority>0.6</priority>
   </url>
   <url>
-    <loc>https://cda-camper.it/categoria.html?slug=interni.garage</loc>
+    <loc>https://cda-camper.it/categoria-interni-cucina.html</loc>
     <changefreq>weekly</changefreq>
     <priority>0.6</priority>
   </url>
   <url>
-    <loc>https://cda-camper.it/categoria.html?slug=interni.oscuranti</loc>
+    <loc>https://cda-camper.it/categoria-interni-garage.html</loc>
     <changefreq>weekly</changefreq>
     <priority>0.6</priority>
   </url>
   <url>
-    <loc>https://cda-camper.it/categoria.html?slug=interni.zanzariere</loc>
+    <loc>https://cda-camper.it/categoria-interni-oscuranti.html</loc>
     <changefreq>weekly</changefreq>
     <priority>0.6</priority>
   </url>
   <url>
-    <loc>https://cda-camper.it/categoria.html?slug=interni.aperture</loc>
+    <loc>https://cda-camper.it/categoria-interni-zanzariere.html</loc>
     <changefreq>weekly</changefreq>
     <priority>0.6</priority>
   </url>
   <url>
-    <loc>https://cda-camper.it/categoria.html?slug=interni.cabina-guida</loc>
+    <loc>https://cda-camper.it/categoria-interni-aperture.html</loc>
     <changefreq>weekly</changefreq>
     <priority>0.6</priority>
   </url>
   <url>
-    <loc>https://cda-camper.it/categoria.html?slug=interni.utensili</loc>
+    <loc>https://cda-camper.it/categoria-interni-cabina-guida.html</loc>
     <changefreq>weekly</changefreq>
     <priority>0.6</priority>
   </url>
   <url>
-    <loc>https://cda-camper.it/categoria.html?slug=esterni</loc>
-    <changefreq>weekly</changefreq>
-    <priority>0.7</priority>
-  </url>
-  <url>
-    <loc>https://cda-camper.it/categoria.html?slug=esterni.aperture</loc>
+    <loc>https://cda-camper.it/categoria-interni-utensili.html</loc>
     <changefreq>weekly</changefreq>
     <priority>0.6</priority>
   </url>
   <url>
-    <loc>https://cda-camper.it/categoria.html?slug=esterni.verande</loc>
+    <loc>https://cda-camper.it/categoria-esterni.html</loc>
+    <changefreq>weekly</changefreq>
+    <priority>0.8</priority>
+  </url>
+  <url>
+    <loc>https://cda-camper.it/categoria-esterni-aperture.html</loc>
     <changefreq>weekly</changefreq>
     <priority>0.6</priority>
   </url>
   <url>
-    <loc>https://cda-camper.it/categoria.html?slug=esterni.portaggio</loc>
+    <loc>https://cda-camper.it/categoria-esterni-verande.html</loc>
     <changefreq>weekly</changefreq>
     <priority>0.6</priority>
   </url>
   <url>
-    <loc>https://cda-camper.it/categoria.html?slug=esterni.sicurezza</loc>
+    <loc>https://cda-camper.it/categoria-esterni-portaggio.html</loc>
     <changefreq>weekly</changefreq>
     <priority>0.6</priority>
   </url>
   <url>
-    <loc>https://cda-camper.it/categoria.html?slug=esterni.illuminazione</loc>
+    <loc>https://cda-camper.it/categoria-esterni-sicurezza.html</loc>
     <changefreq>weekly</changefreq>
     <priority>0.6</priority>
   </url>
   <url>
-    <loc>https://cda-camper.it/categoria.html?slug=energia</loc>
-    <changefreq>weekly</changefreq>
-    <priority>0.7</priority>
-  </url>
-  <url>
-    <loc>https://cda-camper.it/categoria.html?slug=energia.batterie</loc>
+    <loc>https://cda-camper.it/categoria-esterni-illuminazione.html</loc>
     <changefreq>weekly</changefreq>
     <priority>0.6</priority>
   </url>
   <url>
-    <loc>https://cda-camper.it/categoria.html?slug=energia.pannelli-solari</loc>
+    <loc>https://cda-camper.it/categoria-energia.html</loc>
+    <changefreq>weekly</changefreq>
+    <priority>0.8</priority>
+  </url>
+  <url>
+    <loc>https://cda-camper.it/categoria-energia-batterie.html</loc>
     <changefreq>weekly</changefreq>
     <priority>0.6</priority>
   </url>
   <url>
-    <loc>https://cda-camper.it/categoria.html?slug=energia.strumentazioni</loc>
+    <loc>https://cda-camper.it/categoria-energia-pannelli-solari.html</loc>
     <changefreq>weekly</changefreq>
     <priority>0.6</priority>
   </url>
   <url>
-    <loc>https://cda-camper.it/categoria.html?slug=acqua</loc>
-    <changefreq>weekly</changefreq>
-    <priority>0.7</priority>
-  </url>
-  <url>
-    <loc>https://cda-camper.it/categoria.html?slug=acqua.prodotti-chimici</loc>
+    <loc>https://cda-camper.it/categoria-energia-strumentazioni.html</loc>
     <changefreq>weekly</changefreq>
     <priority>0.6</priority>
   </url>
   <url>
-    <loc>https://cda-camper.it/categoria.html?slug=acqua.pompe</loc>
+    <loc>https://cda-camper.it/categoria-acqua.html</loc>
+    <changefreq>weekly</changefreq>
+    <priority>0.8</priority>
+  </url>
+  <url>
+    <loc>https://cda-camper.it/categoria-acqua-prodotti-chimici.html</loc>
     <changefreq>weekly</changefreq>
     <priority>0.6</priority>
   </url>
   <url>
-    <loc>https://cda-camper.it/categoria.html?slug=acqua.serbatoi</loc>
+    <loc>https://cda-camper.it/categoria-acqua-pompe.html</loc>
     <changefreq>weekly</changefreq>
     <priority>0.6</priority>
   </url>
   <url>
-    <loc>https://cda-camper.it/categoria.html?slug=acqua.rubinetteria</loc>
+    <loc>https://cda-camper.it/categoria-acqua-serbatoi.html</loc>
     <changefreq>weekly</changefreq>
     <priority>0.6</priority>
   </url>
   <url>
-    <loc>https://cda-camper.it/categoria.html?slug=clima</loc>
-    <changefreq>weekly</changefreq>
-    <priority>0.7</priority>
-  </url>
-  <url>
-    <loc>https://cda-camper.it/categoria.html?slug=clima.climatizzatori</loc>
+    <loc>https://cda-camper.it/categoria-acqua-rubinetteria.html</loc>
     <changefreq>weekly</changefreq>
     <priority>0.6</priority>
   </url>
   <url>
-    <loc>https://cda-camper.it/categoria.html?slug=clima.riscaldatori-gasolio-gas</loc>
+    <loc>https://cda-camper.it/categoria-clima.html</loc>
+    <changefreq>weekly</changefreq>
+    <priority>0.8</priority>
+  </url>
+  <url>
+    <loc>https://cda-camper.it/categoria-clima-climatizzatori.html</loc>
     <changefreq>weekly</changefreq>
     <priority>0.6</priority>
   </url>
   <url>
-    <loc>https://cda-camper.it/categoria.html?slug=elettronica</loc>
-    <changefreq>weekly</changefreq>
-    <priority>0.7</priority>
-  </url>
-  <url>
-    <loc>https://cda-camper.it/categoria.html?slug=elettronica.avviatori</loc>
+    <loc>https://cda-camper.it/categoria-clima-riscaldatori-gasolio-gas.html</loc>
     <changefreq>weekly</changefreq>
     <priority>0.6</priority>
   </url>
   <url>
-    <loc>https://cda-camper.it/categoria.html?slug=elettronica.caricabatterie</loc>
+    <loc>https://cda-camper.it/categoria-clima-bombole-gpl.html</loc>
     <changefreq>weekly</changefreq>
     <priority>0.6</priority>
   </url>
   <url>
-    <loc>https://cda-camper.it/categoria.html?slug=elettronica.monitor-telecamere</loc>
+    <loc>https://cda-camper.it/categoria-elettronica.html</loc>
+    <changefreq>weekly</changefreq>
+    <priority>0.8</priority>
+  </url>
+  <url>
+    <loc>https://cda-camper.it/categoria-elettronica-avviatori.html</loc>
     <changefreq>weekly</changefreq>
     <priority>0.6</priority>
   </url>
   <url>
-    <loc>https://cda-camper.it/categoria.html?slug=elettronica.inverter-regolatori</loc>
+    <loc>https://cda-camper.it/categoria-elettronica-caricabatterie.html</loc>
     <changefreq>weekly</changefreq>
     <priority>0.6</priority>
   </url>
   <url>
-    <loc>https://cda-camper.it/categoria.html?slug=elettronica.compressori</loc>
+    <loc>https://cda-camper.it/categoria-elettronica-monitor-telecamere.html</loc>
+    <changefreq>weekly</changefreq>
+    <priority>0.6</priority>
+  </url>
+  <url>
+    <loc>https://cda-camper.it/categoria-elettronica-inverter-regolatori.html</loc>
+    <changefreq>weekly</changefreq>
+    <priority>0.6</priority>
+  </url>
+  <url>
+    <loc>https://cda-camper.it/categoria-elettronica-compressori.html</loc>
     <changefreq>weekly</changefreq>
     <priority>0.6</priority>
   </url>
@@ -1076,6 +1081,7 @@
     <priority>0.5</priority>
   </url>
 </urlset>
+
 
 
 

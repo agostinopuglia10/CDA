@@ -164,7 +164,7 @@ function initTestimonials() {
 // Supabase quando ha un dato reale — finché il campo è vuoto, niente badge
 // né promessa sui tempi viene mostrata da nessuna parte del sito.
 function initDeliveryInfo() {
-  if (!supabaseClient) return;
+  if (typeof supabaseClient === 'undefined' || !supabaseClient) return;
   var tripItem = document.getElementById('trust-delivery-item');
   var tripText = document.getElementById('trust-delivery-text');
   var specRow = document.getElementById('spec-delivery-row');
@@ -405,13 +405,19 @@ function resolveCategoryPath(pathStr) {
   return { node: node, ancestors: ancestors };
 }
 
+// Ogni categoria ha una pagina statica generata dal build (categoria-<percorso>.html,
+// con i punti sostituiti da trattini): URL, titolo e canonical reali anche senza JavaScript.
+function categoryPageUrl(path) {
+  return 'categoria-' + String(path).replace(/\./g, '-') + '.html';
+}
+
 function initCategoryPage() {
   var grid = document.getElementById('category-product-grid');
   var subcatGrid = document.getElementById('subcategory-grid');
   if (!grid || !subcatGrid) return;
 
   var params = new URLSearchParams(window.location.search);
-  var pathStr = params.get('slug') || 'interni';
+  var pathStr = (typeof window.CDA_CATEGORY_SLUG !== 'undefined' && window.CDA_CATEGORY_SLUG) ? window.CDA_CATEGORY_SLUG : (params.get('slug') || 'interni');
 
   applyCategoryData(pathStr, subcatGrid, grid);
 
@@ -447,7 +453,7 @@ function applyCategoryData(pathStr, subcatGrid, grid) {
     ancestors.forEach(function (a, i) {
       acc = acc ? acc + '.' + a.slug : a.slug;
       if (i < ancestors.length - 1) {
-        trailHtml += ' / <a href="categoria.html?slug=' + acc + '">' + a.name + '</a>';
+        trailHtml += ' / <a href="' + categoryPageUrl(acc) + '">' + a.name + '</a>';
       } else {
         trailHtml += ' / <span id="breadcrumb-current">' + a.name + '</span>';
       }
@@ -478,7 +484,7 @@ function applyCategoryData(pathStr, subcatGrid, grid) {
     var el = document.createElement(hasChildren ? 'a' : 'button');
     el.className = 'subcat-chip';
     if (hasChildren) {
-      el.setAttribute('href', 'categoria.html?slug=' + pathStr + '.' + slug);
+      el.setAttribute('href', categoryPageUrl(pathStr + '.' + slug));
     } else {
       el.setAttribute('data-subcat', slug);
     }
@@ -516,7 +522,7 @@ function applyCategoryData(pathStr, subcatGrid, grid) {
 // da quale categoria fosse davvero mostrata (stesso bug già corretto sulle
 // pagine prodotto).
 function updateCategorySeoTags(pathStr, name, description, ancestors) {
-  var pageUrl = 'https://cda-camper.it/categoria.html?slug=' + encodeURIComponent(pathStr);
+  var pageUrl = 'https://cda-camper.it/' + categoryPageUrl(pathStr);
   var title = name + ' — Shop Camper | CDA Tivoli';
 
   var canonicalEl = document.getElementById('canonical-link');
@@ -547,7 +553,7 @@ function updateCategorySeoTags(pathStr, name, description, ancestors) {
         '@type': 'ListItem',
         position: items.length + 1,
         name: a.name,
-        item: 'https://cda-camper.it/categoria.html?slug=' + acc
+        item: 'https://cda-camper.it/' + categoryPageUrl(acc)
       });
     });
     breadcrumbEl.textContent = JSON.stringify({
@@ -784,7 +790,7 @@ function renderProductPage(p) {
   if (breadcrumbNameEl) breadcrumbNameEl.textContent = p.name;
   if (breadcrumbCatEl && topSlug) {
     breadcrumbCatEl.textContent = topName;
-    breadcrumbCatEl.setAttribute('href', 'categoria.html?slug=' + topSlug);
+    breadcrumbCatEl.setAttribute('href', categoryPageUrl(topSlug));
   }
 
   if (badgeEl) {
@@ -867,7 +873,7 @@ function updateProductSeoTags(p, descText, topName, topSlug) {
       { '@type': 'ListItem', position: 2, name: 'Shop Camper', item: 'https://cda-camper.it/shop.html' }
     ];
     if (topSlug && topName) {
-      items.push({ '@type': 'ListItem', position: 3, name: topName, item: 'https://cda-camper.it/categoria.html?slug=' + topSlug });
+      items.push({ '@type': 'ListItem', position: 3, name: topName, item: 'https://cda-camper.it/' + categoryPageUrl(topSlug) });
     }
     items.push({ '@type': 'ListItem', position: items.length + 1, name: p.name, item: pageUrl });
     breadcrumbEl.textContent = JSON.stringify({

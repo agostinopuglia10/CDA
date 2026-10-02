@@ -22,4 +22,4 @@
 
 ## Note per crawler e assistenti AI
 
-Le pagine prodotto (prodotto.html?id=...) e categoria (categoria.html?slug=...) caricano i dati in tempo reale da un database e includono dati strutturati schema.org (Product, BreadcrumbList, LocalBusiness) aggiornati dinamicamente per ciascun prodotto. Il sitemap completo è su https://cda-camper.it/sitemap.xml.
+Le pagine prodotto (prodotto.html?id=...) e categoria (categoria----.html) caricano i dati in tempo reale da un database e includono dati strutturati schema.org (Product, BreadcrumbList, LocalBusiness) aggiornati dinamicamente per ciascun prodotto. Il sitemap completo è su https://cda-camper.it/sitemap.xml.

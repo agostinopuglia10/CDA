@@ -83,7 +83,7 @@ function buildPage(template, p) {
     { '@type': 'ListItem', position: 2, name: 'Shop Camper', item: SITE_URL + '/shop.html' }
   ];
   if (topSlug && catName) {
-    breadcrumbItems.push({ '@type': 'ListItem', position: 3, name: catName, item: SITE_URL + '/categoria.html?slug=' + topSlug });
+    breadcrumbItems.push({ '@type': 'ListItem', position: 3, name: catName, item: SITE_URL + '/categoria-' + topSlug + '.html' });
   }
   breadcrumbItems.push({ '@type': 'ListItem', position: breadcrumbItems.length + 1, name: p.name, item: pageUrl });
   const breadcrumbLd = JSON.stringify({
@@ -174,23 +174,29 @@ async function main() {
   const redirectsPath = path.join(ROOT, '_redirects');
   const existingLines = fs.existsSync(redirectsPath)
     ? fs.readFileSync(redirectsPath, 'utf8').split('\n').filter(function (l) {
-        return l.trim() && l.indexOf('/prodotto.html') !== 0;
+        return l.trim() && l.indexOf('/prodotto.html') !== 0 && l.indexOf('/categoria.html') !== 0;
       })
     : [];
-  fs.writeFileSync(redirectsPath, existingLines.concat(redirectLines).join('\n') + '\n', 'utf8');
+  const categoryRedirectLines = categoryPaths().map(function (cp) { return '/categoria.html  slug=' + cp + '  /' + categoryFileName(cp) + '  301!'; });
+  fs.writeFileSync(redirectsPath, existingLines.concat(redirectLines, categoryRedirectLines).join('\n') + '\n', 'utf8');
 
   // sitemap.xml: sostituisce le vecchie voci prodotto.html?id=... (se
   // presenti da una generazione precedente) con gli URL statici reali.
   const sitemapPath = path.join(ROOT, 'sitemap.xml');
   let sitemap = fs.readFileSync(sitemapPath, 'utf8');
   sitemap = sitemap.replace(/\s*<url>\s*<loc>https:\/\/cda-camper\.it\/prodotto(?:\.html\?id=|-)[^<]*<\/loc>[\s\S]*?<\/url>/g, '');
-  sitemap = sitemap.replace('</urlset>', sitemapUrls.join('\n') + '\n</urlset>\n');
+  sitemap = sitemap.replace(/\s*<url>\s*<loc>https:\/\/cda-camper\.it\/categoria(?:\.html\?slug=|-)[^<]*<\/loc>[\s\S]*?<\/url>/g, '');
+  const categoryUrls = categoryPaths().map(function (cp) {
+    return '  <url>\n    <loc>' + SITE_URL + '/' + categoryFileName(cp) + '</loc>\n    <changefreq>weekly</changefreq>\n    <priority>' + (cp.indexOf('.') === -1 ? '0.8' : '0.6') + '</priority>\n  </url>';
+  });
+  sitemap = sitemap.replace('</urlset>', categoryUrls.concat(sitemapUrls).join('\n') + '\n</urlset>\n');
   fs.writeFileSync(sitemapPath, sitemap, 'utf8');
 
   console.log('Generate ' + generatedFiles.length + ' pagine prodotto statiche.');
   console.log('_redirects e sitemap.xml aggiornati.');
 
   buildCatalogPage(products);
+  buildCategoryPages();
 }
 
 // catalogo.html: elenco statico di tutti i prodotti con link normali, così
@@ -233,7 +239,7 @@ function buildCatalogPage(products) {
     const g = groups[key];
     if (g.topName !== currentTop) {
       currentTop = g.topName;
-      out += '    <h2><a href="categoria.html?slug=' + g.topSlug + '" style="color:inherit;">' + escapeHtml(g.topName) + '</a></h2>\n';
+      out += '    <h2><a href="categoria-' + g.topSlug + '.html" style="color:inherit;">' + escapeHtml(g.topName) + '</a></h2>\n';
     }
     out += '    <h3>' + escapeHtml(g.subName) + '</h3>\n    <ul>\n';
     for (const p of g.items.sort(function (a, b) { return a.name.localeCompare(b.name, 'it'); })) {
@@ -252,3 +258,93 @@ main().catch(function (err) {
   console.error('Build pagine prodotto fallita:', err);
   process.exit(1);
 });
+
+// ---- Pagine di categoria statiche -------------------------------------
+// Le categorie (nomi, descrizioni, albero) vivono in CATEGORIES_DATA dentro
+// js/main.js, la stessa fonte che usa il browser: la leggiamo da li' cosi'
+// il build non ha una seconda copia da tenere allineata.
+function loadCategoriesData() {
+  const src = fs.readFileSync(path.join(ROOT, 'js', 'main.js'), 'utf8');
+  const start = src.indexOf('var CATEGORIES_DATA');
+  if (start === -1) throw new Error('CATEGORIES_DATA non trovato in js/main.js');
+  const end = src.indexOf('\n};', start);
+  const literal = src.slice(src.indexOf('{', start), end + 2);
+  return new Function('return ' + literal + ';')();
+}
+
+function walkCategories(nodes, prefix, out) {
+  Object.keys(nodes).forEach(function (slug) {
+    const node = nodes[slug];
+    const p = prefix ? prefix + '.' + slug : slug;
+    out.push({ path: p, node: node });
+    if (node.children) walkCategories(node.children, p, out);
+  });
+  return out;
+}
+
+function categoryPaths() {
+  return walkCategories(loadCategoriesData(), '', []).map(function (c) { return c.path; });
+}
+
+function categoryFileName(cp) {
+  return 'categoria-' + cp.replace(/\./g, '-') + '.html';
+}
+
+function buildCategoryPages() {
+  const template = fs.readFileSync(path.join(ROOT, 'categoria.html'), 'utf8');
+  const data = loadCategoriesData();
+  const all = walkCategories(data, '', []);
+
+  for (const c of all) {
+    const segs = c.path.split('.');
+    const names = [];
+    let nodes = data;
+    for (const seg of segs) { names.push({ slug: seg, name: nodes[seg].name }); nodes = nodes[seg].children || {}; }
+
+    const name = c.node.name;
+    const desc = c.node.description || (name + ' - accessori per camper, spedizione in tutta Italia, installazione nel centro tecnico CDA di Tivoli.');
+    const file = categoryFileName(c.path);
+    const url = SITE_URL + '/' + file;
+    const title = name + ' — Shop Camper | CDA Tivoli';
+
+    const items = [
+      { '@type': 'ListItem', position: 1, name: 'Home', item: SITE_URL + '/' },
+      { '@type': 'ListItem', position: 2, name: 'Shop Camper', item: SITE_URL + '/shop.html' }
+    ];
+    let acc = '';
+    names.forEach(function (n) {
+      acc = acc ? acc + '.' + n.slug : n.slug;
+      items.push({ '@type': 'ListItem', position: items.length + 1, name: n.name, item: SITE_URL + '/' + categoryFileName(acc) });
+    });
+    const breadcrumbLd = JSON.stringify({ '@context': 'https://schema.org', '@type': 'BreadcrumbList', itemListElement: items });
+
+    let trail = '<a href="/">Home</a> / <a href="shop.html">Shop Camper</a>';
+    acc = '';
+    names.forEach(function (n, i) {
+      acc = acc ? acc + '.' + n.slug : n.slug;
+      trail += i < names.length - 1
+        ? ' / <a href="' + categoryFileName(acc) + '">' + escapeHtml(n.name) + '</a>'
+        : ' / <span id="breadcrumb-current">' + escapeHtml(n.name) + '</span>';
+    });
+
+    let html = template;
+    html = html.replace(/(<title id="page-title">)[\s\S]*?(<\/title>)/, '$1' + escapeHtml(title) + '$2');
+    html = html.replace(/(<meta id="meta-description" name="description" content=")[^"]*(")/, '$1' + escapeHtml(desc) + '$2');
+    html = html.replace(/(<link rel="canonical" href=")[^"]*(" id="canonical-link">)/, '$1' + url + '$2');
+    html = html.replace(/(<meta id="og-title" property="og:title" content=")[^"]*(")/, '$1' + escapeHtml(title) + '$2');
+    html = html.replace(/(<meta id="og-description" property="og:description" content=")[^"]*(")/, '$1' + escapeHtml(desc) + '$2');
+    html = html.replace(/(<meta id="og-url" property="og:url" content=")[^"]*(")/, '$1' + url + '$2');
+    html = html.replace(/(<meta id="twitter-title" name="twitter:title" content=")[^"]*(")/, '$1' + escapeHtml(title) + '$2');
+    html = html.replace(/(<meta id="twitter-description" name="twitter:description" content=")[^"]*(")/, '$1' + escapeHtml(desc) + '$2');
+    html = html.replace(/(<script type="application\/ld\+json" id="breadcrumb-jsonld">)[\s\S]*?(<\/script>)/, '$1' + breadcrumbLd + '$2');
+    html = html.replace(/(<h1 id="category-name">)[\s\S]*?(<\/h1>)/, '$1' + escapeHtml(name) + '$2');
+    html = html.replace(/(<p id="category-desc">)[\s\S]*?(<\/p>)/, '$1' + escapeHtml(c.node.description || '') + '$2');
+    html = html.replace(/(<div class="breadcrumb" id="breadcrumb">)[\s\S]*?(<\/div>)/, '$1' + trail + '$2');
+    html = html.replace(
+      '<script src="js/supabase-config.js"></script>',
+      '<script>window.CDA_CATEGORY_SLUG = "' + escapeJsString(c.path) + '";</script>\n<script src="js/supabase-config.js"></script>'
+    );
+    fs.writeFileSync(path.join(ROOT, file), html, 'utf8');
+  }
+  console.log('Generate ' + all.length + ' pagine di categoria statiche.');
+}
