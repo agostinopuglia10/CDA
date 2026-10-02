@@ -189,6 +189,63 @@ async function main() {
 
   console.log('Generate ' + generatedFiles.length + ' pagine prodotto statiche.');
   console.log('_redirects e sitemap.xml aggiornati.');
+
+  buildCatalogPage(products);
+}
+
+// catalogo.html: elenco statico di tutti i prodotti con link normali, così
+// Google li trova senza dover eseguire JavaScript (shop e categorie li
+// mostrano solo dopo il caricamento da Supabase).
+const TOP_CATEGORY_NAMES = {
+  interni: 'Interni',
+  esterni: 'Esterni',
+  energia: 'Energia',
+  acqua: 'Acqua',
+  clima: 'Clima',
+  elettronica: 'Elettronica & Accessori'
+};
+
+function buildCatalogPage(products) {
+  const catalogPath = path.join(ROOT, 'catalogo.html');
+  if (!fs.existsSync(catalogPath)) return;
+
+  const groups = {};
+  for (const p of products) {
+    if (!p.slug) continue;
+    const topSlug = p.categories && p.categories.path ? p.categories.path.split('.')[0] : 'altro';
+    const topName = TOP_CATEGORY_NAMES[topSlug] || 'Altro';
+    const subName = p.categories ? p.categories.name : 'Altri prodotti';
+    const key = topName + '|||' + subName;
+    (groups[key] = groups[key] || { topName, subName, topSlug, items: [] }).items.push(p);
+  }
+
+  const order = Object.keys(TOP_CATEGORY_NAMES).map(function (k) { return TOP_CATEGORY_NAMES[k]; });
+  const sorted = Object.keys(groups).sort(function (a, b) {
+    const ga = groups[a], gb = groups[b];
+    const oa = order.indexOf(ga.topName), ob = order.indexOf(gb.topName);
+    if (oa !== ob) return oa - ob;
+    return ga.subName.localeCompare(gb.subName, 'it');
+  });
+
+  let out = '';
+  let currentTop = '';
+  for (const key of sorted) {
+    const g = groups[key];
+    if (g.topName !== currentTop) {
+      currentTop = g.topName;
+      out += '    <h2><a href="categoria.html?slug=' + g.topSlug + '" style="color:inherit;">' + escapeHtml(g.topName) + '</a></h2>\n';
+    }
+    out += '    <h3>' + escapeHtml(g.subName) + '</h3>\n    <ul>\n';
+    for (const p of g.items.sort(function (a, b) { return a.name.localeCompare(b.name, 'it'); })) {
+      out += '      <li><a href="prodotto-' + p.slug + '.html">' + escapeHtml(p.name) + '</a></li>\n';
+    }
+    out += '    </ul>\n';
+  }
+
+  let html = fs.readFileSync(catalogPath, 'utf8');
+  html = html.replace(/<!--CATALOGO-START-->[\s\S]*?<!--CATALOGO-END-->/, '<!--CATALOGO-START-->\n' + out + '<!--CATALOGO-END-->');
+  fs.writeFileSync(catalogPath, html, 'utf8');
+  console.log('catalogo.html aggiornato: ' + products.length + ' prodotti.');
 }
 
 main().catch(function (err) {
