@@ -67,12 +67,24 @@
   var sessionId = params.get('session_id');
   var orderId = params.get('order_id');
   var method = params.get('method');
+  var pickupOrder = params.get('delivery') === 'pickup';
 
   if (method === 'cod' && orderId) {
-    document.getElementById('order-status-msg').textContent = 'Il tuo ordine è confermato. Pagherai in contanti al corriere al momento della consegna. Riceverai una email di conferma con tutti i dettagli a breve.';
+    document.getElementById('order-status-msg').textContent = pickupOrder
+      ? 'Il tuo ordine è confermato. Pagherai in officina quando vieni a ritirarlo. Riceverai una email di conferma con tutti i dettagli a breve.'
+      : 'Il tuo ordine è confermato. Pagherai in contanti al corriere al momento della consegna. Riceverai una email di conferma con tutti i dettagli a breve.';
     document.getElementById('order-ref').textContent = 'Riferimento ordine: ' + orderId;
   } else if (sessionId) {
     document.getElementById('order-ref').textContent = 'Riferimento ordine: ' + sessionId;
+  }
+
+  // Ritiro in officina: niente spedizione, quindi i passaggi "cosa succede ora" cambiano.
+  if (pickupOrder) {
+    var pickupSteps = document.querySelectorAll('.info-card .info-line .v');
+    if (pickupSteps.length >= 3) {
+      pickupSteps[0].textContent = 'Prepariamo il tuo ordine e ti contattiamo per fissare quando passare';
+      pickupSteps[1].textContent = 'Lo ritiri da noi: CDA, Strada Arci n.24, 00019 Tivoli (RM)';
+    }
   }
 
   // Registra la conversione su GA4 usando gli articoli ancora nel carrello,

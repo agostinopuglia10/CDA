@@ -76,11 +76,21 @@ Deno.serve(async (req) => {
           .filter(Boolean)
           .join(', ');
 
+        // Ordine con ritiro in officina: l'indirizzo e' gia' scritto da create-checkout-session
+        // ("RITIRO IN OFFICINA - ...") e Stripe non raccoglie nessun indirizzo di spedizione:
+        // non va sovrascritto con l'eventuale indirizzo di fatturazione.
+        const { data: existingOrder } = await supabase
+          .from('orders')
+          .select('shipping_address')
+          .eq('id', orderId)
+          .single();
+        const isPickupOrder = String(existingOrder?.shipping_address || '').startsWith('RITIRO IN OFFICINA');
+
         const updatePayload: Record<string, unknown> = { status: 'paid' };
         if (details?.name) updatePayload.customer_name = details.name;
         if (details?.email) updatePayload.customer_email = details.email;
         if (details?.phone) updatePayload.customer_phone = details.phone;
-        if (formattedAddress) updatePayload.shipping_address = formattedAddress;
+        if (formattedAddress && !isPickupOrder) updatePayload.shipping_address = formattedAddress;
 
         const { data: updatedOrder, error } = await supabase
           .from('orders')
@@ -127,7 +137,9 @@ async function notifyNewOrder(
     )
     .join('');
 
-  const shippingLine = order.shipping_cents
+  const shippingLine = String(order.shipping_address || '').startsWith('RITIRO IN OFFICINA')
+    ? `<p><strong>Consegna:</strong> RITIRO IN OFFICINA a Tivoli — gia' pagato con carta, nessuna spedizione. Contatta il cliente per fissare quando passare.</p>`
+    : order.shipping_cents
     ? `<p><strong>Spedizione:</strong> ${(order.shipping_cents / 100).toFixed(2)} € — ricordarsi la sponda idraulica per i pallet a domicilio privato (gratuita ma va richiesta a mano nell'ordine al corriere)</p>`
     : `<p><strong>Spedizione:</strong> gratuita</p>`;
 

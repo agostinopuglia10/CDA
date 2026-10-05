@@ -43,16 +43,23 @@ Deno.serve(async (req) => {
   }
 
   try {
-    const { items, customer, zona } = await req.json();
+    const { items, customer, zona, delivery } = await req.json();
     // items atteso: [{ product_id: 'uuid', quantity: 2 }, ...]
     // customer atteso: { name, email, phone, shipping_address }
     // zona atteso: 'italia' | 'isole' (rilevante solo per articoli su pallet)
+    // delivery atteso (facoltativo): 'pickup' = ritiro in officina a Tivoli, pagamento al ritiro
+    const isPickup = delivery === 'pickup';
 
     if (!Array.isArray(items) || items.length === 0) {
       return jsonError('Carrello vuoto', 400);
     }
-    if (!customer?.name || !customer?.email || !customer?.phone || !customer?.shipping_address) {
-      return jsonError('Dati cliente incompleti: nome, email, telefono e indirizzo di spedizione sono obbligatori per il contrassegno', 400);
+    if (!customer?.name || !customer?.email || !customer?.phone || (!isPickup && !customer?.shipping_address)) {
+      return jsonError(
+        isPickup
+          ? 'Dati cliente incompleti: nome, email e telefono sono obbligatori per il ritiro in officina'
+          : 'Dati cliente incompleti: nome, email, telefono e indirizzo di spedizione sono obbligatori per il contrassegno',
+        400
+      );
     }
 
     const supabase = createClient(SUPABASE_URL, SERVICE_ROLE_KEY);
@@ -79,7 +86,8 @@ Deno.serve(async (req) => {
       0
     );
 
-    const shippingCents = await calculateShippingCents(supabase, lineItems, subtotalCents, zona);
+    // Ritiro in officina: nessun corriere, nessun costo di spedizione.
+    const shippingCents = isPickup ? 0 : await calculateShippingCents(supabase, lineItems, subtotalCents, zona);
     const totalCents = subtotalCents + shippingCents;
 
     // 2. Crea l'ordine con status 'cod_pending': da riscuotere alla consegna,
@@ -90,7 +98,7 @@ Deno.serve(async (req) => {
         customer_name: customer.name,
         customer_email: customer.email,
         customer_phone: customer.phone,
-        shipping_address: customer.shipping_address,
+        shipping_address: isPickup ? PICKUP_ADDRESS_LABEL : customer.shipping_address,
         status: 'cod_pending',
         total_cents: totalCents,
         shipping_cents: shippingCents,
@@ -110,7 +118,7 @@ Deno.serve(async (req) => {
     );
 
     // Avviso via email: mai far fallire l'ordine se l'email non parte.
-    await notifyNewOrder(order, lineItems, 'Contrassegno').catch(() => {});
+    await notifyNewOrder(order, lineItems, isPickup ? 'Pagamento al ritiro in officina' : 'Contrassegno', isPickup).catch(() => {});
 
     return new Response(JSON.stringify({ order_id: order.id }), {
       headers: { ...CORS_HEADERS, 'Content-Type': 'application/json' },
@@ -128,6 +136,9 @@ function jsonError(message: string, status: number) {
 }
 
 const FREE_SHIPPING_THRESHOLD_CENTS = 150000; // € 1.500,00
+
+// Scritto sull'ordine quando il cliente sceglie il ritiro in officina.
+const PICKUP_ADDRESS_LABEL = 'RITIRO IN OFFICINA - CDA, Strada Arci n.24, 00019 Tivoli (RM)';
 
 // Calcola la spedizione reale sommando il peso degli articoli non esclusi
 // (shipping_included = spedizione già nel prezzo, es. batterie Ultimatron ULM)
@@ -181,7 +192,8 @@ async function calculateShippingCents(
 async function notifyNewOrder(
   order: { id: string; customer_name: string; customer_email: string; customer_phone: string; shipping_address: string; total_cents: number; shipping_cents?: number },
   lineItems: { product: { name: string; price_cents: number }; quantity: number }[],
-  paymentLabel: string
+  paymentLabel: string,
+  isPickup = false
 ) {
   if (!RESEND_API_KEY) return; // secret non ancora configurato: nessun avviso, nessun errore
 
@@ -189,7 +201,9 @@ async function notifyNewOrder(
     .map((li) => `<li>${escapeHtml(li.product.name)} × ${li.quantity} — ${(li.product.price_cents / 100).toFixed(2)} €</li>`)
     .join('');
 
-  const shippingLine = order.shipping_cents
+  const shippingLine = isPickup
+    ? `<p><strong>Consegna:</strong> RITIRO IN OFFICINA a Tivoli — nessuna spedizione. Il cliente paga al ritiro: contattalo per fissare quando passare.</p>`
+    : order.shipping_cents
     ? `<p><strong>Spedizione:</strong> ${(order.shipping_cents / 100).toFixed(2)} € — ricordarsi la sponda idraulica per i pallet a domicilio privato (gratuita ma va richiesta a mano nell'ordine al corriere)</p>`
     : `<p><strong>Spedizione:</strong> gratuita</p>`;
 
@@ -224,7 +238,7 @@ async function notifyNewOrder(
   await fetch(`https://ntfy.sh/${NTFY_TOPIC}`, {
     method: 'POST',
     headers: { Title: `Nuovo ordine - ${(order.total_cents / 100).toFixed(2)} EUR`, Priority: 'high' },
-    body: `${paymentLabel} (da riscuotere al corriere alla consegna) - ${order.customer_name || 'Cliente'} - ${lineItems.map((li) => li.product.name).join(', ')}`,
+    body: `${paymentLabel} (${isPickup ? 'da riscuotere in officina al ritiro' : 'da riscuotere al corriere alla consegna'}) - ${order.customer_name || 'Cliente'} - ${lineItems.map((li) => li.product.name).join(', ')}`,
   }).catch(() => {});
 }
 

@@ -1865,25 +1865,57 @@ function initCartPage() {
   var paymentRadios = document.querySelectorAll('input[name="payment-method"]');
   var codFieldsEl = document.getElementById('cod-fields');
   var stripeEmailFieldEl = document.getElementById('stripe-email-field');
+  var deliveryRadios = document.querySelectorAll('input[name="delivery-method"]');
+  var pickupNoteEl = document.getElementById('pickup-note');
+  var codLabelEl = document.getElementById('cod-label');
+  var codAddressFieldEl = document.getElementById('cod-address-field');
+  var codCourierNoteEl = document.getElementById('cod-courier-note');
   var lastShippingEstimate = { shippingCents: null, needsZone: false };
   if (!emptyEl || !contentEl) return;
+
+  var COD_COURIER_NOTE = 'Il corriere potrebbe applicare una commissione per il contrassegno, da pagare al momento della consegna insieme al totale dell\'ordine.';
 
   function getPaymentMethod() {
     var checked = document.querySelector('input[name="payment-method"]:checked');
     return checked ? checked.value : 'stripe';
   }
 
+  // 'ship' = spedizione con corriere, 'pickup' = ritiro in officina a Tivoli (nessuna spedizione).
+  function getDeliveryMethod() {
+    var checked = document.querySelector('input[name="delivery-method"]:checked');
+    return checked ? checked.value : 'ship';
+  }
+
   function updatePaymentMethodUI() {
     var method = getPaymentMethod();
+    var pickup = getDeliveryMethod() === 'pickup';
     document.querySelectorAll('.payment-method-option').forEach(function (opt) {
-      opt.classList.toggle('selected', opt.querySelector('input').value === method);
+      var input = opt.querySelector('input');
+      if (input.name === 'payment-method') opt.classList.toggle('selected', input.value === method);
+      if (input.name === 'delivery-method') opt.classList.toggle('selected', input.checked);
     });
     if (codFieldsEl) codFieldsEl.style.display = method === 'cod' ? '' : 'none';
     if (stripeEmailFieldEl) stripeEmailFieldEl.style.display = method === 'cod' ? 'none' : '';
-    if (checkoutBtn) checkoutBtn.textContent = method === 'cod' ? 'Conferma ordine (pagamento alla consegna)' : 'Vai al pagamento';
+    if (pickupNoteEl) pickupNoteEl.style.display = pickup ? '' : 'none';
+    if (codAddressFieldEl) codAddressFieldEl.style.display = pickup ? 'none' : '';
+    if (codCourierNoteEl) codCourierNoteEl.textContent = pickup ? 'Paghi in officina quando vieni a ritirare. Ti contattiamo per fissare il giorno.' : COD_COURIER_NOTE;
+    if (codLabelEl) codLabelEl.textContent = pickup ? '💶 Pago al ritiro in officina' : '💶 Contrassegno (contanti alla consegna)';
+    if (checkoutBtn) {
+      checkoutBtn.textContent = method === 'cod'
+        ? (pickup ? 'Conferma ordine (pagamento al ritiro)' : 'Conferma ordine (pagamento alla consegna)')
+        : 'Vai al pagamento';
+    }
   }
 
   paymentRadios.forEach(function (radio) { radio.addEventListener('change', updatePaymentMethodUI); });
+  deliveryRadios.forEach(function (radio) {
+    radio.addEventListener('change', function () {
+      updatePaymentMethodUI();
+      var cartItems = getCartItems();
+      var cartSubtotal = cartItems.reduce(function (sum, it) { return sum + it.price_cents * it.quantity; }, 0);
+      if (cartItems.length) renderShippingProgress(cartSubtotal, cartItems);
+    });
+  });
   updatePaymentMethodUI();
 
   function updateCartBadge() {
@@ -1913,6 +1945,19 @@ function initCartPage() {
 
   function renderShippingProgress(subtotal, items) {
     if (!shippingProgressEl) return;
+
+    // Ritiro in officina: niente spedizione, niente barra "spedizione gratuita", niente zona.
+    if (getDeliveryMethod() === 'pickup') {
+      shippingProgressEl.className = 'shipping-progress reached';
+      shippingProgressEl.innerHTML =
+        '<div class="shipping-progress-label">🔧 <strong>Ritiro in officina a Tivoli: nessun costo di spedizione.</strong></div>';
+      if (shippingEl) shippingEl.textContent = 'Ritiro in officina (gratis)';
+      if (deliveryZoneFieldEl) deliveryZoneFieldEl.style.display = 'none';
+      lastShippingEstimate = { shippingCents: 0, needsZone: false };
+      totalEl.textContent = formatEUR(subtotal);
+      return;
+    }
+
     var remaining = FREE_SHIPPING_THRESHOLD_CENTS - subtotal;
     var pct = Math.min(100, Math.round((subtotal / FREE_SHIPPING_THRESHOLD_CENTS) * 100));
 
@@ -2164,8 +2209,9 @@ function initCartPage() {
         return;
       }
 
+      var pickup = getDeliveryMethod() === 'pickup';
       var zona = deliveryZoneEl ? deliveryZoneEl.value : '';
-      if (lastShippingEstimate.needsZone && !zona) {
+      if (!pickup && lastShippingEstimate.needsZone && !zona) {
         statusEl.className = 'form-status show error';
         statusEl.textContent = 'Seleziona la zona di consegna per calcolare la spedizione prima di procedere.';
         if (deliveryZoneEl) deliveryZoneEl.focus();
@@ -2184,9 +2230,11 @@ function initCartPage() {
         var codPhone = document.getElementById('cod-phone').value.trim();
         var codAddress = document.getElementById('cod-address').value.trim();
 
-        if (!codName || !codEmail || !codPhone || !codAddress) {
+        if (!codName || !codEmail || !codPhone || (!pickup && !codAddress)) {
           statusEl.className = 'form-status show error';
-          statusEl.textContent = 'Per il contrassegno servono nome, email, telefono e indirizzo di spedizione completi.';
+          statusEl.textContent = pickup
+            ? 'Per il ritiro in officina servono nome, email e telefono.'
+            : 'Per il contrassegno servono nome, email, telefono e indirizzo di spedizione completi.';
           return;
         }
 
@@ -2199,14 +2247,15 @@ function initCartPage() {
           headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + SUPABASE_ANON_KEY },
           body: JSON.stringify({
             items: realItems.map(function (it) { return { product_id: it.id, quantity: it.quantity }; }),
-            customer: { name: codName, email: codEmail, phone: codPhone, shipping_address: codAddress },
-            zona: zona || 'italia'
+            customer: { name: codName, email: codEmail, phone: codPhone, shipping_address: pickup ? '' : codAddress },
+            zona: zona || 'italia',
+            delivery: pickup ? 'pickup' : 'ship'
           })
         })
           .then(function (res) { return res.json(); })
           .then(function (data) {
             if (data.order_id) {
-              window.location.href = 'ordine-confermato.html?order_id=' + encodeURIComponent(data.order_id) + '&method=cod';
+              window.location.href = 'ordine-confermato.html?order_id=' + encodeURIComponent(data.order_id) + '&method=cod' + (pickup ? '&delivery=pickup' : '');
             } else {
               throw new Error(data.error || 'Errore sconosciuto');
             }
@@ -2233,6 +2282,7 @@ function initCartPage() {
         body: JSON.stringify({
           items: realItems.map(function (it) { return { product_id: it.id, quantity: it.quantity }; }),
           zona: zona || 'italia',
+          delivery: pickup ? 'pickup' : 'ship',
           customer: stripeEmail ? { email: stripeEmail } : undefined
         })
       })

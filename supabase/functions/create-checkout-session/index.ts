@@ -40,10 +40,12 @@ Deno.serve(async (req) => {
   }
 
   try {
-    const { items, customer, zona } = await req.json();
+    const { items, customer, zona, delivery } = await req.json();
     // items atteso: [{ product_id: 'uuid', quantity: 2 }, ...]
     // customer atteso: { name, email, phone, shipping_address }
     // zona atteso: 'italia' | 'isole' (rilevante solo per articoli su pallet)
+    // delivery atteso (facoltativo): 'pickup' = ritiro in officina a Tivoli, niente spedizione
+    const isPickup = delivery === 'pickup';
 
     if (!Array.isArray(items) || items.length === 0) {
       return jsonError('Carrello vuoto', 400);
@@ -73,7 +75,8 @@ Deno.serve(async (req) => {
       0
     );
 
-    const shippingCents = await calculateShippingCents(supabase, lineItems, subtotalCents, zona);
+    // Ritiro in officina: nessun corriere, nessun costo di spedizione.
+    const shippingCents = isPickup ? 0 : await calculateShippingCents(supabase, lineItems, subtotalCents, zona);
     const totalCents = subtotalCents + shippingCents;
 
     // 2. Crea l'ordine "pending" nel database
@@ -83,7 +86,7 @@ Deno.serve(async (req) => {
         customer_name: customer?.name || '',
         customer_email: customer?.email || '',
         customer_phone: customer?.phone || '',
-        shipping_address: customer?.shipping_address || '',
+        shipping_address: isPickup ? PICKUP_ADDRESS_LABEL : (customer?.shipping_address || ''),
         status: 'pending',
         total_cents: totalCents,
         shipping_cents: shippingCents,
@@ -105,14 +108,15 @@ Deno.serve(async (req) => {
     // 3. Crea la sessione di pagamento su Stripe
     const stripeBody = new URLSearchParams();
     stripeBody.set('mode', 'payment');
-    stripeBody.set('success_url', `${SITE_URL}/ordine-confermato.html?session_id={CHECKOUT_SESSION_ID}`);
+    stripeBody.set('success_url', `${SITE_URL}/ordine-confermato.html?session_id={CHECKOUT_SESSION_ID}${isPickup ? '&delivery=pickup' : ''}`);
     stripeBody.set('cancel_url', `${SITE_URL}/shop.html`);
     stripeBody.set('client_reference_id', order.id);
     if (customer?.email) stripeBody.set('customer_email', customer.email);
     // Chiediamo indirizzo e telefono direttamente a Stripe durante il pagamento:
     // oggi il sito non li raccoglie affatto per chi paga con carta (vedi stripe-webhook,
     // che li salva sull'ordine appena il pagamento va a buon fine).
-    stripeBody.set('shipping_address_collection[allowed_countries][0]', 'IT');
+    // Con il ritiro in officina l'indirizzo di spedizione non serve (e non va chiesto).
+    if (!isPickup) stripeBody.set('shipping_address_collection[allowed_countries][0]', 'IT');
     stripeBody.set('phone_number_collection[enabled]', 'true');
 
     lineItems.forEach((li: { product: { name: string; price_cents: number; currency: string }; quantity: number }, idx: number) => {
@@ -161,6 +165,11 @@ function jsonError(message: string, status: number) {
 }
 
 const FREE_SHIPPING_THRESHOLD_CENTS = 150000; // € 1.500,00
+
+// Scritto sull'ordine quando il cliente sceglie il ritiro in officina. Il prefisso
+// "RITIRO IN OFFICINA" e' usato da stripe-webhook per non sovrascriverlo con
+// l'indirizzo di fatturazione raccolto da Stripe.
+const PICKUP_ADDRESS_LABEL = 'RITIRO IN OFFICINA - CDA, Strada Arci n.24, 00019 Tivoli (RM)';
 
 // Calcola la spedizione reale sommando il peso degli articoli non esclusi
 // (shipping_included = spedizione già nel prezzo, es. batterie Ultimatron ULM)

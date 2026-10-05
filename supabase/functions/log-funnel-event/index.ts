@@ -23,9 +23,22 @@ const CORS_HEADERS = {
 
 const ALLOWED_EVENTS = new Set(['view_item', 'add_to_cart', 'begin_checkout']);
 
+// Crawler e strumenti automatici (Googlebot, Bing, PageSpeed, Lighthouse, browser headless...)
+// eseguono il JavaScript del sito e mandavano eventi falsi: il 03-04/10/2026 risultavano
+// 167 e 124 "visualizzazioni prodotto" in un giorno su 123 prodotti diversi, cioe' Google che
+// scansionava il catalogo, non persone. Non vanno contate nel funnel.
+const BOT_USER_AGENT = /bot|crawl|spider|slurp|headless|lighthouse|pagespeed|inspectiontool|python-requests|curl\/|wget|node-fetch|axios/i;
+
 Deno.serve(async (req) => {
   if (req.method === 'OPTIONS') {
     return new Response('ok', { headers: CORS_HEADERS });
+  }
+
+  // Risposta "ok" anche per i bot, cosi' non vedono errori: semplicemente non registriamo nulla.
+  if (BOT_USER_AGENT.test(req.headers.get('user-agent') || '')) {
+    return new Response(JSON.stringify({ ok: true, ignored: 'bot' }), {
+      headers: { ...CORS_HEADERS, 'Content-Type': 'application/json' },
+    });
   }
 
   try {
