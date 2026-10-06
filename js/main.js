@@ -738,6 +738,26 @@ function renderRelatedProducts(p) {
     });
 }
 
+// Mostra il costo di spedizione reale gia' sulla pagina prodotto (prima si scopriva solo al
+// carrello). Stesso calcolo del carrello: fascia di peso/pallet da shipping_rate_bands. E' una
+// stima per un solo pezzo; il prezzo definitivo e' sempre ricalcolato dal server al pagamento.
+function renderProductShipping(p) {
+  var el = document.getElementById('spec-shipping');
+  if (!el || typeof calculateShippingEstimate !== 'function') return;
+  calculateShippingEstimate([{ id: p.id, quantity: 1 }], p.price_cents, 'italia').then(function (r) {
+    if (!r || r.shippingCents === null || r.shippingCents === undefined) return; // resta "Tutta Italia"
+    var text;
+    if (r.shippingCents === 0) {
+      text = (r.packageType === 'inclusa') ? 'Inclusa nel prezzo, in tutta Italia' : 'Gratuita in tutta Italia';
+    } else if (r.packageType === 'pallet') {
+      text = formatEUR(r.shippingCents) + ' in Italia (isole: calcolata nel carrello)';
+    } else {
+      text = formatEUR(r.shippingCents) + ' in tutta Italia';
+    }
+    el.textContent = text;
+  }).catch(function () { /* resta il testo statico */ });
+}
+
 function renderProductPage(p) {
   var catName = p.categories ? p.categories.name : '';
   var topSlug = p.categories && p.categories.path ? p.categories.path.split('.')[0] : '';
@@ -777,6 +797,7 @@ function renderProductPage(p) {
       ? 'Disponibile, spedizione immediata'
       : 'Su ordinazione, spedizione diretta';
   }
+  if (!priceNotSet) renderProductShipping(p);
   var datasheetRow = document.getElementById('spec-datasheet-row');
   var datasheetLink = document.getElementById('spec-datasheet-link');
   if (datasheetRow && datasheetLink) {
@@ -1828,9 +1849,13 @@ function calculateShippingEstimate(items, subtotalCents, zona) {
         totalWeight += w * qty;
       });
 
+      // Tutto il carrello ha la spedizione gia' inclusa nel prezzo (es. batterie Ultimatron ULM):
+      // il server (create-checkout-session) addebita 0, quindi anche qui niente costo.
+      if (totalWeight === 0) return { shippingCents: 0, needsZone: false, packageType: 'inclusa' };
+
       var packageType = anyPallet ? 'pallet' : (anyLong ? 'lungo' : 'normale');
       var neededZone = anyPallet;
-      if (neededZone && !zona) return { shippingCents: null, needsZone: true };
+      if (neededZone && !zona) return { shippingCents: null, needsZone: true, packageType: packageType };
 
       var zonaFilter = packageType === 'pallet' ? (zona || 'italia') : 'tutte';
 
@@ -1843,8 +1868,8 @@ function calculateShippingEstimate(items, subtotalCents, zona) {
         .order('weight_min_kg', { ascending: false })
         .limit(1)
         .then(function (bandRes) {
-          if (bandRes.error || !bandRes.data || bandRes.data.length === 0) return { shippingCents: null, needsZone: neededZone };
-          return { shippingCents: bandRes.data[0].price_cents, needsZone: neededZone };
+          if (bandRes.error || !bandRes.data || bandRes.data.length === 0) return { shippingCents: null, needsZone: neededZone, packageType: packageType };
+          return { shippingCents: bandRes.data[0].price_cents, needsZone: neededZone, packageType: packageType };
         });
     });
 }
