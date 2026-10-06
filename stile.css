@@ -484,6 +484,15 @@ section{padding:80px 0;}
   font-family:var(--font-display);font-size:12px;letter-spacing:.04em;
   color:var(--steel);margin-bottom:22px;
 }
+/* Voto reale della scheda Google (4,7/5, 27 recensioni, verificato il 06/10/2026). Solo testo e
+   link: nessun markup strutturato, Google non ammette le recensioni "proprie" nei dati strutturati. */
+.google-rating{
+  display:inline-block;margin-bottom:18px;
+  font-family:var(--font-display);font-size:14px;letter-spacing:.04em;
+  color:var(--ink);text-decoration:none;border-bottom:1px solid var(--line);
+}
+.google-rating:hover{border-bottom-color:var(--red);}
+.google-rating .stars{color:var(--red);letter-spacing:.1em;margin-right:4px;}
 /* Barra fissa d'acquisto (solo mobile, vedi @media max-width:960px) */
 .buy-bar-sticky{display:none;}
 
