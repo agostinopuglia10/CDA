@@ -809,6 +809,10 @@ function renderProductPage(p) {
       guide = { href: 'guida-climatizzatore-camper.html', text: 'Non sai quale scegliere? Leggi la guida al climatizzatore →' };
     } else if (guidePath.indexOf('clima.riscaldatori') === 0) {
       guide = { href: 'guida-riscaldamento-camper.html', text: 'Gasolio, gas o portatile? Leggi la guida al riscaldamento →' };
+    } else if (guidePath.indexOf('acqua.pompe') === 0 || guidePath.indexOf('acqua.serbatoi') === 0) {
+      guide = { href: 'guida-impianto-acqua-camper.html', text: 'Quale scegliere? Leggi la guida a pompe e serbatoi acqua →' };
+    } else if (guidePath.indexOf('elettronica.inverter-regolatori') === 0 || guidePath.indexOf('elettronica.caricabatterie') === 0) {
+      guide = { href: 'guida-impianto-elettrico-camper.html', text: 'Come abbinarli? Leggi la guida a inverter, MPPT e caricabatterie →' };
     } else if (guidePath.indexOf('energia.batterie') === 0) {
       guide = { href: 'guida-batteria-litio-camper.html', text: 'Quanti Ah ti servono? Leggi la guida alle batterie al litio →' };
     }

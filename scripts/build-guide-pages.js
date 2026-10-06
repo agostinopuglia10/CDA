@@ -27,7 +27,7 @@ const esc = (s) => String(s == null ? '' : s).replace(/&/g, '&amp;').replace(/</
 const eur = (cents) => (cents / 100).toLocaleString('it-IT', { minimumFractionDigits: 2, maximumFractionDigits: 2 }) + ' €';
 
 async function fetchProducts(nameFilter) {
-  const url = SUPABASE_URL + '/rest/v1/products?select=name,slug,brand,price_cents,shipping_included,description'
+  const url = SUPABASE_URL + '/rest/v1/products?select=name,slug,brand,price_cents,shipping_included,weight_kg,description'
     + '&active=eq.true&price_cents=gt.0&' + nameFilter + '&order=price_cents.asc';
   const res = await fetch(url, { headers: { apikey: SUPABASE_ANON_KEY, Authorization: 'Bearer ' + SUPABASE_ANON_KEY } });
   if (!res.ok) throw new Error('Fetch prodotti per guide fallita: ' + res.status + ' ' + (await res.text()));
@@ -446,15 +446,203 @@ ${rowsHtml(portableRows)}
   };
 }
 
+// ---------- Guida 4: impianto acqua (pompe e serbatoi) ----------
+function buildWaterGuide(products) {
+  const pumps = products.filter((p) => /^Pompa/i.test(p.name) && !/\(blister\)/i.test(p.name));
+  const tanks = products.filter((p) => /^Serbatoio/i.test(p.name));
+  if (pumps.length === 0 || tanks.length === 0) throw new Error('Guida acqua: mancano pompe o serbatoi nel catalogo');
+  const flow = (p) => Number((p.name.match(/(\d+)\s?L\/min/i) || [])[1] || (p.name.match(/(\d+)\s?L\b/) || [])[1] || 0);
+  pumps.sort((a, b) => flow(a) - flow(b) || a.price_cents - b.price_cents);
+  const pumpNote = (p) => {
+    if (/Twin/i.test(p.name)) return 'Doppia pompa: portata raddoppiata per impianti con richiesta d\'acqua più elevata';
+    if (/Power Jet/i.test(p.name)) return 'Alta pressione, pensata per la doccia con getto potente';
+    const bits = [];
+    if (/portagomma/i.test(p.name)) bits.push('attacco portagomma per collegare i tubi flessibili');
+    if (/senza valvola/i.test(p.name)) bits.push('senza valvola di non ritorno');
+    else if (/valvola/i.test(p.name)) bits.push('valvola di non ritorno: pressione costante, senza riflussi');
+    return bits.join('; ');
+  };
+  const pumpRows = pumps.map((p) => [
+    `<a href="prodotto-${esc(p.slug)}.html">${esc(p.name)}</a>`,
+    flow(p) ? flow(p) + ' L/min' : '—',
+    esc(pumpNote(p)),
+    eur(p.price_cents),
+    esc(shippingNote(p))
+  ]);
+  const litres = (p) => Number((p.name.match(/(\d+)\s?L\b/) || [])[1] || 0);
+  tanks.sort((a, b) => litres(a) - litres(b));
+  const tankRows = tanks.map((p) => {
+    const dim = (p.name.match(/\(([^)]+)\)/) || [])[1] || '—';
+    return [
+      `<a href="prodotto-${esc(p.slug)}.html">${esc(p.name.replace(/\s*\([^)]*\)/, ''))}</a>`,
+      litres(p) ? litres(p) + ' L' : '—',
+      esc(dim),
+      p.weight_kg ? esc(String(p.weight_kg).replace('.', ',')) + ' kg' : '—',
+      eur(p.price_cents),
+      esc(shippingNote(p))
+    ];
+  });
+  return {
+    file: 'guida-impianto-acqua-camper.html',
+    shortTitle: 'Guida all\'impianto acqua del camper',
+    title: 'Pompe e serbatoi acqua per camper: come scegliere | CDA Tivoli',
+    description: 'Come scegliere la pompa ad immersione e il serbatoio acqua per il camper: portata in L/min, valvola di non ritorno, pompa Twin, capacità e dimensioni dei serbatoi, prezzi aggiornati.',
+    h1: 'Pompe e serbatoi acqua per camper: come scegliere',
+    lead: 'Le differenze tra le pompe ad immersione e i serbatoi che vendiamo, con portate, dimensioni e prezzi aggiornati.',
+    body: `      <p>L'impianto acqua di un camper si regge su due componenti: la <strong>pompa</strong>, che manda l'acqua ai rubinetti, e il <strong>serbatoio</strong>, che ne determina l'autonomia. Qui trovi i modelli che abbiamo a catalogo e le cose da guardare prima di sceglierli. I prezzi si aggiornano da soli.</p>
+
+      <h2>Pompe ad immersione</h2>
+      <p>Ogni pompa ha una <strong>portata in L/min</strong>: più è alta, più acqua arriva ai rubinetti, e più utenze possono restare aperte insieme. Due dettagli cambiano molto la scelta:</p>
+      <ul>
+        <li><strong>Valvola di non ritorno:</strong> nei modelli che ce l'hanno mantiene la pressione costante, senza riflussi indesiderati nel circuito.</li>
+        <li><strong>Attacco portagomma:</strong> collegamento rapido ai tubi flessibili dell'impianto.</li>
+        <li><strong>Twin:</strong> è una doppia pompa, con portata raddoppiata per impianti che chiedono più acqua.</li>
+        <li><strong>Power Jet:</strong> versione ad alta pressione, pensata per la doccia con getto potente.</li>
+      </ul>
+      <div class="guide-table-wrap">
+        <table class="guide-table">
+          <thead><tr><th>Modello</th><th>Portata</th><th>Caratteristiche</th><th>Prezzo</th><th>Spedizione</th></tr></thead>
+          <tbody>
+${tableRows(pumpRows)}
+          </tbody>
+        </table>
+      </div>
+      <p>Alcuni modelli sono disponibili anche in confezione blister: li trovi nello shop con la dicitura "confezione blister".</p>
+
+      <h2>Serbatoi acqua</h2>
+      <p>La capacità dà autonomia, ma conta quanto spazio hai: i serbatoi sono pensati per entrare nei vani del camper, per questo ti diamo le dimensioni esatte.</p>
+      <div class="guide-table-wrap">
+        <table class="guide-table">
+          <thead><tr><th>Modello</th><th>Capacità</th><th>Dimensioni (cm)</th><th>Peso</th><th>Prezzo</th><th>Spedizione</th></tr></thead>
+          <tbody>
+${tableRows(tankRows)}
+          </tbody>
+        </table>
+      </div>
+
+      <h2>Come scegliere</h2>
+      <ul>
+        <li><strong>Misura lo spazio prima di tutto:</strong> controlla le dimensioni del vano e confrontale con la tabella.</li>
+        <li><strong>Quante utenze usi insieme?</strong> Con più rubinetti aperti serve più portata; per un impianto semplice bastano le portate più basse.</li>
+        <li><strong>Valvola di non ritorno</strong> se vuoi pressione costante e nessun riflusso.</li>
+        <li><strong>Autonomia:</strong> un serbatoio più grande significa meno rifornimenti, ma anche più peso a bordo.</li>
+      </ul>
+
+      <div class="guide-note"><strong>Non sai quale pompa o serbatoio si adatta al tuo impianto?</strong> Chiamaci al <a href="tel:+393489905455">348 990 5455</a> e ti consigliamo prima che tu ordini.</div>
+
+      <h2>Spedizione, ritiro e montaggio</h2>
+      <ul>
+        <li><strong>Spedizione in tutta Italia</strong>, con costo calcolato nel carrello.</li>
+        <li><strong>Ritiro gratis in officina a Tivoli</strong>, senza spedizione.</li>
+        <li><strong>Montaggio nel nostro centro tecnico</strong> per i prodotti acquistati da noi. Il montaggio lo facciamo soltanto per i prodotti acquistati da CDA.</li>
+        <li><strong>Reso entro 14 giorni</strong> e garanzia legale di 24 mesi.</li>
+      </ul>
+
+      <div class="guide-links">
+        <a href="categoria-acqua-pompe.html" class="btn btn-primary btn-sm">Vedi tutte le pompe</a>
+        <a href="categoria-acqua-serbatoi.html" class="btn btn-outline btn-sm">Vedi tutti i serbatoi</a>
+        <a href="guida-impianto-elettrico-camper.html" class="btn btn-outline btn-sm">Guida all'impianto elettrico</a>
+      </div>`
+  };
+}
+
+// ---------- Guida 5: impianto elettrico (inverter, MPPT, caricabatterie) ----------
+function buildPowerGuide(products) {
+  const chargers = products.filter((p) => /^Carica Batterie/i.test(p.name));
+  const mppt = products.filter((p) => /^Regolatore/i.test(p.name));
+  const inverters = products.filter((p) => /^Inverter/i.test(p.name));
+  if (chargers.length === 0 || mppt.length === 0 || inverters.length === 0) throw new Error('Guida elettrico: mancano caricabatterie, regolatori o inverter nel catalogo');
+  const row = (p, mid) => [`<a href="prodotto-${esc(p.slug)}.html">${esc(p.name)}</a>`, esc(mid), eur(p.price_cents), esc(shippingNote(p))];
+  const chargerRows = chargers.map((p) => row(p, /26A/.test(p.name) ? 'Batterie da 25 a 500 Ah, incluse LiFePO4' : 'Batterie da 4 a 240 Ah, incluse LiFePO4'));
+  const mpptRows = mppt.map((p) => row(p, 'Impianti solari 12-24 V, con display LCD per monitorare la ricarica'));
+  const invRows = inverters.map((p) => {
+    const input = (p.name.match(/\b(12|24|48)V\b/) || [])[1] || (/Onda Sinusoidale/i.test(p.name) ? '12' : '');
+    const mid = (/Onda Sinusoidale/i.test(p.name)) ? 'Ingresso 12 V, uscita 220 V, onda sinusoidale pura: per dispositivi sensibili'
+      : 'Ingresso ' + input + ' V con regolatore MPPT integrato' + ((p.name.match(/MPPT (\d+)A/) || [])[1] ? ' da ' + (p.name.match(/MPPT (\d+)A/) || [])[1] + ' A' : '');
+    return row(p, mid);
+  });
+  return {
+    file: 'guida-impianto-elettrico-camper.html',
+    shortTitle: 'Guida all\'impianto elettrico del camper',
+    title: 'Inverter, MPPT e caricabatterie per camper: guida | CDA Tivoli',
+    description: 'Come scegliere inverter, regolatore di carica MPPT e caricabatterie per il camper: tensione 12, 24 o 48 V, onda sinusoidale pura, caricabatterie per batterie al litio, prezzi aggiornati.',
+    h1: 'Inverter, regolatore MPPT e caricabatterie per camper',
+    lead: 'Che cosa fa ogni componente dell\'impianto elettrico, come abbinarli e quali modelli Alcapower abbiamo a catalogo, con prezzi aggiornati.',
+    body: `      <p>Per avere corrente a bordo senza dipendere dalla rete servono tre pezzi che lavorano insieme: un <strong>caricabatterie</strong> (da rete o generatore), un <strong>regolatore di carica MPPT</strong> (dal pannello solare) e un <strong>inverter</strong> (che trasforma la corrente della batteria in corrente di rete a 220-230 V). Qui trovi i modelli Alcapower che teniamo a catalogo e come sceglierli. I prezzi si aggiornano da soli.</p>
+
+      <h2>La regola da non dimenticare: la tensione</h2>
+      <p>Batterie, inverter e regolatori devono parlare la <strong>stessa tensione</strong>: 12, 24 o 48 V. Nei nostri modelli, l'inverter a onda sinusoidale pura da 1500 W ha ingresso a 12 V, gli inverter da 2,4 e 3,5 kW a 24 V, il 5,5 kW a 48 V. Scegli prima la tensione del tuo impianto, poi il modello.</p>
+
+      <h2>Caricabatterie</h2>
+      <p>I caricabatterie switching sono automatici, compatibili 12/24 V e adatti anche alle batterie al litio LiFePO4. Cambia il range di capacità delle batterie che possono caricare.</p>
+      <div class="guide-table-wrap">
+        <table class="guide-table">
+          <thead><tr><th>Modello</th><th>Per chi</th><th>Prezzo</th><th>Spedizione</th></tr></thead>
+          <tbody>
+${tableRows(chargerRows)}
+          </tbody>
+        </table>
+      </div>
+
+      <h2>Regolatore di carica MPPT</h2>
+      <p>Il regolatore MPPT gestisce la ricarica dal pannello solare e si adatta alla produzione, per sfruttare meglio il sole. Il modello a catalogo ha un display LCD per controllare la ricarica.</p>
+      <div class="guide-table-wrap">
+        <table class="guide-table">
+          <thead><tr><th>Modello</th><th>Per chi</th><th>Prezzo</th><th>Spedizione</th></tr></thead>
+          <tbody>
+${tableRows(mpptRows)}
+          </tbody>
+        </table>
+      </div>
+
+      <h2>Inverter</h2>
+      <p>L'inverter alimenta le prese di casa (220-230 V) partendo dalla batteria. L'<strong>onda sinusoidale pura</strong> è la scelta per i dispositivi più sensibili. Gli inverter più grandi integrano già un regolatore MPPT: un pezzo in meno da installare per impianti solari più impegnativi.</p>
+      <div class="guide-table-wrap">
+        <table class="guide-table">
+          <thead><tr><th>Modello</th><th>Caratteristiche</th><th>Prezzo</th><th>Spedizione</th></tr></thead>
+          <tbody>
+${tableRows(invRows)}
+          </tbody>
+        </table>
+      </div>
+
+      <h2>Come scegliere</h2>
+      <ul>
+        <li><strong>Parti dai consumi.</strong> Somma la potenza dei dispositivi che userai insieme: l'inverter deve reggerla, con un po' di margine.</li>
+        <li><strong>Abbina la tensione</strong> di batterie, inverter e regolatore (12, 24 o 48 V).</li>
+        <li><strong>Dimensiona il caricabatterie</strong> sulla capacità della tua batteria, usando il range indicato per ogni modello.</li>
+        <li><strong>Solare:</strong> se vuoi un pezzo unico, scegli un inverter con MPPT integrato; se hai già un inverter, aggiungi un regolatore MPPT a parte.</li>
+      </ul>
+
+      <div class="guide-note"><strong>Impianto da dimensionare?</strong> Dicci cosa vuoi alimentare e per quanto tempo: chiamaci al <a href="tel:+393489905455">348 990 5455</a> e lo calcoliamo insieme prima di ordinare.</div>
+
+      <h2>Spedizione, ritiro e montaggio</h2>
+      <ul>
+        <li><strong>Spedizione in tutta Italia</strong>, con costo calcolato nel carrello (gratuita sopra 1.500 €).</li>
+        <li><strong>Ritiro gratis in officina a Tivoli</strong>, senza spedizione.</li>
+        <li><strong>Montaggio nel nostro centro tecnico</strong> per i prodotti acquistati da noi: un impianto elettrico va collegato a regola d'arte. Il montaggio lo facciamo soltanto per i prodotti acquistati da CDA.</li>
+        <li><strong>Reso entro 14 giorni</strong> e garanzia legale di 24 mesi.</li>
+      </ul>
+
+      <div class="guide-links">
+        <a href="categoria-elettronica-inverter-regolatori.html" class="btn btn-primary btn-sm">Vedi inverter e regolatori</a>
+        <a href="guida-batteria-litio-camper.html" class="btn btn-outline btn-sm">Guida alle batterie al litio</a>
+        <a href="guida-impianto-acqua-camper.html" class="btn btn-outline btn-sm">Guida all'impianto acqua</a>
+      </div>`
+  };
+}
+
 async function main() {
   const shell = siteShell();
-  const [dometic, batterie, riscaldamento] = await Promise.all([
+  const [dometic, batterie, riscaldamento, acqua, elettrico] = await Promise.all([
     fetchProducts('name=ilike.*fresh*'),
     fetchProducts('name=ilike.batteria*'),
-    fetchProducts('or=(name.ilike.*riscald*,name.ilike.*stufa*,name.ilike.*autoterm*,name.ilike.*travel box*)')
+    fetchProducts('or=(name.ilike.*riscald*,name.ilike.*stufa*,name.ilike.*autoterm*,name.ilike.*travel box*)'),
+    fetchProducts('or=(name.ilike.pompa*,name.ilike.serbatoio*)'),
+    fetchProducts('or=(name.ilike.inverter*,name.ilike.regolatore*,name.ilike.carica batterie*)')
   ]);
 
-  const guides = [buildClimateGuide(dometic), buildBatteryGuide(batterie), buildHeatingGuide(riscaldamento)];
+  const guides = [buildClimateGuide(dometic), buildBatteryGuide(batterie), buildHeatingGuide(riscaldamento), buildWaterGuide(acqua), buildPowerGuide(elettrico)];
   guides.forEach((g) => {
     fs.writeFileSync(path.join(ROOT, g.file), pageHtml(shell, g), 'utf8');
     console.log('Generata', g.file);
