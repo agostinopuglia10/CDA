@@ -101,7 +101,7 @@ Deno.serve(async (req) => {
 
         return `  <item>
     <g:id>${escapeXml(p.id)}</g:id>
-    <title>${escapeXml(truncate(p.name, 150))}</title>
+    <title>${escapeXml(truncate(buildFeedTitle(p), 150))}</title>
     <description>${escapeXml(truncate(p.description || p.name, 5000))}</description>
     <link>${escapeXml(link)}</link>
     <g:image_link>${escapeXml(imageLink)}</g:image_link>
@@ -135,6 +135,29 @@ ${items}
     return new Response(err instanceof Error ? err.message : 'Errore sconosciuto', { status: 500, headers: CORS_HEADERS });
   }
 });
+
+// Titolo mostrato su Google Shopping. Il nome sul sito NON cambia: qui lo rendiamo piu'
+// "cercabile" usando solo dati gia' presenti nel database (mai inventati):
+//  1. "(blister)" diventa "- confezione blister" (resta distinguibile dalla versione sfusa);
+//  2. se il prodotto ha una marca che non compare nel nome, la marca va davanti
+//     (esclusi i kit CDA: brand "CDA" o bundle);
+//  3. se il titolo e' molto corto (< 25 caratteri, es. "Cargo Strap", "Tank 70"),
+//     si aggiunge la categoria del prodotto ("Cargo Strap - Garage").
+function buildFeedTitle(p: { name: string; brand?: string | null; is_bundle?: boolean | null; categories?: { name?: string } | null }): string {
+  let title = p.name.replace(/\s*\(blister\)\s*$/i, ' - confezione blister').trim();
+
+  const brand = (p.brand || '').trim();
+  if (brand && brand.toUpperCase() !== 'CDA' && !p.is_bundle && !title.toLowerCase().includes(brand.toLowerCase())) {
+    title = `${brand} ${title}`;
+  }
+
+  const category = (p.categories?.name || '').trim();
+  if (title.length < 25 && category && !title.toLowerCase().includes(category.toLowerCase())) {
+    title = `${title} - ${category}`;
+  }
+
+  return title;
+}
 
 function escapeXml(value: string): string {
   return String(value)
