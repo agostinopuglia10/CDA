@@ -353,13 +353,15 @@ function buildHeatingGuide(products) {
   ]);
   const gasRows = gas.map((p) => [
     `<a href="prodotto-${esc(p.slug)}.html">${esc(p.name)}</a>`,
-    /5004/.test(p.name) ? 'Più potenza, per i camper più grandi' : 'Calore immediato e costante, accensione automatica',
+    /5004/.test(p.name)
+      ? 'Potenza termica 6.000 W, per i camper più grandi. GPL a 30 mbar, venduta senza pannello'
+      : 'Potenza termica 3.500 W, calore immediato e costante. GPL a 30 mbar, venduta senza pannello',
     eur(p.price_cents),
     esc(shippingNote(p))
   ]);
   const portableRows = portable.map((p) => [
     `<a href="prodotto-${esc(p.slug)}.html">${esc(p.name)}</a>`,
-    'Portatile, non richiede installazione fissa, pronto all\'uso in pochi minuti',
+    'Portatile a gasolio, 12 V, potenza di riscaldamento 2 kW: non richiede installazione fissa, pronto all\'uso in pochi minuti',
     eur(p.price_cents),
     esc(shippingNote(p))
   ]);
@@ -632,17 +634,99 @@ ${tableRows(invRows)}
   };
 }
 
+// ---------- Guida 6: frigoriferi a compressore ----------
+// Dati tecnici dalle schede del fornitore GES (06/10/2026), abbinati al modello dal codice FRG nel nome prodotto.
+const FRIDGE_SPECS = {
+  FRG551: { l: '50 L (senza freezer)', dim: '402 x 485 x 670', kg: '24', cons: '0,42 Ah (5,4 Wh)' },
+  FRG571: { l: '70 L (senza freezer)', dim: '460 x 460 x 820', kg: '24', cons: '0,45 Ah (5,8 Wh)' },
+  FRG547: { l: '47 L (freezer 4,5 L)', dim: '380 x 510 x 530', kg: '18', cons: '1,6 Ah (20,8 Wh)' },
+  FRG564: { l: '64 L (freezer 10,5 L)', dim: '419 x 450 x 820', kg: '24', cons: '1,5 Ah (18,7 Wh)' },
+  FRG584: { l: '83 L (freezer 10 L)', dim: '520 x 500 x 821', kg: '27', cons: '1,2 Ah (15 Wh)' },
+  FRG583: { l: '83 L (freezer 10 L), con passaruota', dim: '520 x 580 x 821', kg: '23,5', cons: '0,36 kWh' },
+  FRG587: { l: '87 L (freezer 10,5 L)', dim: '419 x 485 x 976', kg: '28', cons: '1,6 Ah (20 Wh)' },
+  FRG575: { l: '175 L doppia porta (frigo 137 L + freezer 38 L)', dim: '523 x 593 x 1245', kg: '39,5', cons: '1,8 Ah (22,9 Wh)' }
+};
+
+function buildFridgeGuide(products) {
+  const list = products.filter((p) => /^Frigorifero/i.test(p.name));
+  const known = [];
+  list.forEach((p) => {
+    const code = (p.name.match(/FRG\d+/) || [])[0];
+    if (code && FRIDGE_SPECS[code]) known.push({ p, code, s: FRIDGE_SPECS[code] });
+  });
+  if (known.length === 0) throw new Error('Guida frigoriferi: nessun modello con dati tecnici trovato');
+  const litres = (k) => Number((k.s.l.match(/^(\d+)/) || [])[1] || 0);
+  known.sort((a, b) => litres(a) - litres(b) || a.p.price_cents - b.p.price_cents);
+  const rows = known.map((k) => [
+    `<a href="prodotto-${esc(k.p.slug)}.html">ExtraCOOL ${esc(k.code)}</a>`,
+    esc(k.s.l),
+    esc(k.s.dim) + ' mm',
+    esc(k.s.kg) + ' kg',
+    eur(k.p.price_cents),
+    esc(shippingNote(k.p))
+  ]);
+  const others = list.length - known.length;
+  const othersNote = others > 0
+    ? ' A catalogo ci sono anche altri ' + others + ' modelli di frigorifero a compressore: aprili dalla <a href="categoria-interni-cucina.html">categoria Cucina</a> per vederne le schede.'
+    : '';
+  return {
+    file: 'guida-frigorifero-camper.html',
+    shortTitle: 'Guida al frigorifero per camper',
+    title: 'Frigorifero a compressore per camper: come scegliere | CDA Tivoli',
+    description: 'Come scegliere il frigorifero a compressore a 12 V per il camper: litri, freezer, dimensioni e peso dei modelli ExtraCOOL, con prezzi aggiornati, spedizione e montaggio a Tivoli.',
+    h1: 'Frigorifero a compressore per camper: come scegliere',
+    lead: 'I modelli ExtraCOOL a 12 V che vendiamo, con litri, freezer, dimensioni, peso e prezzi aggiornati.',
+    body: `      <p>Il frigorifero a compressore lavora a 12 V, raffredda in modo efficiente anche con temperature esterne elevate e non consuma gas né richiede areazione esterna. Qui trovi i modelli <strong>ExtraCOOL</strong> che abbiamo a catalogo, con i dati tecnici dichiarati dal costruttore. I prezzi si aggiornano da soli.</p>
+
+      <h2>I modelli a confronto</h2>
+      <div class="guide-table-wrap">
+        <table class="guide-table">
+          <thead><tr><th>Modello</th><th>Capacità</th><th>Dimensioni (L x P x A)</th><th>Peso</th><th>Prezzo</th><th>Spedizione</th></tr></thead>
+          <tbody>
+${tableRows(rows)}
+          </tbody>
+        </table>
+      </div>
+      <p>I consumi dichiarati dal costruttore sono nella scheda di ciascun modello: apri il frigorifero che ti interessa per vederli.${othersNote}</p>
+
+      <h2>Come scegliere</h2>
+      <ul>
+        <li><strong>Misura il vano prima di tutto.</strong> Confronta le dimensioni in tabella con lo spazio che hai: a parità di litri la forma cambia molto (basso e largo, oppure alto e stretto).</li>
+        <li><strong>Freezer sì o no?</strong> Due modelli (50 e 70 L) sono senza freezer; gli altri hanno un freezer di dimensioni diverse; il 175 L ha doppia porta, con frigorifero e freezer separati.</li>
+        <li><strong>Passaruota:</strong> il modello da 83 L con passaruota è pensato per i vani dove c'è l'ingombro del passaruota.</li>
+        <li><strong>Consumi:</strong> se vivi fuori rete, controlla nella scheda il consumo del modello e confrontalo con la capacità della tua batteria: ti aiuta la <a href="guida-batteria-litio-camper.html">guida alle batterie al litio</a>.</li>
+      </ul>
+
+      <div class="guide-note"><strong>Dubbi sul modello giusto per il tuo camper?</strong> Chiamaci al <a href="tel:+393489905455">348 990 5455</a> e ne parliamo prima che tu ordini.</div>
+
+      <h2>Spedizione, ritiro e montaggio</h2>
+      <ul>
+        <li><strong>Spedizione in tutta Italia</strong>, con costo calcolato nel carrello (gratuita sopra 1.500 €).</li>
+        <li><strong>Ritiro gratis in officina a Tivoli</strong>, senza spedizione.</li>
+        <li><strong>Montaggio nel nostro centro tecnico</strong> per i prodotti acquistati da noi. Il montaggio lo facciamo soltanto per i prodotti acquistati da CDA.</li>
+        <li><strong>Reso entro 14 giorni</strong> e garanzia legale di 24 mesi.</li>
+      </ul>
+
+      <div class="guide-links">
+        <a href="categoria-interni-cucina.html" class="btn btn-primary btn-sm">Vedi tutti i frigoriferi</a>
+        <a href="guida-batteria-litio-camper.html" class="btn btn-outline btn-sm">Guida alle batterie al litio</a>
+        <a href="guida-impianto-elettrico-camper.html" class="btn btn-outline btn-sm">Guida all'impianto elettrico</a>
+      </div>`
+  };
+}
+
 async function main() {
   const shell = siteShell();
-  const [dometic, batterie, riscaldamento, acqua, elettrico] = await Promise.all([
+  const [dometic, batterie, riscaldamento, acqua, elettrico, frigoriferi] = await Promise.all([
     fetchProducts('name=ilike.*fresh*'),
     fetchProducts('name=ilike.batteria*'),
     fetchProducts('or=(name.ilike.*riscald*,name.ilike.*stufa*,name.ilike.*autoterm*,name.ilike.*travel box*)'),
     fetchProducts('or=(name.ilike.pompa*,name.ilike.serbatoio*)'),
-    fetchProducts('or=(name.ilike.inverter*,name.ilike.regolatore*,name.ilike.carica batterie*)')
+    fetchProducts('or=(name.ilike.inverter*,name.ilike.regolatore*,name.ilike.carica batterie*)'),
+    fetchProducts('name=ilike.frigorifero*')
   ]);
 
-  const guides = [buildClimateGuide(dometic), buildBatteryGuide(batterie), buildHeatingGuide(riscaldamento), buildWaterGuide(acqua), buildPowerGuide(elettrico)];
+  const guides = [buildClimateGuide(dometic), buildBatteryGuide(batterie), buildHeatingGuide(riscaldamento), buildWaterGuide(acqua), buildPowerGuide(elettrico), buildFridgeGuide(frigoriferi)];
   guides.forEach((g) => {
     fs.writeFileSync(path.join(ROOT, g.file), pageHtml(shell, g), 'utf8');
     console.log('Generata', g.file);

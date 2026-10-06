@@ -813,6 +813,8 @@ function renderProductPage(p) {
       guide = { href: 'guida-impianto-acqua-camper.html', text: 'Quale scegliere? Leggi la guida a pompe e serbatoi acqua →' };
     } else if (guidePath.indexOf('elettronica.inverter-regolatori') === 0 || guidePath.indexOf('elettronica.caricabatterie') === 0) {
       guide = { href: 'guida-impianto-elettrico-camper.html', text: 'Come abbinarli? Leggi la guida a inverter, MPPT e caricabatterie →' };
+    } else if (guidePath.indexOf('interni.cucina') === 0 && /frigorifer/i.test(p.name)) {
+      guide = { href: 'guida-frigorifero-camper.html', text: 'Quale scegliere? Leggi la guida al frigorifero a compressore →' };
     } else if (guidePath.indexOf('energia.batterie') === 0) {
       guide = { href: 'guida-batteria-litio-camper.html', text: 'Quanti Ah ti servono? Leggi la guida alle batterie al litio →' };
     }
