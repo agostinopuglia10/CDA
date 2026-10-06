@@ -80,8 +80,8 @@
       <div class="breadcrumb" id="product-breadcrumb">
         <a href="/">Home</a> /
         <a href="shop.html">Shop Camper</a> /
-        <a href="categoria-energia.html" id="product-breadcrumb-cat">Energia</a> /
-        <span id="product-breadcrumb-name">Kit Installazione Pannello Solare</span>
+        <a href="categoria-elettronica.html" id="product-breadcrumb-cat">Elettronica &amp; Accessori</a> /
+        <span id="product-breadcrumb-name">Inverter Alcapower 5,5kW 230V 48V con MPPT 110A</span>
       </div>
       <div class="social-icons">
         <a href="https://www.instagram.com/cda_camper/" target="_blank" rel="noopener" aria-label="Instagram CDA"><svg viewBox="0 0 24 24" fill="none"><rect x="3" y="3" width="18" height="18" stroke="currentColor" stroke-width="1.6"/><circle cx="12" cy="12" r="4.2" stroke="currentColor" stroke-width="1.6"/><circle cx="17.3" cy="6.7" r="1" fill="currentColor"/></svg></a>
@@ -91,29 +91,20 @@
 
     <div class="product-detail">
       <div>
-        <div class="product-detail-thumb" id="product-thumb">
-          <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M14.7 6.3a5 5 0 0 0-6.9 6.9L3 18l3 3 4.8-4.8a5 5 0 0 0 6.9-6.9L14 12l-2-2 2.7-2.7z" stroke="currentColor" stroke-width="1.2" stroke-linejoin="round"/></svg>
-        </div>
+        <div class="product-detail-thumb" id="product-thumb"><img src="images/prodotti/inverter-5-5kw-230v-48v-mppt-110a-800052.jpg" alt="Inverter Alcapower 5,5kW 230V 48V con MPPT 110A" style="width:100%;height:100%;object-fit:cover;"></div>
       </div>
 
       <div>
-        <span class="product-cat" id="product-cat">Energia · Pannelli Solari</span>
-        <span class="product-badge" id="product-badge" style="position:static;display:inline-block;margin:8px 0 0;">Kit risparmio</span>
-        <h1 id="product-name" style="font-size:clamp(28px,3.4vw,38px);margin-top:.15em;">Kit Installazione Pannello Solare</h1>
-        <div class="product-detail-price" id="product-price">€ 249,00</div>
-        <p class="desc" id="product-desc">Ricarichi le batterie anche in un'area di sosta senza corrente: tutto il necessario per installare un impianto solare funzionante, senza dover cercare e abbinare i pezzi giusti da solo. Pannello, regolatore e cablaggio sono già compatibili tra loro e pronti da montare.</p>
+        <span class="product-cat" id="product-cat">Elettronica &amp; Accessori · Inverter e Regolatori di Carica</span>
+        <span class="product-badge" id="product-badge" style="position:static;display:inline-block;margin:8px 0 0;;display:none">Kit risparmio</span>
+        <h1 id="product-name" style="font-size:clamp(28px,3.4vw,38px);margin-top:.15em;">Inverter Alcapower 5,5kW 230V 48V con MPPT 110A</h1>
+        <div class="product-detail-price" id="product-price"><strong>€ 1322,99</strong></div>
+        <p class="desc" id="product-desc">Inverter 5,5kW con ingresso 48V e regolatore MPPT 110A integrato, per impianti solari ad alta potenza.</p>
 
-        <div class="kit-contents" id="kit-contents">
+        <div class="kit-contents" id="kit-contents" style="display:none;">
           <h3>Cosa include questo kit</h3>
-          <ul class="kit-items" id="kit-items-list">
-            <li><span class="kit-item-name">Pannello solare flessibile 200W</span><span class="kit-item-price">€ 189,00</span></li>
-            <li><span class="kit-item-name">Regolatore di carica MPPT 20A</span><span class="kit-item-price">€ 69,00</span></li>
-            <li><span class="kit-item-name">Cablaggio e connettori dedicati</span><span class="kit-item-price">€ 29,00</span></li>
-          </ul>
-          <div class="kit-savings" id="kit-savings">
-            <span>Valore se acquistati singolarmente: <strong class="kit-strike">€ 287,00</strong></span>
-            <span class="kit-save-badge">Risparmi € 38,00</span>
-          </div>
+          <ul class="kit-items" id="kit-items-list"></ul>
+          <div class="kit-savings" id="kit-savings"></div>
         </div>
 
         <div class="kit-contents" id="kit-upsell" style="display:none;">
@@ -123,13 +114,14 @@
         </div>
 
         <ul class="spec-list">
-          <li><span>Categoria</span><span id="spec-category">Energia</span></li>
+          <li><span>Categoria</span><span id="spec-category">Inverter e Regolatori di Carica</span></li>
           <li><span>Disponibilità</span><span id="spec-availability">Su ordinazione, spedizione diretta</span></li>
           <!-- Compare solo quando "delivery_time_text" è compilato su Supabase
                (tabella "site_settings") — vedi initDeliveryInfo() in js/main.js. -->
           <li id="spec-delivery-row" style="display:none;"><span>Consegna</span><span id="spec-delivery"></span></li>
           <li id="spec-datasheet-row" style="display:none;"><span>Certificazione</span><span><a href="#" id="spec-datasheet-link" target="_blank" rel="noopener">Scheda tecnica (PDF)</a></span></li>
-          <li><span>Spedizione</span><span>Tutta Italia</span></li>
+          <li><span>Spedizione</span><span id="spec-shipping">Tutta Italia</span></li>
+          <li><span>Ritiro</span><span>Gratis in officina a Tivoli, senza spedizione</span></li>
           <li><span>Installazione</span><span>Disponibile nel centro tecnico</span></li>
           <li><span>Reso</span><span>Entro 14 giorni</span></li>
           <li><span>Garanzia</span><span>24 mesi legali</span></li>
@@ -151,9 +143,15 @@
 
         <div class="buy-trust-row">
           <span>🚚 Spedizione in tutta Italia</span>
+          <span>🔧 Ritiro gratis a Tivoli</span>
           <span>↩️ Reso 14 giorni</span>
           <span>🔒 Pagamenti sicuri</span>
         </div>
+
+        <a href="https://www.google.com/search?q=C.D.A.+Di+Talucci+Maria" target="_blank" rel="noopener" class="google-rating"><span class="stars">★★★★★</span> 4,7/5 · 27 recensioni su Google</a>
+
+        <!-- Compare solo per climatizzatori e batterie: link alla guida all'acquisto (vedi renderProductPage in js/main.js) -->
+        <p id="product-guide-link" style="display:none;margin:0 0 18px;"><a id="product-guide-anchor" href="#" style="color:var(--ink);text-decoration:underline;text-underline-offset:3px;font-weight:600;"></a></p>
 
         <a href="servizi.html#installazione" class="btn btn-outline btn-sm">Richiedi installazione nel centro tecnico</a>
       </div>
@@ -245,6 +243,9 @@
           <li><a href="categoria-energia.html">Energia</a></li>
           <li><a href="shop.html">Vedi tutto</a></li>
           <li><a href="catalogo.html">Catalogo completo</a></li>
+          <li><a href="guida-climatizzatore-camper.html">Guida: climatizzatore</a></li>
+          <li><a href="guida-batteria-litio-camper.html">Guida: batteria al litio</a></li>
+          <li><a href="guida-riscaldamento-camper.html">Guida: riscaldamento</a></li>
         </ul>
       </div>
       <div>

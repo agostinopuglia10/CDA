@@ -29,7 +29,7 @@ const ROOT = path.join(__dirname, '..');
 const TEMPLATE_PATH = path.join(ROOT, 'prodotto.html');
 
 async function fetchProducts() {
-  const url = SUPABASE_URL + '/rest/v1/products?select=id,slug,name,description,price_cents,image_url,category_id,categories(name,slug,path)&active=eq.true&order=slug.asc';
+  const url = SUPABASE_URL + '/rest/v1/products?select=id,slug,name,description,price_cents,image_url,is_bundle,category_id,categories(name,slug,path)&active=eq.true&order=slug.asc';
   const res = await fetch(url, {
     headers: {
       apikey: SUPABASE_ANON_KEY,
@@ -53,6 +53,12 @@ function escapeHtml(s) {
 
 function escapeJsString(s) {
   return String(s || '').replace(/\\/g, '\\\\').replace(/"/g, '\\"').replace(/</g, '\\u003c');
+}
+
+let _categoriesDataCache = null;
+function loadCategoriesDataCached() {
+  if (!_categoriesDataCache) _categoriesDataCache = loadCategoriesData();
+  return _categoriesDataCache;
 }
 
 function buildPage(template, p) {
@@ -113,6 +119,44 @@ function buildPage(template, p) {
   }
 
   let html = template;
+
+  // CONTENUTO VISIBILE REALE nel codice della pagina (non solo dopo il JavaScript).
+  // Prima il template conteneva i dati di esempio di un "Kit Installazione Pannello Solare"
+  // (nome, prezzo, descrizione, lista componenti con "Risparmi 38 EUR") su TUTTE le pagine:
+  // chi non esegue il JavaScript (o Google alla prima lettura) vedeva 174 pagine identiche e
+  // incoerenti col titolo. js/main.js (renderProductPage) sovrascrive comunque questi valori.
+  const topName = (function () {
+    try {
+      const cats = loadCategoriesDataCached();
+      return topSlug && cats[topSlug] ? cats[topSlug].name : catName;
+    } catch (e) { return catName; }
+  })();
+  const priceText = '€ ' + (p.price_cents / 100).toLocaleString('it-IT', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+  const setById = function (id, inner) {
+    const re = new RegExp('(<(\\w+)[^>]*\\bid="' + id + '"[^>]*>)[\\s\\S]*?(</\\2>)');
+    html = html.replace(re, function (m, open, tag, close) { return open + inner + close; });
+  };
+  setById('product-name', escapeHtml(p.name));
+  setById('product-breadcrumb-name', escapeHtml(p.name));
+  setById('product-cat', escapeHtml(topName && catName && topName !== catName ? topName + ' · ' + catName : catName));
+  setById('spec-category', escapeHtml(catName));
+  setById('product-desc', escapeHtml(descSource));
+  if (!priceNotSet) setById('product-price', '<strong>' + priceText + '</strong>');
+  if (topSlug) {
+    html = html.replace(/(<a href=")categoria-energia\.html(" id="product-breadcrumb-cat">)[^<]*(<\/a>)/, '$1categoria-' + topSlug + '.html$2' + escapeHtml(topName) + '$3');
+  }
+  if (p.image_url) {
+    setById('product-thumb', '<img src="' + escapeHtml(p.image_url) + '" alt="' + escapeHtml(p.name) + '" style="width:100%;height:100%;object-fit:cover;">');
+  }
+  // Badge "Kit risparmio" e blocco componenti del kit: solo per i veri kit, e li riempie il JavaScript.
+  html = html.replace(/(<span class="product-badge" id="product-badge" style=")([^"]*)(")/, function (m, a, style, c) {
+    return a + style + (p.is_bundle ? '' : ';display:none') + c;
+  });
+  html = html.replace('<div class="kit-contents" id="kit-contents">', '<div class="kit-contents" id="kit-contents" style="display:none;">');
+  // Componenti e risparmio di esempio del kit solare: li riscrive interamente js/main.js per i veri kit.
+  setById('kit-items-list', '');
+  setById('kit-savings', '');
+
   html = html.replace(/<title>[\s\S]*?<\/title>/, '<title>' + escapeHtml(title) + '</title>');
   html = html.replace(/(<meta name="description" content=")[^"]*(")/, '$1' + escapeHtml(metaDesc) + '$2');
   html = html.replace(/(<link rel="canonical" id="canonical-link")(\s*\/?>)/, '$1 href="' + pageUrl + '"$2');
