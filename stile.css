@@ -1107,3 +1107,18 @@ button.ba-card:focus-visible{outline:2px solid var(--red);outline-offset:2px;}
 
   #featured-section{padding-top:20px !important;}
 }
+/* ===== Guide all'acquisto (guida-*.html, generate da scripts/build-guide-pages.js) ===== */
+.guide-body{max-width:780px;margin:0 auto;padding:8px 0 24px;}
+.guide-body h2{margin:34px 0 12px;}
+.guide-body p,.guide-body li{line-height:1.7;}
+.guide-body ul,.guide-body ol{padding-left:22px;margin:0 0 16px;}
+.guide-body .guide-note{background:var(--red-light);border:1px solid var(--red-light-border);padding:14px 16px;margin:20px 0;font-size:14.5px;}
+.guide-table-wrap{overflow-x:auto;margin:18px 0 26px;border:1px solid var(--line);}
+.guide-table{width:100%;border-collapse:collapse;font-size:14.5px;min-width:620px;}
+.guide-table th,.guide-table td{padding:11px 14px;text-align:left;border-bottom:1px solid var(--line);vertical-align:top;}
+.guide-table th{font-family:var(--font-display);letter-spacing:.06em;text-transform:uppercase;font-size:13px;color:var(--steel);}
+.guide-table td.num{white-space:nowrap;font-weight:600;}
+.guide-table a{color:var(--ink);text-decoration:underline;text-underline-offset:3px;}
+.guide-faq dt{font-weight:700;margin-top:18px;}
+.guide-faq dd{margin:6px 0 0;line-height:1.7;}
+.guide-links{display:flex;gap:12px;flex-wrap:wrap;margin:18px 0 6px;}

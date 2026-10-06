@@ -798,6 +798,24 @@ function renderProductPage(p) {
       : 'Su ordinazione, spedizione diretta';
   }
   if (!priceNotSet) renderProductShipping(p);
+
+  // Guida all'acquisto pertinente (collegamento interno utile ai visitatori e a Google).
+  var guideWrap = document.getElementById('product-guide-link');
+  var guideAnchor = document.getElementById('product-guide-anchor');
+  if (guideWrap && guideAnchor && p.categories && p.categories.path) {
+    var guidePath = p.categories.path;
+    var guide = null;
+    if (guidePath.indexOf('clima.climatizzatori') === 0 && /dometic|fresh/i.test(p.name)) {
+      guide = { href: 'guida-climatizzatore-camper.html', text: 'Non sai quale scegliere? Leggi la guida al climatizzatore →' };
+    } else if (guidePath.indexOf('energia.batterie') === 0) {
+      guide = { href: 'guida-batteria-litio-camper.html', text: 'Quanti Ah ti servono? Leggi la guida alle batterie al litio →' };
+    }
+    if (guide) {
+      guideAnchor.setAttribute('href', guide.href);
+      guideAnchor.textContent = guide.text;
+      guideWrap.style.display = '';
+    }
+  }
   var datasheetRow = document.getElementById('spec-datasheet-row');
   var datasheetLink = document.getElementById('spec-datasheet-link');
   if (datasheetRow && datasheetLink) {
