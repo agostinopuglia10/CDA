@@ -1321,6 +1321,28 @@ function initCookieBanner() {
 // L'ordine tra le due non è fisso: il consenso può arrivare prima o dopo.
 var pageViewState = { ready: false, analytics: false, sent: false };
 
+// TRAFFICO INTERNO: chi lavora sul sito (prove, controlli, anteprime in locale) non deve sporcare
+// i dati. Si attiva una volta sola visitando qualsiasi pagina con ?interno=1 (resta nel browser;
+// ?interno=0 lo toglie). Con il flag attivo, o in locale (localhost / file), non parte niente:
+// né il registro del funnel su Supabase, né GA4, né il Pixel Meta.
+(function () {
+  try {
+    var m = window.location.search.match(/[?&]interno=([01])\b/);
+    if (m) {
+      if (m[1] === '1') window.localStorage.setItem('cda_internal', '1');
+      else window.localStorage.removeItem('cda_internal');
+    }
+  } catch (e) {}
+})();
+
+function isInternalVisitor() {
+  try {
+    if (window.localStorage.getItem('cda_internal') === '1') return true;
+  } catch (e) {}
+  var h = window.location.hostname;
+  return h === 'localhost' || h === '127.0.0.1' || h === '' || h.slice(-6) === '.local';
+}
+
 function markPageReady() {
   pageViewState.ready = true;
   sendPageViewOnce();
@@ -1336,6 +1358,7 @@ function sendPageViewOnce() {
 }
 
 function loadAnalytics() {
+  if (isInternalVisitor()) return; // traffico interno: niente GA4 né Pixel Meta
   var GA_MEASUREMENT_ID = 'G-H2W2W8FGY6';
   if (!window.__gaLoaded) {
     window.__gaLoaded = true;
@@ -1405,6 +1428,7 @@ function getVisitId() {
 var FUNNEL_LOG_EVENTS = { view_item: 1, add_to_cart: 1, begin_checkout: 1 };
 function logFunnelEvent(name, params) {
   if (!FUNNEL_LOG_EVENTS[name]) return;
+  if (isInternalVisitor()) return; // traffico interno: non registrare nel funnel
   try {
     var productId = (params && Array.isArray(params.items) && params.items[0]) ? params.items[0].item_id : null;
     fetch(SUPABASE_URL + '/functions/v1/log-funnel-event', {

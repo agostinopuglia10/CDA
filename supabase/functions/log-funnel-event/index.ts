@@ -27,7 +27,12 @@ const ALLOWED_EVENTS = new Set(['view_item', 'add_to_cart', 'begin_checkout']);
 // eseguono il JavaScript del sito e mandavano eventi falsi: il 03-04/10/2026 risultavano
 // 167 e 124 "visualizzazioni prodotto" in un giorno su 123 prodotti diversi, cioe' Google che
 // scansionava il catalogo, non persone. Non vanno contate nel funnel.
-const BOT_USER_AGENT = /bot|crawl|spider|slurp|headless|lighthouse|pagespeed|inspectiontool|python-requests|curl\/|wget|node-fetch|axios/i;
+// Aggiunti il 06/10/2026 i programmi che generano l'anteprima di un link quando lo si pubblica o lo si
+// manda (Facebook/Instagram/Meta, WhatsApp, Telegram, X, LinkedIn, Slack, Discord, Pinterest): il 02/10
+// alle 09:28 ora italiana, un minuto dopo il post sul kit GPL, ci sono state 3 "viste" in 7 secondi.
+const BOT_USER_AGENT = /bot|crawl|spider|slurp|headless|lighthouse|pagespeed|inspectiontool|python-requests|curl\/|wget|node-fetch|axios|facebookexternalhit|meta-external|whatsapp\/|skypeuri/i;
+// (Twitter/X, LinkedIn, Slack, Telegram, Discord, Pinterest e Facebot hanno gia' "bot" nel nome; NON si filtrano
+// "twitter"/"linkedin"/"slack" da soli perche' compaiono anche nel browser interno delle loro app, cioe' persone vere.)
 
 Deno.serve(async (req) => {
   if (req.method === 'OPTIONS') {
