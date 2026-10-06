@@ -807,6 +807,8 @@ function renderProductPage(p) {
     var guide = null;
     if (guidePath.indexOf('clima.climatizzatori') === 0 && /dometic|fresh/i.test(p.name)) {
       guide = { href: 'guida-climatizzatore-camper.html', text: 'Non sai quale scegliere? Leggi la guida al climatizzatore →' };
+    } else if (guidePath.indexOf('clima.riscaldatori') === 0) {
+      guide = { href: 'guida-riscaldamento-camper.html', text: 'Gasolio, gas o portatile? Leggi la guida al riscaldamento →' };
     } else if (guidePath.indexOf('energia.batterie') === 0) {
       guide = { href: 'guida-batteria-litio-camper.html', text: 'Quanti Ah ti servono? Leggi la guida alle batterie al litio →' };
     }

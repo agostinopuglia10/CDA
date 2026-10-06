@@ -209,6 +209,7 @@ ${tableRows(rows)}
       <div class="guide-links">
         <a href="categoria-clima-climatizzatori.html" class="btn btn-primary btn-sm">Vedi tutti i climatizzatori</a>
         <a href="guida-batteria-litio-camper.html" class="btn btn-outline btn-sm">Guida alle batterie al litio</a>
+        <a href="guida-riscaldamento-camper.html" class="btn btn-outline btn-sm">Guida al riscaldamento</a>
       </div>`
   };
 }
@@ -311,14 +312,149 @@ ${tableRows(rows)}
   };
 }
 
+// ---------- Guida 3: riscaldatori (gasolio, gas, portatile) ----------
+function heaterKind(p) {
+  if (/Travel Box/i.test(p.name)) return 'portatile';
+  if (/Truma/i.test(p.name)) return 'gas';
+  if (/Autoterm|Riscaldatore a gasolio|Kit Riscaldamento Invernale/i.test(p.name)) return 'gasolio';
+  return null;
+}
+
+function heaterPanel(p) {
+  if (/PU-5/i.test(p.name)) return 'PU-5 (base)';
+  if (/Comfort/i.test(p.name)) return 'Comfort (retroilluminato, timer settimanale)';
+  return 'Non incluso: da aggiungere';
+}
+
+function heaterNote(p) {
+  if (/Kit Riscaldamento Invernale/i.test(p.name)) return 'Riscaldatore Air 2D + oscurante termico per la cabina; il pannello di controllo va aggiunto';
+  if (/^Kit Autoterm/i.test(p.name)) return 'Kit con tutto il necessario per l\'installazione';
+  if (/Autoterm Air 2D/i.test(p.name)) return 'Motore brushless silenzioso, funzionamento garantito fino a −45 °C';
+  if (/Autoterm Air 4D/i.test(p.name)) return 'Più potenza per ambienti più grandi, funzionamento garantito fino a −45 °C';
+  if (/Riscaldatore a gasolio 2 kW/i.test(p.name)) return 'Compatto, per furgonati e camper di dimensioni contenute';
+  if (/Riscaldatore a gasolio 4 kW/i.test(p.name)) return 'Più potenza: scalda rapidamente anche gli ambienti più grandi';
+  return '';
+}
+
+function buildHeatingGuide(products) {
+  const heaters = products.filter((p) => heaterKind(p) === 'gasolio');
+  const gas = products.filter((p) => heaterKind(p) === 'gas');
+  const portable = products.filter((p) => heaterKind(p) === 'portatile');
+  if (heaters.length === 0 || gas.length === 0 || portable.length === 0) {
+    throw new Error('Guida riscaldatori: manca una famiglia di prodotti nel catalogo (gasolio/gas/portatile)');
+  }
+
+  const dieselRows = heaters.map((p) => [
+    `<a href="prodotto-${esc(p.slug)}.html">${esc(p.name)}</a>`,
+    esc(heaterPanel(p)),
+    esc(heaterNote(p)),
+    eur(p.price_cents),
+    esc(shippingNote(p))
+  ]);
+  const gasRows = gas.map((p) => [
+    `<a href="prodotto-${esc(p.slug)}.html">${esc(p.name)}</a>`,
+    /5004/.test(p.name) ? 'Più potenza, per i camper più grandi' : 'Calore immediato e costante, accensione automatica',
+    eur(p.price_cents),
+    esc(shippingNote(p))
+  ]);
+  const portableRows = portable.map((p) => [
+    `<a href="prodotto-${esc(p.slug)}.html">${esc(p.name)}</a>`,
+    'Portatile, non richiede installazione fissa, pronto all\'uso in pochi minuti',
+    eur(p.price_cents),
+    esc(shippingNote(p))
+  ]);
+  const rowsHtml = (rows, valueCol) => rows.map((r) => `<tr>${r.map((c, i) => `<td${i === r.length - 2 ? ' class="num"' : ''}>${c}</td>`).join('')}</tr>`).join('\n');
+
+  return {
+    file: 'guida-riscaldamento-camper.html',
+    shortTitle: 'Guida al riscaldamento per camper',
+    title: 'Riscaldamento camper: gasolio, gas o portatile | CDA Tivoli',
+    description: 'Come scegliere il riscaldamento per il camper: riscaldatori a gasolio Autoterm, stufe a gas Truma e riscaldatore portatile. Differenze, pannelli di controllo, prezzi aggiornati e montaggio a Tivoli.',
+    h1: 'Riscaldamento per camper: gasolio, gas o portatile?',
+    lead: 'Le tre soluzioni che vendiamo, a confronto, con i prezzi aggiornati e le cose da controllare prima di ordinare (compreso il pannello di controllo).',
+    body: `      <p>Con l'arrivo del freddo, scaldare il camper diventa la priorità. Le soluzioni che teniamo a catalogo sono tre: il <strong>riscaldatore a gasolio indipendente</strong> (Autoterm), la <strong>stufa a gas</strong> (Truma) e il <strong>riscaldatore portatile</strong> (Travel Box). Qui trovi come si differenziano. I prezzi sono letti dal nostro catalogo e si aggiornano da soli.</p>
+
+      <h2>Riscaldatore a gasolio indipendente</h2>
+      <p>Un riscaldatore a gasolio funziona in modo indipendente e si installa in modo fisso nel camper. I modelli Autoterm hanno un motore brushless silenzioso e il funzionamento è garantito fino a −45 °C. La scelta è tra <strong>Air 2D</strong> (soluzione compatta) e <strong>Air 4D</strong> (più potenza per ambienti più grandi).</p>
+      <div class="guide-note"><strong>Attenzione al pannello di controllo.</strong> Per accendere e regolare il riscaldatore serve un pannello. Nei modelli che lo riportano nel nome è incluso: <strong>PU-5</strong> (base) oppure <strong>Comfort</strong> (retroilluminato, con timer settimanale). I riscaldatori a gasolio da 2 kW e 4 kW senza pannello e il Kit Riscaldamento Invernale <strong>non lo includono</strong>: va aggiunto a parte.</div>
+      <div class="guide-table-wrap">
+        <table class="guide-table">
+          <thead><tr><th>Modello</th><th>Pannello</th><th>Note</th><th>Prezzo</th><th>Spedizione</th></tr></thead>
+          <tbody>
+${rowsHtml(dieselRows)}
+          </tbody>
+        </table>
+      </div>
+
+      <h2>Stufa a gas</h2>
+      <p>La stufa a gas Truma SL è la soluzione per chi preferisce il gas del camper: calore immediato e costante, con accensione automatica.</p>
+      <div class="guide-table-wrap">
+        <table class="guide-table">
+          <thead><tr><th>Modello</th><th>Per chi</th><th>Prezzo</th><th>Spedizione</th></tr></thead>
+          <tbody>
+${rowsHtml(gasRows)}
+          </tbody>
+        </table>
+      </div>
+
+      <h2>Riscaldatore portatile</h2>
+      <p>Se non vuoi un'installazione fissa, il <strong>Travel Box 2.0</strong> è un riscaldatore a gasolio portatile, pronto all'uso in pochi minuti.</p>
+      <div class="guide-table-wrap">
+        <table class="guide-table">
+          <thead><tr><th>Modello</th><th>Caratteristiche</th><th>Prezzo</th><th>Spedizione</th></tr></thead>
+          <tbody>
+${rowsHtml(portableRows)}
+          </tbody>
+        </table>
+      </div>
+
+      <h2>Come scegliere</h2>
+      <ul>
+        <li><strong>Dimensioni del camper.</strong> Per furgonati e camper di dimensioni contenute è pensata la soluzione compatta (Air 2D o il riscaldatore a gasolio da 2 kW); per ambienti più grandi guarda l'Air 4D, il 4 kW o la Truma SL 5004.</li>
+        <li><strong>Gasolio o gas?</strong> Il riscaldatore a gasolio funziona in modo indipendente; la stufa a gas usa l'impianto gas del camper. Scegli in base a quale combustibile preferisci avere a bordo.</li>
+        <li><strong>Fisso o portatile?</strong> Il riscaldatore fisso va installato nel camper; il Travel Box si sposta dove serve e non richiede installazione fissa.</li>
+        <li><strong>Pannello di controllo.</strong> Controlla sempre se è incluso (vedi riquadro sopra).</li>
+      </ul>
+
+      <div class="guide-note"><strong>Dubbi su quale scegliere o sull'installazione?</strong> Chiamaci al <a href="tel:+393489905455">348 990 5455</a> e ne parliamo prima che tu ordini.</div>
+
+      <h2>Spedizione, ritiro e montaggio</h2>
+      <ul>
+        <li><strong>Spedizione in tutta Italia</strong>, con costo calcolato nel carrello (gratuita sopra 1.500 €).</li>
+        <li><strong>Ritiro gratis in officina a Tivoli</strong>, senza spedizione.</li>
+        <li><strong>Montaggio nel nostro centro tecnico</strong> per i prodotti acquistati da noi. Un riscaldatore fisso richiede collegamenti al combustibile e allo scarico: va fatto a regola d'arte. Il montaggio lo facciamo soltanto per i prodotti acquistati da CDA.</li>
+        <li><strong>Reso entro 14 giorni</strong> e garanzia legale di 24 mesi.</li>
+      </ul>
+
+      <h2>Domande frequenti</h2>
+      <dl class="guide-faq">
+        <dt>Il pannello di controllo è incluso?</dt>
+        <dd>Dipende dal modello: è incluso dove il nome riporta PU-5 o Comfort. Nei riscaldatori da 2 kW e 4 kW senza pannello e nel Kit Riscaldamento Invernale va aggiunto a parte.</dd>
+        <dt>Che differenza c'è tra il pannello PU-5 e il Comfort?</dt>
+        <dd>Il PU-5 è il pannello base; il Comfort è retroilluminato e ha il timer settimanale.</dd>
+        <dt>Fino a quale temperatura funzionano i riscaldatori Autoterm?</dt>
+        <dd>Secondo la scheda, il funzionamento è garantito fino a −45 °C.</dd>
+        <dt>Lo montate voi?</dt>
+        <dd>Sì, se lo acquisti da noi, nel nostro centro tecnico a Tivoli (Strada Arci n.24).</dd>
+      </dl>
+
+      <div class="guide-links">
+        <a href="categoria-clima-riscaldatori-gasolio-gas.html" class="btn btn-primary btn-sm">Vedi tutti i riscaldatori</a>
+        <a href="guida-climatizzatore-camper.html" class="btn btn-outline btn-sm">Guida al climatizzatore</a>
+        <a href="guida-batteria-litio-camper.html" class="btn btn-outline btn-sm">Guida alle batterie al litio</a>
+      </div>`
+  };
+}
+
 async function main() {
   const shell = siteShell();
-  const [dometic, batterie] = await Promise.all([
+  const [dometic, batterie, riscaldamento] = await Promise.all([
     fetchProducts('name=ilike.*fresh*'),
-    fetchProducts('name=ilike.batteria*')
+    fetchProducts('name=ilike.batteria*'),
+    fetchProducts('or=(name.ilike.*riscald*,name.ilike.*stufa*,name.ilike.*autoterm*,name.ilike.*travel box*)')
   ]);
 
-  const guides = [buildClimateGuide(dometic), buildBatteryGuide(batterie)];
+  const guides = [buildClimateGuide(dometic), buildBatteryGuide(batterie), buildHeatingGuide(riscaldamento)];
   guides.forEach((g) => {
     fs.writeFileSync(path.join(ROOT, g.file), pageHtml(shell, g), 'utf8');
     console.log('Generata', g.file);
