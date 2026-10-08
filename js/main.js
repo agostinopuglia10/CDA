@@ -20,7 +20,7 @@ document.addEventListener('DOMContentLoaded', function () {
     Promise.resolve(initTestimonials()),
     Promise.resolve(initDeliveryInfo())
   ]);
-  pageInit.then(function () {
+  pageInit.then(initStoreOnlyProducts).then(function () {
     initCart();
     initProductFilters();
     initQtySelector();
@@ -183,6 +183,31 @@ function initDeliveryInfo() {
       if (specRow && specText) { specText.textContent = text; specRow.style.display = ''; }
     })
     .catch(function () { /* dato non ancora impostato */ });
+}
+
+// Prodotti non spedibili (aerosol, infiammabili): restano visibili sul sito ma non hanno il pulsante
+// "aggiungi al carrello" e si ritirano solo in officina a Tivoli (products.in_store_only).
+// Va eseguita DOPO che le liste prodotto sono state disegnate e PRIMA di initCart().
+function initStoreOnlyProducts() {
+  if (!supabaseClient) return Promise.resolve();
+  return supabaseClient
+    .from('products')
+    .select('id')
+    .eq('in_store_only', true)
+    .eq('active', true)
+    .then(function (res) {
+      var ids = {};
+      ((res && res.data) || []).forEach(function (r) { ids[r.id] = true; });
+      if (!Object.keys(ids).length) return;
+      document.querySelectorAll('.add-btn[data-product-id]').forEach(function (btn) {
+        if (!ids[btn.getAttribute('data-product-id')]) return;
+        var tag = document.createElement('span');
+        tag.className = 'store-only-tag';
+        tag.textContent = 'Solo in officina';
+        btn.parentNode.replaceChild(tag, btn);
+      });
+    })
+    .catch(function () { /* senza rete restano i pulsanti: il controllo vero e' sul server */ });
 }
 
 function initShopCatalog() {
@@ -670,7 +695,7 @@ function initProductPage() {
 
   return supabaseClient
     .from('products')
-    .select('id, slug, name, description, price_cents, compare_at_price_cents, image_url, featured, is_bundle, stock, category_id, datasheet_url, categories(name, slug, path)')
+    .select('id, slug, name, description, price_cents, compare_at_price_cents, image_url, featured, is_bundle, stock, category_id, datasheet_url, in_store_only, categories(name, slug, path)')
     .eq('id', id)
     .eq('active', true)
     .single()
@@ -745,6 +770,7 @@ function renderRelatedProducts(p) {
 function renderProductShipping(p) {
   var el = document.getElementById('spec-shipping');
   if (!el || typeof calculateShippingEstimate !== 'function') return;
+  if (p.in_store_only) { el.textContent = 'Non spedibile: ritiro in officina'; return; }
   calculateShippingEstimate([{ id: p.id, quantity: 1 }], p.price_cents, 'italia').then(function (r) {
     if (!r || r.shippingCents === null || r.shippingCents === undefined) return; // resta "Tutta Italia"
     var text;
@@ -794,9 +820,11 @@ function renderProductPage(p) {
     // La maggior parte dei prodotti non è tenuta a magazzino: si spedisce
     // direttamente dal fornitore all'indirizzo del cliente. "stock" resta
     // pronto per quando (e se) alcuni articoli verranno tenuti in sede.
-    specAvailabilityEl.textContent = (p.stock && p.stock > 0)
-      ? 'Disponibile, spedizione immediata'
-      : 'Su ordinazione, spedizione diretta';
+    specAvailabilityEl.textContent = p.in_store_only
+      ? 'Disponibile solo in officina a Tivoli'
+      : ((p.stock && p.stock > 0)
+        ? 'Disponibile, spedizione immediata'
+        : 'Su ordinazione, spedizione diretta');
   }
   if (!priceNotSet) renderProductShipping(p);
 
@@ -948,7 +976,7 @@ function updateProductSeoTags(p, descText, topName, topSlug) {
         '@type': 'Offer',
         priceCurrency: 'EUR',
         price: (p.price_cents / 100).toFixed(2),
-        availability: (p.stock && p.stock > 0) ? 'https://schema.org/InStock' : 'https://schema.org/BackOrder',
+        availability: p.in_store_only ? 'https://schema.org/InStoreOnly' : ((p.stock && p.stock > 0) ? 'https://schema.org/InStock' : 'https://schema.org/BackOrder'),
         url: pageUrl
       };
     }

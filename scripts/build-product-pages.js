@@ -29,7 +29,7 @@ const ROOT = path.join(__dirname, '..');
 const TEMPLATE_PATH = path.join(ROOT, 'prodotto.html');
 
 async function fetchProducts() {
-  const url = SUPABASE_URL + '/rest/v1/products?select=id,slug,name,description,price_cents,image_url,is_bundle,category_id,categories(name,slug,path)&active=eq.true&order=slug.asc';
+  const url = SUPABASE_URL + '/rest/v1/products?select=id,slug,name,description,price_cents,image_url,is_bundle,in_store_only,category_id,categories(name,slug,path)&active=eq.true&order=slug.asc';
   const res = await fetch(url, {
     headers: {
       apikey: SUPABASE_ANON_KEY,
@@ -136,7 +136,7 @@ function buildPage(template, p, dupDesc) {
       '@type': 'Offer',
       priceCurrency: 'EUR',
       price: (p.price_cents / 100).toFixed(2),
-      availability: 'https://schema.org/InStock',
+      availability: p.in_store_only ? 'https://schema.org/InStoreOnly' : 'https://schema.org/InStock',
       url: pageUrl
     };
   }
@@ -179,6 +179,19 @@ function buildPage(template, p, dupDesc) {
   // Componenti e risparmio di esempio del kit solare: li riscrive interamente js/main.js per i veri kit.
   setById('kit-items-list', '');
   setById('kit-savings', '');
+
+  // Prodotti non spedibili (aerosol, infiammabili): al posto di quantita'/carrello/barra fissa mobile
+  // c'e' l'avviso "solo in officina". Vedi anche initStoreOnlyProducts() in js/main.js.
+  if (p.in_store_only) {
+    const notice = '<div class="store-only-box"><strong>Disponibile solo in officina a Tivoli</strong>'
+      + '<p>Per le sue caratteristiche (prodotto infiammabile o sotto pressione) non viene spedito. Passa a ritirarlo da noi in Strada Arci n.24, 00019 Tivoli, oppure '
+      + '<a href="tel:+393489905455">chiamaci al 348 990 5455</a> per verificare la disponibilita\'.</p>'
+      + '<a href="contatti.html" class="btn btn-primary btn-sm">Orari e contatti</a></div>';
+    html = html.replace(/<div class="purchase-row">[\s\S]*?<\/button>\s*<\/div>\s*<div class="buy-trust-row">[\s\S]*?<\/div>/, () => notice);
+    html = html.replace(/<div class="buy-bar-sticky" id="buy-bar-sticky">[\s\S]*?<\/div>/, '');
+    setById('spec-availability', 'Disponibile solo in officina a Tivoli');
+    setById('spec-shipping', 'Non spedibile: ritiro in officina');
+  }
 
   html = html.replace(/<title>[\s\S]*?<\/title>/, '<title>' + escapeHtml(title) + '</title>');
   html = html.replace(/(<meta name="description" content=")[^"]*(")/, '$1' + escapeHtml(metaDesc) + '$2');

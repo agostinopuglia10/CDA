@@ -36,6 +36,41 @@
     <priority>0.5</priority>
   </url>
   <url>
+    <loc>https://cda-camper.it/guida-climatizzatore-camper.html</loc>
+    <changefreq>monthly</changefreq>
+    <priority>0.6</priority>
+  </url>
+  <url>
+    <loc>https://cda-camper.it/guida-batteria-litio-camper.html</loc>
+    <changefreq>monthly</changefreq>
+    <priority>0.6</priority>
+  </url>
+  <url>
+    <loc>https://cda-camper.it/guida-riscaldamento-camper.html</loc>
+    <changefreq>monthly</changefreq>
+    <priority>0.6</priority>
+  </url>
+  <url>
+    <loc>https://cda-camper.it/guida-impianto-acqua-camper.html</loc>
+    <changefreq>monthly</changefreq>
+    <priority>0.6</priority>
+  </url>
+  <url>
+    <loc>https://cda-camper.it/guida-impianto-elettrico-camper.html</loc>
+    <changefreq>monthly</changefreq>
+    <priority>0.6</priority>
+  </url>
+  <url>
+    <loc>https://cda-camper.it/guida-frigorifero-camper.html</loc>
+    <changefreq>monthly</changefreq>
+    <priority>0.6</priority>
+  </url>
+  <url>
+    <loc>https://cda-camper.it/guida-batteria-200ah-ultimatron-extrapower.html</loc>
+    <changefreq>monthly</changefreq>
+    <priority>0.6</priority>
+  </url>
+  <url>
     <loc>https://cda-camper.it/categoria-interni.html</loc>
     <changefreq>weekly</changefreq>
     <priority>0.8</priority>
@@ -866,6 +901,16 @@
     <priority>0.5</priority>
   </url>
   <url>
+    <loc>https://cda-camper.it/prodotto-cda-0186-npt-activator-400-np-250-ml.html</loc>
+    <changefreq>weekly</changefreq>
+    <priority>0.5</priority>
+  </url>
+  <url>
+    <loc>https://cda-camper.it/prodotto-cda-0187-npt-gs-cleaner-spray-600-ml.html</loc>
+    <changefreq>weekly</changefreq>
+    <priority>0.5</priority>
+  </url>
+  <url>
     <loc>https://cda-camper.it/prodotto-cda-0188-npt-u-bond-ultra-2k-1-min-50-ml.html</loc>
     <changefreq>weekly</changefreq>
     <priority>0.5</priority>
@@ -1105,42 +1150,9 @@
     <changefreq>weekly</changefreq>
     <priority>0.5</priority>
   </url>
-  <url>
-    <loc>https://cda-camper.it/guida-climatizzatore-camper.html</loc>
-    <changefreq>monthly</changefreq>
-    <priority>0.6</priority>
-  </url>
-  <url>
-    <loc>https://cda-camper.it/guida-batteria-litio-camper.html</loc>
-    <changefreq>monthly</changefreq>
-    <priority>0.6</priority>
-  </url>
-  <url>
-    <loc>https://cda-camper.it/guida-riscaldamento-camper.html</loc>
-    <changefreq>monthly</changefreq>
-    <priority>0.6</priority>
-  </url>
-  <url>
-    <loc>https://cda-camper.it/guida-impianto-acqua-camper.html</loc>
-    <changefreq>monthly</changefreq>
-    <priority>0.6</priority>
-  </url>
-  <url>
-    <loc>https://cda-camper.it/guida-impianto-elettrico-camper.html</loc>
-    <changefreq>monthly</changefreq>
-    <priority>0.6</priority>
-  </url>
-  <url>
-    <loc>https://cda-camper.it/guida-frigorifero-camper.html</loc>
-    <changefreq>monthly</changefreq>
-    <priority>0.6</priority>
-  </url>
-  <url>
-    <loc>https://cda-camper.it/guida-batteria-200ah-ultimatron-extrapower.html</loc>
-    <changefreq>monthly</changefreq>
-    <priority>0.6</priority>
-  </url>
 </urlset>
+
+
 
 
 

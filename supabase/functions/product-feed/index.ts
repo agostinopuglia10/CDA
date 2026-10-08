@@ -61,6 +61,7 @@ Deno.serve(async (req) => {
       .from('products')
       .select('id, slug, name, description, price_cents, currency, image_url, brand, stock, is_bundle, long_package, ships_on_pallet, weight_kg, google_product_category, gtin, categories(name, path)')
       .eq('active', true)
+      .eq('in_store_only', false) // aerosol/infiammabili: acquistabili solo in officina, niente Google Shopping
       .gt('price_cents', 0)
       .not('image_url', 'is', null)
       .neq('image_url', '');
