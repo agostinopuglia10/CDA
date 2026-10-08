@@ -447,6 +447,8 @@ ${rowsHtml(portableRows)}
         <a href="categoria-clima-riscaldatori-gasolio-gas.html" class="btn btn-primary btn-sm">Vedi tutti i riscaldatori</a>
         <a href="guida-climatizzatore-camper.html" class="btn btn-outline btn-sm">Guida al climatizzatore</a>
         <a href="guida-batteria-litio-camper.html" class="btn btn-outline btn-sm">Guida alle batterie al litio</a>
+        <a href="guida-pannello-pu5-o-comfort-autoterm.html" class="btn btn-outline btn-sm">Autoterm: PU-5 o Comfort</a>
+        <a href="guida-stufa-truma-sl-3004-o-5004.html" class="btn btn-outline btn-sm">Truma SL 3004 o 5004</a>
       </div>`
   };
 }
@@ -633,6 +635,7 @@ ${tableRows(invRows)}
         <a href="categoria-elettronica-inverter-regolatori.html" class="btn btn-primary btn-sm">Vedi inverter e regolatori</a>
         <a href="guida-batteria-litio-camper.html" class="btn btn-outline btn-sm">Guida alle batterie al litio</a>
         <a href="guida-impianto-acqua-camper.html" class="btn btn-outline btn-sm">Guida all'impianto acqua</a>
+        <a href="guida-regolatore-mppt-o-pwm.html" class="btn btn-outline btn-sm">MPPT o PWM</a>
       </div>`
   };
 }
@@ -809,6 +812,256 @@ ${faq.map((f) => `        <dt>${esc(f[0])}</dt>\n        <dd>${esc(f[1])}</dd>`)
   };
 }
 
+// ---------- Pagina di confronto: pannello PU-5 o Comfort (riscaldatori Autoterm) ----------
+function buildPanelCompare(products) {
+  const find = (re) => {
+    const p = products.find((x) => re.test(x.name));
+    if (!p) throw new Error('Confronto pannelli: prodotto non trovato nel catalogo: ' + re);
+    return p;
+  };
+  const a2pu = find(/^Autoterm Air 2D con pannello PU-5$/i);
+  const a2co = find(/^Autoterm Air 2D con pannello Comfort$/i);
+  const a4pu = find(/^Autoterm Air 4D con pannello PU-5$/i);
+  const a4co = find(/^Autoterm Air 4D con pannello Comfort$/i);
+  const k2pu = find(/^Kit Autoterm Air 2D con pannello PU-5$/i);
+  const k2co = find(/^Kit Autoterm Air 2D con pannello Comfort$/i);
+  const k4pu = find(/^Kit Autoterm Air 4D con pannello PU-5$/i);
+  const k4co = find(/^Kit Autoterm Air 4D con pannello Comfort$/i);
+  const link = (p, label) => `<a href="prodotto-${esc(p.slug)}.html">${esc(label || p.name)}</a>`;
+  const d = (a, b) => eur(b.price_cents - a.price_cents);
+  const row = (label, pu, co) => `<tr><th scope="row">${esc(label)}</th><td>${link(pu, eur(pu.price_cents))}</td><td>${link(co, eur(co.price_cents))}</td><td class="num">+ ${d(pu, co)}</td></tr>`;
+  const faq = [
+    ['Qual è la differenza tra il pannello PU-5 e il Comfort?', 'Nel nostro catalogo il PU-5 è il pannello base, mentre il Comfort è retroilluminato e ha il timer settimanale. Il riscaldatore Autoterm è lo stesso: cambia solo il pannello.'],
+    ['Quanto costa in più il pannello Comfort?', `Sull'Air 2D ${d(a2pu, a2co)} in più (${eur(a2pu.price_cents)} contro ${eur(a2co.price_cents)}), sull'Air 4D ${d(a4pu, a4co)} in più (${eur(a4pu.price_cents)} contro ${eur(a4co.price_cents)}). Nei kit la differenza è di ${d(k2pu, k2co)} sul 2D e ${d(k4pu, k4co)} sul 4D.`],
+    ['Il pannello è incluso nel prezzo?', 'Sì, nei modelli che lo riportano nel nome (con pannello PU-5 o con pannello Comfort). I riscaldatori a gasolio da 2 kW e 4 kW senza pannello e il Kit Riscaldamento Invernale non lo includono: va aggiunto a parte.'],
+    ['Montate voi il riscaldatore?', 'Sì, nel nostro centro tecnico di Tivoli, solo per i prodotti acquistati da noi.']
+  ];
+  return {
+    file: 'guida-pannello-pu5-o-comfort-autoterm.html',
+    shortTitle: 'Autoterm: pannello PU-5 o Comfort',
+    title: 'Autoterm PU-5 o Comfort: quale pannello scegliere',
+    description: 'Differenze tra i pannelli PU-5 e Comfort dei riscaldatori Autoterm Air 2D e 4D a catalogo: funzioni, differenza di prezzo e quale scegliere.',
+    h1: 'Riscaldatore Autoterm: pannello PU-5 o Comfort?',
+    lead: 'Lo stesso riscaldatore a gasolio con due pannelli di controllo diversi: cosa cambia e quanto costa in più.',
+    faq,
+    body: `      <p><strong>In breve:</strong> il riscaldatore Autoterm Air 2D o 4D è lo stesso con entrambi i pannelli. Il PU-5 è il pannello base; il Comfort è retroilluminato e ha il timer settimanale, e costa ${d(a2pu, a2co)} in più sull'Air 2D e ${d(a4pu, a4co)} in più sull'Air 4D.</p>
+
+      <h2>I due pannelli a confronto</h2>
+      <div class="guide-table-wrap">
+        <table class="guide-table">
+          <caption>Pannelli di controllo Autoterm a catalogo CDA (dati dalle schede dei prodotti, letti l'08/10/2026)</caption>
+          <thead><tr><th scope="col">Caratteristica</th><th scope="col">PU-5</th><th scope="col">Comfort</th></tr></thead>
+          <tbody>
+            <tr><th scope="row">Tipo</th><td>Pannello base</td><td>Pannello con display retroilluminato</td></tr>
+            <tr><th scope="row">Timer settimanale</th><td>Non indicato nella scheda</td><td>Sì</td></tr>
+            <tr><th scope="row">Riscaldatore</th><td>Autoterm Air 2D o 4D</td><td>Autoterm Air 2D o 4D (identico)</td></tr>
+            <tr><th scope="row">Funzionamento garantito fino a</th><td>-45 °C</td><td>-45 °C</td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <h2>Prezzi: stessa scelta, due pannelli</h2>
+      <div class="guide-table-wrap">
+        <table class="guide-table">
+          <caption>Prezzi IVA inclusa, ultimo controllo 08/10/2026</caption>
+          <thead><tr><th scope="col">Modello</th><th scope="col">Con PU-5</th><th scope="col">Con Comfort</th><th scope="col">Differenza</th></tr></thead>
+          <tbody>
+            ${row('Autoterm Air 2D', a2pu, a2co)}
+            ${row('Autoterm Air 4D', a4pu, a4co)}
+            ${row('Kit Autoterm Air 2D', k2pu, k2co)}
+            ${row('Kit Autoterm Air 4D', k4pu, k4co)}
+          </tbody>
+        </table>
+      </div>
+      <p>I kit comprendono tutto il necessario per l'installazione; la scelta tra Air 2D (soluzione compatta) e Air 4D (più potenza per ambienti più grandi) la trovi nella <a href="guida-riscaldamento-camper.html">guida al riscaldamento</a>.</p>
+
+      <h2>Quale scegliere</h2>
+      <div class="guide-table-wrap">
+        <table class="guide-table">
+          <caption>Quale pannello per quale uso</caption>
+          <thead><tr><th scope="col">Se...</th><th scope="col">Scegli</th><th scope="col">Perché</th></tr></thead>
+          <tbody>
+            <tr><th scope="row">Vuoi spendere meno</th><td>PU-5</td><td>Stesso riscaldatore, ${d(a2pu, a2co)} in meno sull'Air 2D</td></tr>
+            <tr><th scope="row">Vuoi programmare l'accensione</th><td>Comfort</td><td>Ha il timer settimanale</td></tr>
+            <tr><th scope="row">Lo usi spesso di sera</th><td>Comfort</td><td>Il display è retroilluminato</td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <div class="guide-note"><strong>Non ancora provati in officina.</strong> Le funzioni dei pannelli sono quelle indicate nelle schede dei prodotti: non abbiamo ancora eseguito confronti sul nostro banco. Se lo faremo, i risultati verranno aggiunti qui con data e modello.</div>
+
+      <h2>Spedizione, ritiro e montaggio</h2>
+      <ul>
+        <li><strong>Spedizione in tutta Italia</strong>, con costo calcolato nel carrello in base a peso e dimensioni (gratuita sopra 1.500 €).</li>
+        <li><strong>Ritiro gratis in officina a Tivoli</strong>, senza spedizione.</li>
+        <li><strong>Montaggio nel nostro centro tecnico</strong> per i riscaldatori acquistati da noi. Il montaggio lo facciamo soltanto per i prodotti acquistati da CDA.</li>
+      </ul>
+
+      <h2>Domande frequenti</h2>
+      <dl class="guide-faq">
+${faq.map((f) => `        <dt>${esc(f[0])}</dt>\n        <dd>${esc(f[1])}</dd>`).join('\n')}
+      </dl>
+
+      <div class="guide-links">
+        <a href="categoria-clima-riscaldatori-gasolio-gas.html" class="btn btn-primary btn-sm">Vedi tutti i riscaldatori</a>
+        <a href="guida-riscaldamento-camper.html" class="btn btn-outline btn-sm">Guida al riscaldamento</a>
+        <a href="guida-stufa-truma-sl-3004-o-5004.html" class="btn btn-outline btn-sm">Truma SL 3004 o 5004</a>
+      </div>`
+  };
+}
+
+// ---------- Pagina di confronto: stufa a gas Truma SL 3004 o SL 5004 ----------
+function buildTrumaCompare(products) {
+  const find = (re) => {
+    const p = products.find((x) => re.test(x.name));
+    if (!p) throw new Error('Confronto Truma: prodotto non trovato nel catalogo: ' + re);
+    return p;
+  };
+  const s3 = find(/Truma SL 3004/i);
+  const s5 = find(/Truma SL 5004/i);
+  const kg = (p) => (p.weight_kg ? String(p.weight_kg).replace('.', ',') + ' kg' : 'non indicato');
+  const link = (p, label) => `<a href="prodotto-${esc(p.slug)}.html">${esc(label)}</a>`;
+  const faq = [
+    ['Qual è la differenza tra la Truma SL 3004 e la SL 5004?', 'La potenza termica nominale: 3.500 W contro 6.000 W. La SL 5004 consuma più gas (da 60 a 480 g/h contro 30-280 g/h), è più grande e pesante ed è indicata dal fornitore per i camper più grandi.'],
+    ['Il pannello è incluso?', 'No: entrambe le stufe sono fornite senza pannello, come indicato dal fornitore.'],
+    ['Che gas usano?', 'GPL a 30 mbar, con accensione automatica.'],
+    ['Si può aggiungere un ventilatore?', 'Sì, entrambe sono predisposte per un ventilatore 012 TEB/TEN.'],
+    ['Le montate voi?', 'Sì, nel nostro centro tecnico di Tivoli, solo per le stufe acquistate da noi.']
+  ];
+  return {
+    file: 'guida-stufa-truma-sl-3004-o-5004.html',
+    shortTitle: 'Truma SL 3004 o SL 5004',
+    title: 'Truma SL 3004 o SL 5004: quale stufa a gas scegliere',
+    description: 'Confronto tra le stufe a gas Truma SL 3004 e SL 5004 a catalogo: potenza, consumo di gas, dimensioni, peso e prezzi aggiornati.',
+    h1: 'Stufa a gas Truma: SL 3004 o SL 5004?',
+    lead: 'Due stufe Truma a GPL con accensione automatica: cosa cambia in potenza, consumi, ingombro e prezzo.',
+    faq,
+    body: `      <p><strong>In breve:</strong> la Truma SL 3004 ha una potenza termica nominale di 3.500 W e costa ${eur(s3.price_cents)}; la SL 5004 arriva a 6.000 W, è indicata dal fornitore per i camper più grandi e costa ${eur(s5.price_cents)}. Entrambe sono a GPL a 30 mbar, con accensione automatica e senza pannello.</p>
+
+      <h2>Le due stufe a confronto</h2>
+      <div class="guide-table-wrap">
+        <table class="guide-table">
+          <caption>Stufe a gas Truma a catalogo CDA, prezzi IVA inclusa (dati dalle schede del fornitore e dal nostro catalogo, letti l'08/10/2026)</caption>
+          <thead><tr><th scope="col">Caratteristica</th><th scope="col">${link(s3, 'Truma SL 3004')}</th><th scope="col">${link(s5, 'Truma SL 5004')}</th></tr></thead>
+          <tbody>
+            <tr><th scope="row">Potenza termica nominale</th><td>3.500 W</td><td>6.000 W</td></tr>
+            <tr><th scope="row">Consumo di gas</th><td>da 30 a 280 g/h</td><td>da 60 a 480 g/h</td></tr>
+            <tr><th scope="row">Alimentazione</th><td>GPL a 30 mbar</td><td>GPL a 30 mbar</td></tr>
+            <tr><th scope="row">Accensione</th><td>Automatica</td><td>Automatica</td></tr>
+            <tr><th scope="row">Dimensioni</th><td>503 × 545 × 373 mm</td><td>533 × 568 × 496 mm</td></tr>
+            <tr><th scope="row">Peso (dato a catalogo)</th><td>${kg(s3)}</td><td>${kg(s5)}</td></tr>
+            <tr><th scope="row">Ventilatore</th><td>Predisposta per 012 TEB/TEN</td><td>Predisposta per 012 TEB/TEN</td></tr>
+            <tr><th scope="row">Pannello</th><td>Non incluso</td><td>Non incluso</td></tr>
+            <tr><th scope="row">Prezzo</th><td>${eur(s3.price_cents)}</td><td>${eur(s5.price_cents)}</td></tr>
+            <tr><th scope="row">Spedizione</th><td>${esc(shippingNote(s3))}</td><td>${esc(shippingNote(s5))}</td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <h2>Quale scegliere</h2>
+      <div class="guide-table-wrap">
+        <table class="guide-table">
+          <caption>Quale stufa per quale camper</caption>
+          <thead><tr><th scope="col">Se...</th><th scope="col">Scegli</th><th scope="col">Perché</th></tr></thead>
+          <tbody>
+            <tr><th scope="row">Il camper è di dimensioni contenute o medie</th><td>SL 3004</td><td>3.500 W, ingombro e peso minori, consumo da 30 a 280 g/h</td></tr>
+            <tr><th scope="row">Il camper è grande</th><td>SL 5004</td><td>6.000 W, indicata dal fornitore per i camper più grandi</td></tr>
+            <tr><th scope="row">Hai poco spazio per il vano stufa</th><td>SL 3004</td><td>503 × 545 × 373 mm contro 533 × 568 × 496 mm</td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <div class="guide-note"><strong>Prima di ordinare</strong> misura il vano e controlla l'impianto del gas del tuo camper. Per scegliere la potenza giusta chiamaci al <a href="tel:+393489905455">348 990 5455</a>: ti consigliamo in base al tuo camper.</div>
+
+      <div class="guide-note"><strong>Non ancora provate in officina.</strong> I dati di questa pagina sono quelli del fornitore: non abbiamo ancora eseguito prove sul nostro banco. Se lo faremo, i risultati verranno aggiunti qui con data e modello del veicolo.</div>
+
+      <h2>Spedizione, ritiro e montaggio</h2>
+      <ul>
+        <li><strong>Spedizione in tutta Italia</strong>, con costo calcolato nel carrello in base a peso e dimensioni (gratuita sopra 1.500 €).</li>
+        <li><strong>Ritiro gratis in officina a Tivoli</strong>, senza spedizione.</li>
+        <li><strong>Montaggio nel nostro centro tecnico</strong> per le stufe acquistate da noi, con collegamento e collaudo. Il montaggio lo facciamo soltanto per i prodotti acquistati da CDA.</li>
+      </ul>
+
+      <h2>Domande frequenti</h2>
+      <dl class="guide-faq">
+${faq.map((f) => `        <dt>${esc(f[0])}</dt>\n        <dd>${esc(f[1])}</dd>`).join('\n')}
+      </dl>
+
+      <div class="guide-links">
+        <a href="categoria-clima-riscaldatori-gasolio-gas.html" class="btn btn-primary btn-sm">Vedi tutti i riscaldatori</a>
+        <a href="guida-riscaldamento-camper.html" class="btn btn-outline btn-sm">Guida al riscaldamento</a>
+        <a href="guida-pannello-pu5-o-comfort-autoterm.html" class="btn btn-outline btn-sm">Autoterm: PU-5 o Comfort</a>
+      </div>`
+  };
+}
+
+// ---------- Pagina di confronto: regolatore di carica MPPT o PWM ----------
+function buildMpptCompare(products) {
+  const mppt = products.find((x) => /^Regolatore di Carica MPPT/i.test(x.name));
+  if (!mppt) throw new Error('Confronto MPPT/PWM: regolatore MPPT non trovato nel catalogo');
+  const inverters = products.filter((x) => /^Inverter .*MPPT/i.test(x.name)).sort((a, b) => a.price_cents - b.price_cents);
+  if (inverters.length === 0) throw new Error('Confronto MPPT/PWM: nessun inverter con MPPT nel catalogo');
+  const link = (p, label) => `<a href="prodotto-${esc(p.slug)}.html">${esc(label || p.name)}</a>`;
+  const invRows = inverters.map((p) => `<tr><td>${link(p)}</td><td class="num">${eur(p.price_cents)}</td><td>${esc(shippingNote(p))}</td></tr>`).join('\n            ');
+  const faq = [
+    ['Qual è la differenza tra regolatore MPPT e PWM?', 'Il regolatore PWM collega il pannello alla batteria adattandone la tensione a quella della batteria. L\'MPPT cerca invece il punto di lavoro migliore del pannello e converte la tensione in più in corrente di carica: di solito rende di più, soprattutto quando il pannello ha una tensione più alta di quella della batteria.'],
+    ['Vendete regolatori PWM?', 'No: a catalogo abbiamo solo regolatori MPPT, compresi quelli integrati negli inverter.'],
+    ['Quale regolatore MPPT avete?', `Il ${mppt.name} da ${eur(mppt.price_cents)}, con display LCD per controllare la ricarica, e tre inverter con regolatore MPPT integrato.`],
+    ['Come scelgo la potenza?', 'Dipende dai pannelli e dalla tensione dell\'impianto (12, 24 o 48 V). Chiamaci al 348 990 5455 con i dati dei tuoi pannelli e ti consigliamo.']
+  ];
+  return {
+    file: 'guida-regolatore-mppt-o-pwm.html',
+    shortTitle: 'Regolatore di carica: MPPT o PWM',
+    title: 'MPPT o PWM: quale regolatore di carica scegliere',
+    description: 'Differenza tra regolatore di carica MPPT e PWM per il camper, e i modelli MPPT a catalogo CDA: regolatore da 40 A e inverter con MPPT integrato.',
+    h1: 'Regolatore di carica per il camper: MPPT o PWM?',
+    lead: 'Come funzionano i due tipi di regolatore, quando conviene l\'MPPT e quali modelli MPPT abbiamo a catalogo.',
+    faq,
+    body: `      <p><strong>In breve:</strong> il regolatore PWM è la soluzione semplice; l'MPPT è più sofisticato e di solito sfrutta meglio i pannelli. A catalogo abbiamo solo regolatori MPPT: un regolatore da ${eur(mppt.price_cents)} e tre inverter con MPPT integrato.</p>
+
+      <h2>Come funzionano</h2>
+      <div class="guide-table-wrap">
+        <table class="guide-table">
+          <caption>MPPT e PWM a confronto (principi generali di funzionamento)</caption>
+          <thead><tr><th scope="col">Aspetto</th><th scope="col">PWM</th><th scope="col">MPPT</th></tr></thead>
+          <tbody>
+            <tr><th scope="row">Come carica</th><td>Porta la tensione del pannello a quella della batteria</td><td>Cerca il punto di lavoro migliore del pannello e converte la tensione in più in corrente</td></tr>
+            <tr><th scope="row">Pannello e batteria</th><td>Servono tensioni compatibili tra loro</td><td>Il pannello può avere una tensione più alta di quella della batteria</td></tr>
+            <tr><th scope="row">Resa</th><td>Più semplice, rende meno</td><td>Di solito rende di più, soprattutto con pannelli ad alta tensione</td></tr>
+            <tr><th scope="row">Costo</th><td>In genere più basso</td><td>In genere più alto</td></tr>
+            <tr><th scope="row">A catalogo CDA</th><td>Non venduto</td><td>Sì</td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <h2>I modelli MPPT che vendiamo</h2>
+      <div class="guide-table-wrap">
+        <table class="guide-table">
+          <caption>Regolatori MPPT a catalogo CDA, prezzi IVA inclusa, ultimo controllo 08/10/2026</caption>
+          <thead><tr><th scope="col">Modello</th><th scope="col">Prezzo</th><th scope="col">Spedizione</th></tr></thead>
+          <tbody>
+            <tr><td>${link(mppt)}</td><td class="num">${eur(mppt.price_cents)}</td><td>${esc(shippingNote(mppt))}</td></tr>
+            ${invRows}
+          </tbody>
+        </table>
+      </div>
+      <p>Il regolatore da 40 A funziona su impianti a 12-24 V; gli inverter con MPPT integrato uniscono la conversione a 230 V e la ricarica dai pannelli (nomi e tensioni nella tabella). Per il resto dell'impianto leggi la <a href="guida-impianto-elettrico-camper.html">guida all'impianto elettrico</a>.</p>
+
+      <div class="guide-note"><strong>Non ancora provati in officina.</strong> La differenza tra MPPT e PWM è quella dei principi di funzionamento generali: non abbiamo ancora misurato le rese sul nostro banco con un confronto diretto. Se lo faremo, i dati verranno aggiunti qui con data e impianto.</div>
+
+      <h2>Domande frequenti</h2>
+      <dl class="guide-faq">
+${faq.map((f) => `        <dt>${esc(f[0])}</dt>\n        <dd>${esc(f[1])}</dd>`).join('\n')}
+      </dl>
+
+      <div class="guide-links">
+        <a href="categoria-elettronica-inverter-regolatori.html" class="btn btn-primary btn-sm">Vedi inverter e regolatori</a>
+        <a href="guida-impianto-elettrico-camper.html" class="btn btn-outline btn-sm">Guida all'impianto elettrico</a>
+        <a href="guida-batteria-200ah-ultimatron-extrapower.html" class="btn btn-outline btn-sm">Batterie da 200 Ah</a>
+      </div>`
+  };
+}
+
 async function main() {
   const shell = siteShell();
   const [dometic, batterie, riscaldamento, acqua, elettrico, frigoriferi] = await Promise.all([
@@ -820,7 +1073,7 @@ async function main() {
     fetchProducts('name=ilike.frigorifero*')
   ]);
 
-  const guides = [buildClimateGuide(dometic), buildBatteryGuide(batterie), buildHeatingGuide(riscaldamento), buildWaterGuide(acqua), buildPowerGuide(elettrico), buildFridgeGuide(frigoriferi), buildBattery200Compare(batterie)];
+  const guides = [buildClimateGuide(dometic), buildBatteryGuide(batterie), buildHeatingGuide(riscaldamento), buildWaterGuide(acqua), buildPowerGuide(elettrico), buildFridgeGuide(frigoriferi), buildBattery200Compare(batterie), buildPanelCompare(riscaldamento), buildTrumaCompare(riscaldamento), buildMpptCompare(elettrico)];
   guides.forEach((g) => {
     fs.writeFileSync(path.join(ROOT, g.file), pageHtml(shell, g), 'utf8');
     console.log('Generata', g.file);
