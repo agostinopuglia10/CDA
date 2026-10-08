@@ -218,11 +218,21 @@ async function main() {
   const redirectsPath = path.join(ROOT, '_redirects');
   const existingLines = fs.existsSync(redirectsPath)
     ? fs.readFileSync(redirectsPath, 'utf8').split('\n').filter(function (l) {
-        return l.trim() && l.indexOf('/prodotto.html') !== 0 && l.indexOf('/categoria.html') !== 0;
+        return l.trim() && !/^\/(prodotto|categoria)(\.html)?\s/.test(l);
       })
     : [];
   const categoryRedirectLines = categoryPaths().map(function (cp) { return '/categoria.html  slug=' + cp + '  /' + categoryFileName(cp) + '  301!'; });
-  fs.writeFileSync(redirectsPath, existingLines.concat(redirectLines, categoryRedirectLines).join('\n') + '\n', 'utf8');
+  // Ultime regole (valgono solo se nessuna delle precedenti, con id/slug, ha combaciato): prodotto.html e
+  // categoria.html sono i MODELLI da cui si generano le pagine vere e non devono essere visti ne' indicizzati
+  // (Gemini e Google li mostravano come pagine del sito, con dati di esempio). Chi arriva li' senza un id
+  // valido viene mandato al catalogo / allo shop. Aggiunto il 08/10/2026.
+  const templateFallbackLines = [
+    '/prodotto.html  /catalogo.html  301!',
+    '/prodotto  /catalogo.html  301!',
+    '/categoria.html  /shop.html  301!',
+    '/categoria  /shop.html  301!'
+  ];
+  fs.writeFileSync(redirectsPath, existingLines.concat(redirectLines, categoryRedirectLines, templateFallbackLines).join('\n') + '\n', 'utf8');
 
   // sitemap.xml: sostituisce le vecchie voci prodotto.html?id=... (se
   // presenti da una generazione precedente) con gli URL statici reali.

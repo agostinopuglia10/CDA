@@ -211,3 +211,7 @@
 /categoria.html  slug=elettronica.monitor-telecamere  /categoria-elettronica-monitor-telecamere.html  301!
 /categoria.html  slug=elettronica.inverter-regolatori  /categoria-elettronica-inverter-regolatori.html  301!
 /categoria.html  slug=elettronica.compressori  /categoria-elettronica-compressori.html  301!
+/prodotto.html  /catalogo.html  301!
+/prodotto  /catalogo.html  301!
+/categoria.html  /shop.html  301!
+/categoria  /shop.html  301!
