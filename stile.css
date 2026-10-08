@@ -1126,3 +1126,10 @@ button.ba-card:focus-visible{outline:2px solid var(--red);outline-offset:2px;}
 .guide-faq dt{font-weight:700;margin-top:18px;}
 .guide-faq dd{margin:6px 0 0;line-height:1.7;}
 .guide-links{display:flex;gap:12px;flex-wrap:wrap;margin:18px 0 6px;}
+
+/* Indice guide e confronti */
+.guide-hub-list{list-style:none;padding:0;margin:0 0 8px;display:grid;gap:14px;}
+.guide-hub-list li{border:1px solid var(--line);padding:14px 16px;line-height:1.55;}
+.guide-hub-list li a{text-decoration:none;color:var(--ink);}
+.guide-hub-list li a:hover strong{color:var(--red);}
+.guide-hub-list li span{color:var(--steel);font-size:14.5px;}

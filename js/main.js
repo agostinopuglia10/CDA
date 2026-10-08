@@ -695,7 +695,7 @@ function initProductPage() {
 
   return supabaseClient
     .from('products')
-    .select('id, slug, name, description, price_cents, compare_at_price_cents, image_url, featured, is_bundle, stock, category_id, datasheet_url, in_store_only, categories(name, slug, path)')
+    .select('id, slug, name, description, price_cents, compare_at_price_cents, image_url, featured, is_bundle, stock, category_id, datasheet_url, in_store_only, brand, categories(name, slug, path)')
     .eq('id', id)
     .eq('active', true)
     .single()
@@ -969,15 +969,27 @@ function updateProductSeoTags(p, descText, topName, topSlug) {
       category: topName || '',
       description: shortDesc,
       image: imageUrl,
-      url: pageUrl
+      url: pageUrl,
+      sku: p.slug
     };
+    if (p.brand && String(p.brand).trim()) productLd.brand = { '@type': 'Brand', name: String(p.brand).trim() };
     if (!priceNotSet) {
+      // Stessa disponibilita' del feed Google Shopping ("in stock", consegna diretta dal fornitore):
+      // markup e feed devono coincidere, altrimenti Merchant segnala la discrepanza.
       productLd.offers = {
         '@type': 'Offer',
         priceCurrency: 'EUR',
         price: (p.price_cents / 100).toFixed(2),
-        availability: p.in_store_only ? 'https://schema.org/InStoreOnly' : ((p.stock && p.stock > 0) ? 'https://schema.org/InStock' : 'https://schema.org/BackOrder'),
-        url: pageUrl
+        availability: p.in_store_only ? 'https://schema.org/InStoreOnly' : 'https://schema.org/InStock',
+        itemCondition: 'https://schema.org/NewCondition',
+        url: pageUrl,
+        seller: { '@type': 'Organization', name: 'CDA', url: 'https://cda-camper.it/' },
+        hasMerchantReturnPolicy: {
+          '@type': 'MerchantReturnPolicy',
+          applicableCountry: 'IT',
+          returnPolicyCategory: 'https://schema.org/MerchantReturnFiniteReturnWindow',
+          merchantReturnDays: 14
+        }
       };
     }
     productEl.textContent = JSON.stringify(productLd);

@@ -29,7 +29,7 @@ const ROOT = path.join(__dirname, '..');
 const TEMPLATE_PATH = path.join(ROOT, 'prodotto.html');
 
 async function fetchProducts() {
-  const url = SUPABASE_URL + '/rest/v1/products?select=id,slug,name,description,price_cents,image_url,is_bundle,in_store_only,category_id,categories(name,slug,path)&active=eq.true&order=slug.asc';
+  const url = SUPABASE_URL + '/rest/v1/products?select=id,slug,name,description,price_cents,image_url,brand,is_bundle,in_store_only,category_id,categories(name,slug,path)&active=eq.true&order=slug.asc';
   const res = await fetch(url, {
     headers: {
       apikey: SUPABASE_ANON_KEY,
@@ -129,15 +129,26 @@ function buildPage(template, p, dupDesc) {
     category: catName,
     description: shortDesc,
     image: imageUrl,
-    url: pageUrl
+    url: pageUrl,
+    sku: p.slug
   };
+  if (p.brand && p.brand.trim()) productLd.brand = { '@type': 'Brand', name: p.brand.trim() };
   if (!priceNotSet) {
     productLd.offers = {
       '@type': 'Offer',
       priceCurrency: 'EUR',
       price: (p.price_cents / 100).toFixed(2),
       availability: p.in_store_only ? 'https://schema.org/InStoreOnly' : 'https://schema.org/InStock',
-      url: pageUrl
+      itemCondition: 'https://schema.org/NewCondition',
+      url: pageUrl,
+      seller: { '@type': 'Organization', name: 'CDA', url: SITE_URL + '/' },
+      // Reso entro 14 giorni dalla consegna (stessa informazione mostrata nella scheda prodotto e nelle FAQ del sito).
+      hasMerchantReturnPolicy: {
+        '@type': 'MerchantReturnPolicy',
+        applicableCountry: 'IT',
+        returnPolicyCategory: 'https://schema.org/MerchantReturnFiniteReturnWindow',
+        merchantReturnDays: 14
+      }
     };
   }
 

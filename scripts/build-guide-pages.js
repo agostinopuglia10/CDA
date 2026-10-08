@@ -1062,6 +1062,38 @@ ${faq.map((f) => `        <dt>${esc(f[0])}</dt>\n        <dd>${esc(f[1])}</dd>`)
   };
 }
 
+// ---------- Pagina indice: tutte le guide e i confronti ----------
+function buildGuideHub(guides) {
+  const groups = [
+    ['Energia e batterie', ['guida-batteria-litio-camper.html', 'guida-batteria-200ah-ultimatron-extrapower.html', 'guida-impianto-elettrico-camper.html', 'guida-regolatore-mppt-o-pwm.html']],
+    ['Clima e riscaldamento', ['guida-climatizzatore-camper.html', 'guida-riscaldamento-camper.html', 'guida-pannello-pu5-o-comfort-autoterm.html', 'guida-stufa-truma-s-3004-o-5004.html']],
+    ['Acqua e frigorifero', ['guida-impianto-acqua-camper.html', 'guida-frigorifero-camper.html']]
+  ];
+  const byFile = {};
+  guides.forEach((g) => { byFile[g.file] = g; });
+  const used = new Set();
+  const item = (g) => `        <li><a href="${esc(g.file)}"><strong>${esc(g.h1)}</strong></a><br><span>${esc(g.description)}</span></li>`;
+  let body = "      <p>Guide all'acquisto e confronti tra i prodotti che vendiamo: tabelle con dati dalle schede dei costruttori, prezzi letti dal nostro catalogo e le domande da farsi prima di ordinare. Dove non abbiamo ancora provato un prodotto in officina lo scriviamo.</p>\n";
+  groups.forEach((grp) => {
+    const list = grp[1].filter((f) => byFile[f]);
+    if (list.length === 0) return;
+    list.forEach((f) => used.add(f));
+    body += `\n      <h2>${esc(grp[0])}</h2>\n      <ul class="guide-hub-list">\n${list.map((f) => item(byFile[f])).join('\n')}\n      </ul>\n`;
+  });
+  const rest = guides.filter((g) => !used.has(g.file));
+  if (rest.length) body += `\n      <h2>Altre guide</h2>\n      <ul class="guide-hub-list">\n${rest.map(item).join('\n')}\n      </ul>\n`;
+  body += `\n      <div class="guide-note"><strong>Non trovi quello che cerchi?</strong> Chiamaci al <a href="tel:+393489905455">348 990 5455</a>: ti consigliamo in base al tuo camper e ai tuoi consumi.</div>\n      <div class="guide-links">\n        <a href="shop.html" class="btn btn-primary btn-sm">Vai allo shop</a>\n        <a href="servizi.html" class="btn btn-outline btn-sm">Servizi e montaggio a Tivoli</a>\n      </div>`;
+  return {
+    file: 'guide.html',
+    shortTitle: 'Guide e confronti',
+    title: 'Guide e confronti per camper | CDA Tivoli',
+    description: "Guide all'acquisto e confronti tra batterie, climatizzatori, riscaldamento, impianto acqua ed elettrico per camper, con prezzi aggiornati.",
+    h1: 'Guide e confronti per il tuo camper',
+    lead: 'Come scegliere batterie, riscaldamento, climatizzatore, impianto acqua ed elettrico: tabelle chiare e prezzi aggiornati.',
+    body
+  };
+}
+
 async function main() {
   const shell = siteShell();
   const [dometic, batterie, riscaldamento, acqua, elettrico, frigoriferi] = await Promise.all([
@@ -1078,12 +1110,15 @@ async function main() {
     fs.writeFileSync(path.join(ROOT, g.file), pageHtml(shell, g), 'utf8');
     console.log('Generata', g.file);
   });
+  const hubPage = buildGuideHub(guides);
+  fs.writeFileSync(path.join(ROOT, hubPage.file), pageHtml(shell, hubPage), 'utf8');
+  console.log('Generata', hubPage.file);
 
   // sitemap: rimuove le vecchie voci guida-* e le riaggiunge
   const sitemapPath = path.join(ROOT, 'sitemap.xml');
   let sitemap = fs.readFileSync(sitemapPath, 'utf8');
-  sitemap = sitemap.replace(/\s*<url>\s*<loc>https:\/\/cda-camper\.it\/guida-[^<]*<\/loc>[\s\S]*?<\/url>/g, '');
-  const entries = guides.map((g) => `  <url>\n    <loc>${SITE_URL}/${g.file}</loc>\n    <changefreq>monthly</changefreq>\n    <priority>0.6</priority>\n  </url>`);
+  sitemap = sitemap.replace(/\s*<url>\s*<loc>https:\/\/cda-camper\.it\/guid[ae][-.][^<]*<\/loc>[\s\S]*?<\/url>/g, '');
+  const entries = guides.concat([hubPage]).map((g) => `  <url>\n    <loc>${SITE_URL}/${g.file}</loc>\n    <changefreq>monthly</changefreq>\n    <priority>0.6</priority>\n  </url>`);
   sitemap = sitemap.replace('</urlset>', entries.join('\n') + '\n</urlset>\n');
   fs.writeFileSync(sitemapPath, sitemap, 'utf8');
   console.log('sitemap.xml aggiornata con le guide.');
