@@ -80,7 +80,7 @@ function pageHtml(shell, g) {
 <link rel="stylesheet" href="stile.css">
 <script type="application/ld+json">
 ${breadcrumb}
-</script>
+</script>${g.faq ? '\n<script type="application/ld+json">\n' + JSON.stringify({ '@context': 'https://schema.org', '@type': 'FAQPage', mainEntity: g.faq.map((f) => ({ '@type': 'Question', name: f[0], acceptedAnswer: { '@type': 'Answer', text: f[1] } })) }) + '\n</script>' : ''}
 </head>
 <body>
 
@@ -160,7 +160,7 @@ function buildClimateGuide(products) {
     file: 'guida-climatizzatore-camper.html',
     shortTitle: 'Guida al climatizzatore per camper',
     title: 'Climatizzatore per camper Dometic: come scegliere | CDA Tivoli',
-    description: 'Guida al climatizzatore da tetto Dometic per camper: differenze tra FreshJet 1500, 1700 e 2200 W, Freshlight e Freshwell, prezzi aggiornati, spedizione e installazione a Tivoli.',
+    description: 'Guida al climatizzatore da tetto Dometic per camper: FreshJet 1500, 1700 e 2200 W, Freshlight e Freshwell, prezzi aggiornati e installazione a Tivoli.',
     h1: 'Climatizzatore per camper: come scegliere il modello giusto',
     lead: 'Le differenze tra i climatizzatori da tetto Dometic che vendiamo, con prezzi aggiornati e le domande da farsi prima di ordinare.',
     body: `      <p>Un climatizzatore da tetto è uno degli acquisti più importanti per un camper: costa, si installa una volta sola e si vive tutta l'estate. Qui trovi i modelli <strong>Dometic</strong> che teniamo a catalogo, in che cosa si differenziano e come orientarti. I prezzi nella tabella vengono letti dal nostro catalogo e si aggiornano da soli.</p>
@@ -249,7 +249,7 @@ function buildBatteryGuide(products) {
     file: 'guida-batteria-litio-camper.html',
     shortTitle: 'Guida alle batterie al litio per camper',
     title: 'Batteria al litio per camper: quanti Ah servono | CDA Tivoli',
-    description: 'Come scegliere la batteria al litio (LiFePO4) per il camper: come calcolare i consumi, differenze tra Ultimatron ed ExtraPOWER, prezzi aggiornati, spedizione e montaggio a Tivoli.',
+    description: 'Come scegliere la batteria al litio LiFePO4 per il camper: consumi, differenze tra Ultimatron ed ExtraPOWER, prezzi aggiornati e montaggio a Tivoli.',
     h1: 'Batteria al litio per camper: quanti Ah servono davvero',
     lead: 'Come calcolare l\'autonomia che ti serve, le differenze tra i modelli Ultimatron ed ExtraPOWER che vendiamo e i prezzi aggiornati.',
     body: `      <p>Passare al litio (LiFePO4) significa avere più energia utilizzabile e meno peso rispetto alle batterie tradizionali. La domanda giusta non è «quanti Ah costa quanto», ma <strong>«quanta energia consumo in una giornata»</strong>. Qui trovi un metodo semplice e i modelli che abbiamo a catalogo, con prezzi letti in tempo reale.</p>
@@ -309,6 +309,7 @@ ${tableRows(rows)}
 
       <div class="guide-links">
         <a href="categoria-energia-batterie.html" class="btn btn-primary btn-sm">Vedi tutte le batterie</a>
+        <a href="guida-batteria-200ah-ultimatron-extrapower.html" class="btn btn-outline btn-sm">Confronto batterie da 200 Ah</a>
         <a href="guida-climatizzatore-camper.html" class="btn btn-outline btn-sm">Guida al climatizzatore</a>
       </div>`
   };
@@ -373,7 +374,7 @@ function buildHeatingGuide(products) {
     file: 'guida-riscaldamento-camper.html',
     shortTitle: 'Guida al riscaldamento per camper',
     title: 'Riscaldamento camper: gasolio, gas o portatile | CDA Tivoli',
-    description: 'Come scegliere il riscaldamento per il camper: riscaldatori a gasolio Autoterm, stufe a gas Truma e riscaldatore portatile. Differenze, pannelli di controllo, prezzi aggiornati e montaggio a Tivoli.',
+    description: 'Come scegliere il riscaldamento per il camper: riscaldatori a gasolio Autoterm, stufe a gas Truma, pannelli di controllo e prezzi aggiornati.',
     h1: 'Riscaldamento per camper: gasolio, gas o portatile?',
     lead: 'Le tre soluzioni che vendiamo, a confronto, con i prezzi aggiornati e le cose da controllare prima di ordinare (compreso il pannello di controllo).',
     body: `      <p>Con l'arrivo del freddo, scaldare il camper diventa la priorità. Le soluzioni che teniamo a catalogo sono tre: il <strong>riscaldatore a gasolio indipendente</strong> (Autoterm), la <strong>stufa a gas</strong> (Truma) e il <strong>riscaldatore portatile</strong> (Travel Box). Qui trovi come si differenziano. I prezzi sono letti dal nostro catalogo e si aggiornano da soli.</p>
@@ -490,7 +491,7 @@ function buildWaterGuide(products) {
     file: 'guida-impianto-acqua-camper.html',
     shortTitle: 'Guida all\'impianto acqua del camper',
     title: 'Pompe e serbatoi acqua per camper: come scegliere | CDA Tivoli',
-    description: 'Come scegliere la pompa ad immersione e il serbatoio acqua per il camper: portata in L/min, valvola di non ritorno, pompa Twin, capacità e dimensioni dei serbatoi, prezzi aggiornati.',
+    description: 'Come scegliere pompa ad immersione e serbatoio acqua per il camper: portata in L/min, valvola di non ritorno, pompa Twin, capacità e prezzi aggiornati.',
     h1: 'Pompe e serbatoi acqua per camper: come scegliere',
     lead: 'Le differenze tra le pompe ad immersione e i serbatoi che vendiamo, con portate, dimensioni e prezzi aggiornati.',
     body: `      <p>L'impianto acqua di un camper si regge su due componenti: la <strong>pompa</strong>, che manda l'acqua ai rubinetti, e il <strong>serbatoio</strong>, che ne determina l'autonomia. Qui trovi i modelli che abbiamo a catalogo e le cose da guardare prima di sceglierli. I prezzi si aggiornano da soli.</p>
@@ -569,7 +570,7 @@ function buildPowerGuide(products) {
     file: 'guida-impianto-elettrico-camper.html',
     shortTitle: 'Guida all\'impianto elettrico del camper',
     title: 'Inverter, MPPT e caricabatterie per camper: guida | CDA Tivoli',
-    description: 'Come scegliere inverter, regolatore di carica MPPT e caricabatterie per il camper: tensione 12, 24 o 48 V, onda sinusoidale pura, caricabatterie per batterie al litio, prezzi aggiornati.',
+    description: 'Come scegliere inverter, regolatore MPPT e caricabatterie per il camper: tensioni 12, 24 e 48 V, onda sinusoidale pura, prezzi aggiornati.',
     h1: 'Inverter, regolatore MPPT e caricabatterie per camper',
     lead: 'Che cosa fa ogni componente dell\'impianto elettrico, come abbinarli e quali modelli Alcapower abbiamo a catalogo, con prezzi aggiornati.',
     body: `      <p>Per avere corrente a bordo senza dipendere dalla rete servono tre pezzi che lavorano insieme: un <strong>caricabatterie</strong> (da rete o generatore), un <strong>regolatore di carica MPPT</strong> (dal pannello solare) e un <strong>inverter</strong> (che trasforma la corrente della batteria in corrente di rete a 220-230 V). Qui trovi i modelli Alcapower che teniamo a catalogo e come sceglierli. I prezzi si aggiornano da soli.</p>
@@ -675,7 +676,7 @@ function buildFridgeGuide(products) {
     file: 'guida-frigorifero-camper.html',
     shortTitle: 'Guida al frigorifero per camper',
     title: 'Frigorifero a compressore per camper: come scegliere | CDA Tivoli',
-    description: 'Come scegliere il frigorifero a compressore a 12 V per il camper: litri, freezer, dimensioni e peso dei modelli ExtraCOOL, con prezzi aggiornati, spedizione e montaggio a Tivoli.',
+    description: 'Come scegliere il frigorifero a compressore a 12 V per il camper: litri, freezer, dimensioni e peso dei modelli ExtraCOOL, prezzi aggiornati.',
     h1: 'Frigorifero a compressore per camper: come scegliere',
     lead: 'I modelli ExtraCOOL a 12 V che vendiamo, con litri, freezer, dimensioni, peso e prezzi aggiornati.',
     body: `      <p>Il frigorifero a compressore lavora a 12 V, raffredda in modo efficiente anche con temperature esterne elevate e non consuma gas né richiede areazione esterna. Qui trovi i modelli <strong>ExtraCOOL</strong> che abbiamo a catalogo, con i dati tecnici dichiarati dal costruttore. I prezzi si aggiornano da soli.</p>
@@ -717,6 +718,97 @@ ${tableRows(rows)}
   };
 }
 
+// ---------- Pagina di confronto: batterie al litio da 200 Ah ----------
+function buildBattery200Compare(products) {
+  const pick = (re) => {
+    const p = products.find((x) => re.test(x.name));
+    if (!p) throw new Error('Confronto 200 Ah: prodotto non trovato nel catalogo: ' + re);
+    return p;
+  };
+  const ex = pick(/ExtraPOWER 200 Ah/i);
+  const ulm = pick(/ULM-12-200H/i);
+  const ubl = pick(/UBL-12-200H-PRO/i);
+  const kg = (p) => (p.weight_kg ? String(p.weight_kg).replace('.', ',') + ' kg' : 'non indicato');
+  const diff = eur(ubl.price_cents - ulm.price_cents);
+  const link = (p, label) => `<a href="prodotto-${esc(p.slug)}.html">${esc(label)}</a>`;
+  const faq = [
+    ['Quanti Wh sono 200 Ah?', 'A 12,8 V, 200 Ah sono 2.560 Wh (Wh = V × Ah).'],
+    ['Qual è la differenza tra Ultimatron ULM e UBL-PRO?', 'Entrambe sono da 200 Ah con riscaldamento delle celle. La ULM ha una custodia in metallo ribassata (357 × 316 × 152 mm) pensata per il sottosedile e la spedizione inclusa; la UBL-PRO ha una custodia in ABS e costa ' + diff + ' in più.'],
+    ['Quale batteria da 200 Ah scegliere per l\'inverno?', 'Le due Ultimatron hanno il riscaldamento delle celle e dichiarano la ricarica fino a −35 °C; la ExtraPOWER non lo ha.'],
+    ['Le montate voi?', 'Sì, nel nostro centro tecnico di Tivoli, solo per le batterie acquistate da noi.']
+  ];
+  return {
+    file: 'guida-batteria-200ah-ultimatron-extrapower.html',
+    shortTitle: 'Batteria al litio 200 Ah: confronto',
+    title: 'Batteria litio 200 Ah camper: Ultimatron o ExtraPOWER?',
+    description: 'Confronto tra le batterie al litio da 200 Ah a catalogo: ExtraPOWER, Ultimatron ULM e UBL-PRO. Cicli, dimensioni, riscaldamento celle, prezzi aggiornati.',
+    h1: 'Batteria al litio da 200 Ah per camper: Ultimatron o ExtraPOWER?',
+    lead: 'Tre batterie da 12,8 V e 200 Ah (2.560 Wh) a confronto: cosa cambia davvero tra loro e per quale uso conviene ciascuna.',
+    faq,
+    body: `      <p><strong>In breve:</strong> a parità di capacità la ExtraPOWER costa meno (${eur(ex.price_cents)}), la Ultimatron ULM-12-200H è pensata per il montaggio sotto il sedile e ha la spedizione inclusa (${eur(ulm.price_cents)}), la Ultimatron UBL-12-200H-PRO ha le celle riscaldate in una custodia in ABS (${eur(ubl.price_cents)}). Le due Ultimatron dichiarano oltre 6.000 cicli all'80% di scarica, la ExtraPOWER oltre 4.000.</p>
+
+      <h2>Le tre batterie a confronto</h2>
+      <div class="guide-table-wrap">
+        <table class="guide-table">
+          <caption>Batterie LiFePO4 da 200 Ah a catalogo CDA, prezzi IVA inclusa (dati dalle schede dei costruttori e dal nostro catalogo, letti l'08/10/2026)</caption>
+          <thead><tr><th scope="col">Caratteristica</th><th scope="col">${link(ex, 'ExtraPOWER 200 Ah')}</th><th scope="col">${link(ulm, 'Ultimatron ULM-12-200H')}</th><th scope="col">${link(ubl, 'Ultimatron UBL-12-200H-PRO')}</th></tr></thead>
+          <tbody>
+            <tr><th scope="row">Tensione e capacità</th><td>12,8 V · 200 Ah</td><td>12,8 V · 200 Ah</td><td>12,8 V · 200 Ah</td></tr>
+            <tr><th scope="row">Energia</th><td>2.560 Wh</td><td>2.560 Wh</td><td>2.560 Wh</td></tr>
+            <tr><th scope="row">Cicli dichiarati (80% di scarica)</th><td>oltre 4.000</td><td>oltre 6.000</td><td>oltre 6.000</td></tr>
+            <tr><th scope="row">Monitoraggio</th><td>Bluetooth</td><td>BMS intelligente, Bluetooth 4.0</td><td>BMS intelligente, Bluetooth 4.0</td></tr>
+            <tr><th scope="row">Riscaldamento celle</th><td>No</td><td>Sì, pellicola da 80 W: ricarica fino a −35 °C</td><td>Sì, lamine integrate: ricarica fino a −35 °C</td></tr>
+            <tr><th scope="row">Dimensioni</th><td>350 × 287 × 187 mm</td><td>357 × 316 × 152 mm (ribassata)</td><td>non indicate</td></tr>
+            <tr><th scope="row">Peso (dato a catalogo)</th><td>${kg(ex)}</td><td>${kg(ulm)}</td><td>${kg(ubl)}</td></tr>
+            <tr><th scope="row">Protezione</th><td>IP54</td><td>IP62</td><td>non indicata (custodia in ABS)</td></tr>
+            <tr><th scope="row">Garanzia del produttore</th><td>non indicata</td><td>5 anni</td><td>5 anni</td></tr>
+            <tr><th scope="row">Prezzo</th><td>${eur(ex.price_cents)}</td><td>${eur(ulm.price_cents)}</td><td>${eur(ubl.price_cents)}</td></tr>
+            <tr><th scope="row">Spedizione</th><td>${esc(shippingNote(ex))}</td><td>${esc(shippingNote(ulm))}</td><td>${esc(shippingNote(ubl))}</td></tr>
+          </tbody>
+        </table>
+      </div>
+      <p>«Non indicato» significa che il dato non compare nella scheda del costruttore: preferiamo dirlo piuttosto che stimarlo.</p>
+
+      <h2>Quale scegliere</h2>
+      <div class="guide-table-wrap">
+        <table class="guide-table">
+          <caption>Quale batteria da 200 Ah per quale uso</caption>
+          <thead><tr><th scope="col">Se...</th><th scope="col">Scegli</th><th scope="col">Perché</th></tr></thead>
+          <tbody>
+            <tr><th scope="row">Vuoi spendere meno a parità di capacità</th><td>ExtraPOWER 200 Ah</td><td>${eur(ex.price_cents)} per 2.560 Wh; celle senza riscaldamento</td></tr>
+            <tr><th scope="row">Devi montarla sotto il sedile</th><td>Ultimatron ULM-12-200H</td><td>Custodia ribassata (152 mm di altezza), riscaldamento delle celle e spedizione inclusa</td></tr>
+            <tr><th scope="row">Viaggi o sosti con il freddo</th><td>Ultimatron ULM o UBL-PRO</td><td>Entrambe dichiarano la ricarica fino a −35 °C</td></tr>
+            <tr><th scope="row">Vuoi la custodia in ABS</th><td>Ultimatron UBL-12-200H-PRO</td><td>Costa ${diff} in più della ULM</td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <div class="guide-note"><strong>Non ancora provate in officina.</strong> I dati di questa pagina sono quelli dichiarati dai costruttori: non abbiamo ancora eseguito prove sul nostro banco. Quando le faremo, i risultati verranno aggiunti qui con data e modello del veicolo.</div>
+
+      <h2>Prima di ordinare</h2>
+      <p>Controlla lo spazio disponibile (le dimensioni qui sopra sono quelle del costruttore) e come verrà ricaricata la batteria: alternatore, pannello solare o caricabatterie. Per calcolare quanta capacità ti serve, leggi la <a href="guida-batteria-litio-camper.html">guida alle batterie al litio</a>.</p>
+
+      <h2>Spedizione, ritiro e montaggio</h2>
+      <ul>
+        <li><strong>Spedizione in tutta Italia</strong>, con costo calcolato nel carrello in base a peso e dimensioni (inclusa nel prezzo per la Ultimatron ULM, gratuita sopra 1.500 €).</li>
+        <li><strong>Ritiro gratis in officina a Tivoli</strong>, senza spedizione.</li>
+        <li><strong>Montaggio nel nostro centro tecnico</strong> per le batterie acquistate da noi. Il montaggio lo facciamo soltanto per i prodotti acquistati da CDA.</li>
+        <li><strong>Reso entro 14 giorni</strong> e garanzia legale di 24 mesi.</li>
+      </ul>
+
+      <h2>Domande frequenti</h2>
+      <dl class="guide-faq">
+${faq.map((f) => `        <dt>${esc(f[0])}</dt>\n        <dd>${esc(f[1])}</dd>`).join('\n')}
+      </dl>
+
+      <div class="guide-links">
+        <a href="categoria-energia-batterie.html" class="btn btn-primary btn-sm">Vedi tutte le batterie</a>
+        <a href="guida-batteria-litio-camper.html" class="btn btn-outline btn-sm">Guida alle batterie al litio</a>
+        <a href="guida-impianto-elettrico-camper.html" class="btn btn-outline btn-sm">Guida all'impianto elettrico</a>
+      </div>`
+  };
+}
+
 async function main() {
   const shell = siteShell();
   const [dometic, batterie, riscaldamento, acqua, elettrico, frigoriferi] = await Promise.all([
@@ -728,7 +820,7 @@ async function main() {
     fetchProducts('name=ilike.frigorifero*')
   ]);
 
-  const guides = [buildClimateGuide(dometic), buildBatteryGuide(batterie), buildHeatingGuide(riscaldamento), buildWaterGuide(acqua), buildPowerGuide(elettrico), buildFridgeGuide(frigoriferi)];
+  const guides = [buildClimateGuide(dometic), buildBatteryGuide(batterie), buildHeatingGuide(riscaldamento), buildWaterGuide(acqua), buildPowerGuide(elettrico), buildFridgeGuide(frigoriferi), buildBattery200Compare(batterie)];
   guides.forEach((g) => {
     fs.writeFileSync(path.join(ROOT, g.file), pageHtml(shell, g), 'utf8');
     console.log('Generata', g.file);

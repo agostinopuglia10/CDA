@@ -61,14 +61,37 @@ function loadCategoriesDataCached() {
   return _categoriesDataCache;
 }
 
-function buildPage(template, p) {
+// Taglia al limite sul confine di parola (Google tronca titoli oltre ~60 caratteri e descrizioni oltre ~160).
+function cutAt(str, max) {
+  str = String(str || '').replace(/\s+/g, ' ').trim();
+  if (str.length <= max) return str;
+  const cut = str.slice(0, max - 1);
+  const sp = cut.lastIndexOf(' ');
+  return (sp > max * 0.6 ? cut.slice(0, sp) : cut).replace(/[\s,;:.\-–—(]+$/, '') + '…';
+}
+
+// Titolo che entra nei risultati di Google: prova prima il suffisso completo, poi quello corto, poi tronca il nome.
+function fitTitle(name) {
+  const MAX = 62;
+  for (const suffix of [' | Shop CDA Tivoli', ' | CDA Tivoli']) {
+    if ((name + suffix).length <= MAX) return name + suffix;
+  }
+  return cutAt(name, MAX - ' | CDA Tivoli'.length) + ' | CDA Tivoli';
+}
+
+function normDesc(d) { return String(d || '').replace(/\s+/g, ' ').trim().toLowerCase(); }
+
+function buildPage(template, p, dupDesc) {
   const relPath = 'prodotto-' + p.slug + '.html';
   const pageUrl = SITE_URL + '/' + relPath;
-  const title = p.name + ' | Shop CDA Tivoli';
+  const title = fitTitle(p.name);
   const descSource = p.description
     || (p.name + ' disponibile nello Shop Camper CDA. Spedizione in tutta Italia o ritiro a Tivoli (RM), installazione disponibile nel centro tecnico.');
   const shortDesc = descSource.slice(0, 200);
-  const metaDesc = descSource.slice(0, 300);
+  // Descrizione meta: unica per pagina e entro ~158 caratteri. Se due prodotti condividono lo stesso testo
+  // (es. versione con e senza blister) si antepone il nome, che li distingue.
+  const metaBase = (dupDesc && dupDesc.has(normDesc(descSource))) ? (p.name + '. ' + descSource) : descSource;
+  const metaDesc = cutAt(metaBase, 158);
   // image_url in Supabase è quasi sempre un URL assoluto (fornitore o
   // Supabase Storage), ma alcune foto caricate a mano (Ultimatron) sono
   // salvate come percorso relativo ("images/prodotti/...") — senza
@@ -181,6 +204,11 @@ async function main() {
   const products = await fetchProducts();
   console.log('Prodotti attivi trovati: ' + products.length);
 
+  // Testi descrizione condivisi da piu' prodotti (varianti blister, frigoriferi gemelli...): servono a rendere unica la meta description.
+  const descCount = new Map();
+  for (const p of products) { const k = normDesc(p.description); if (k) descCount.set(k, (descCount.get(k) || 0) + 1); }
+  const dupDesc = new Set([...descCount].filter(([, n]) => n > 1).map(([k]) => k));
+
   const generatedFiles = [];
   const redirectLines = [];
   const sitemapUrls = [];
@@ -190,7 +218,7 @@ async function main() {
       console.warn('Prodotto senza slug, saltato (non genera pagina statica): ' + p.id + ' ' + p.name);
       continue;
     }
-    const { relPath, html } = buildPage(template, p);
+    const { relPath, html } = buildPage(template, p, dupDesc);
     fs.writeFileSync(path.join(ROOT, relPath), html, 'utf8');
     generatedFiles.push(relPath);
     // Sintassi Netlify per un redirect basato su query string: il
@@ -356,7 +384,9 @@ function buildCategoryPages() {
     for (const seg of segs) { names.push({ slug: seg, name: nodes[seg].name }); nodes = nodes[seg].children || {}; }
 
     const name = c.node.name;
-    const desc = c.node.description || (name + ' - accessori per camper, spedizione in tutta Italia, installazione nel centro tecnico CDA di Tivoli.');
+    const rawDesc = c.node.description || (name + ' - accessori per camper, spedizione in tutta Italia, installazione nel centro tecnico CDA di Tivoli.');
+    // Meta description: se il testo di categoria e' troppo breve per Google lo si completa con i dati reali del servizio.
+    const desc = cutAt(rawDesc.length < 90 ? rawDesc.replace(/\.?$/, '.') + ' Spedizione in tutta Italia, ritiro gratis a Tivoli.' : rawDesc, 158);
     const file = categoryFileName(c.path);
     const url = SITE_URL + '/' + file;
     const title = name + ' — Shop Camper | CDA Tivoli';
