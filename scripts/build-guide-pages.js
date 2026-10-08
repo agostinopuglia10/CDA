@@ -218,8 +218,10 @@ ${tableRows(rows)}
 function batteryNote(p) {
   const bits = [];
   if (/Ultimatron/i.test(p.brand || p.name)) {
-    if (/UBL/i.test(p.name)) bits.push('BMS intelligente e Bluetooth');
-    if (/Riscaldatore/i.test(p.name)) bits.push('lamine riscaldanti: ricarica fino a −35 °C');
+    if (/bluetooth/i.test(p.description || '')) bits.push('BMS intelligente e Bluetooth');
+    // Il riscaldamento delle celle si legge dalla scheda (descrizione), non dal nome: anche le ULM 200H e 310H
+    // hanno la pellicola riscaldante da 80 W, pur senza "Riscaldatore" nel nome.
+    if (/riscaldant/i.test(p.description || '') || /Riscaldatore/i.test(p.name)) bits.push('riscaldamento delle celle: ricarica fino a −35 °C');
     if (/ULM/i.test(p.name) && /Sottosedile/i.test(p.name)) bits.push('custodia ribassata per il sottosedile, IP62');
     if (/ULM-12-620/i.test(p.name)) bits.push('massima capacità della gamma ULM');
   } else {
@@ -277,8 +279,8 @@ ${tableRows(rows)}
 
       <h2>Ultimatron o ExtraPOWER?</h2>
       <ul>
-        <li><strong>Ultimatron UBL "PRO"</strong>: BMS intelligente integrato e monitoraggio via Bluetooth dall'app; le versioni con riscaldatore permettono la ricarica fino a −35 °C. Il costruttore dichiara oltre 6.000 cicli all'80% di profondità di scarica.</li>
-        <li><strong>Ultimatron ULM</strong>: custodia metallica pensata anche per il montaggio sotto il sedile del camper, con spedizione già inclusa nel prezzo.</li>
+        <li><strong>Ultimatron UBL "PRO"</strong>: BMS intelligente integrato e monitoraggio via Bluetooth dall'app; le versioni con riscaldamento delle celle permettono la ricarica fino a −35 °C. Il costruttore dichiara oltre 6.000 cicli all'80% di profondità di scarica.</li>
+        <li><strong>Ultimatron ULM</strong>: custodia metallica pensata anche per il montaggio sotto il sedile del camper, con spedizione già inclusa nel prezzo. I modelli ULM-12-200H e ULM-12-310H hanno anche una pellicola riscaldante da 80 W per la ricarica fino a −35 °C.</li>
         <li><strong>ExtraPOWER LiFePO4</strong>: da 100 a 450 Ah, batterie LiFePO4 in tante taglie, per scegliere la capacità che ti serve.</li>
       </ul>
       <p>Per le caratteristiche tecniche complete di ogni modello apri la scheda prodotto dalla tabella.</p>
