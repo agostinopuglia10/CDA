@@ -324,8 +324,8 @@ function heaterKind(p) {
 }
 
 function heaterPanel(p) {
-  if (/PU-5/i.test(p.name)) return 'PU-5 (base)';
-  if (/Comfort/i.test(p.name)) return 'Comfort (retroilluminato, timer settimanale)';
+  if (/PU-5/i.test(p.name)) return 'PU-5 (analogico, base)';
+  if (/Comfort/i.test(p.name)) return 'Comfort (digitale, display OLED, timer programmabili)';
   return 'Non incluso: da aggiungere';
 }
 
@@ -381,7 +381,7 @@ function buildHeatingGuide(products) {
 
       <h2>Riscaldatore a gasolio indipendente</h2>
       <p>Un riscaldatore a gasolio funziona in modo indipendente e si installa in modo fisso nel camper. I modelli Autoterm hanno un motore brushless silenzioso e il funzionamento è garantito fino a −45 °C. La scelta è tra <strong>Air 2D</strong> (soluzione compatta) e <strong>Air 4D</strong> (più potenza per ambienti più grandi).</p>
-      <div class="guide-note"><strong>Attenzione al pannello di controllo.</strong> Per accendere e regolare il riscaldatore serve un pannello. Nei modelli che lo riportano nel nome è incluso: <strong>PU-5</strong> (base) oppure <strong>Comfort</strong> (retroilluminato, con timer settimanale). I riscaldatori a gasolio da 2 kW e 4 kW senza pannello e il Kit Riscaldamento Invernale <strong>non lo includono</strong>: va aggiunto a parte.</div>
+      <div class="guide-note"><strong>Attenzione al pannello di controllo.</strong> Per accendere e regolare il riscaldatore serve un pannello. Nei modelli che lo riportano nel nome è incluso: <strong>PU-5</strong> (pannello analogico di base) oppure <strong>Comfort</strong> (pannello digitale con display OLED e timer programmabili). I riscaldatori a gasolio da 2 kW e 4 kW senza pannello e il Kit Riscaldamento Invernale <strong>non lo includono</strong>: va aggiunto a parte.</div>
       <div class="guide-table-wrap">
         <table class="guide-table">
           <thead><tr><th>Modello</th><th>Pannello</th><th>Note</th><th>Prezzo</th><th>Spedizione</th></tr></thead>
@@ -436,7 +436,7 @@ ${rowsHtml(portableRows)}
         <dt>Il pannello di controllo è incluso?</dt>
         <dd>Dipende dal modello: è incluso dove il nome riporta PU-5 o Comfort. Nei riscaldatori da 2 kW e 4 kW senza pannello e nel Kit Riscaldamento Invernale va aggiunto a parte.</dd>
         <dt>Che differenza c'è tra il pannello PU-5 e il Comfort?</dt>
-        <dd>Il PU-5 è il pannello base; il Comfort è retroilluminato e ha il timer settimanale.</dd>
+        <dd>Il PU-5 è il pannello analogico di base; il Comfort è digitale, con display OLED e timer programmabili.</dd>
         <dt>Fino a quale temperatura funzionano i riscaldatori Autoterm?</dt>
         <dd>Secondo la scheda, il funzionamento è garantito fino a −45 °C.</dd>
         <dt>Lo montate voi?</dt>
@@ -831,7 +831,7 @@ function buildPanelCompare(products) {
   const d = (a, b) => eur(b.price_cents - a.price_cents);
   const row = (label, pu, co) => `<tr><th scope="row">${esc(label)}</th><td>${link(pu, eur(pu.price_cents))}</td><td>${link(co, eur(co.price_cents))}</td><td class="num">+ ${d(pu, co)}</td></tr>`;
   const faq = [
-    ['Qual è la differenza tra il pannello PU-5 e il Comfort?', 'Nel nostro catalogo il PU-5 è il pannello base, mentre il Comfort è retroilluminato e ha il timer settimanale. Il riscaldatore Autoterm è lo stesso: cambia solo il pannello.'],
+    ['Qual è la differenza tra il pannello PU-5 e il Comfort?', 'Secondo la scheda GES il PU-5 è un pannello analogico di base e il Comfort è un pannello digitale con display OLED. Secondo le schede dei rivenditori specializzati il Comfort ha anche tre timer programmabili e un sensore di temperatura integrato, che il PU-5 non ha. Il riscaldatore Autoterm è lo stesso: cambia solo il pannello.'],
     ['Quanto costa in più il pannello Comfort?', `Sull'Air 2D ${d(a2pu, a2co)} in più (${eur(a2pu.price_cents)} contro ${eur(a2co.price_cents)}), sull'Air 4D ${d(a4pu, a4co)} in più (${eur(a4pu.price_cents)} contro ${eur(a4co.price_cents)}). Nei kit la differenza è di ${d(k2pu, k2co)} sul 2D e ${d(k4pu, k4co)} sul 4D.`],
     ['Il pannello è incluso nel prezzo?', 'Sì, nei modelli che lo riportano nel nome (con pannello PU-5 o con pannello Comfort). I riscaldatori a gasolio da 2 kW e 4 kW senza pannello e il Kit Riscaldamento Invernale non lo includono: va aggiunto a parte.'],
     ['Montate voi il riscaldatore?', 'Sì, nel nostro centro tecnico di Tivoli, solo per i prodotti acquistati da noi.']
@@ -844,16 +844,17 @@ function buildPanelCompare(products) {
     h1: 'Riscaldatore Autoterm: pannello PU-5 o Comfort?',
     lead: 'Lo stesso riscaldatore a gasolio con due pannelli di controllo diversi: cosa cambia e quanto costa in più.',
     faq,
-    body: `      <p><strong>In breve:</strong> il riscaldatore Autoterm Air 2D o 4D è lo stesso con entrambi i pannelli. Il PU-5 è il pannello base; il Comfort è retroilluminato e ha il timer settimanale, e costa ${d(a2pu, a2co)} in più sull'Air 2D e ${d(a4pu, a4co)} in più sull'Air 4D.</p>
+    body: `      <p><strong>In breve:</strong> il riscaldatore Autoterm Air 2D o 4D è lo stesso con entrambi i pannelli. Il PU-5 è il pannello analogico di base; il Comfort è digitale, con display OLED e timer programmabili, e costa ${d(a2pu, a2co)} in più sull'Air 2D e ${d(a4pu, a4co)} in più sull'Air 4D.</p>
 
       <h2>I due pannelli a confronto</h2>
       <div class="guide-table-wrap">
         <table class="guide-table">
-          <caption>Pannelli di controllo Autoterm a catalogo CDA (dati dalle schede dei prodotti, letti l'08/10/2026)</caption>
+          <caption>Pannelli di controllo Autoterm a catalogo CDA (tipo di pannello dalle schede GES; timer e sensore dalle schede dei rivenditori specializzati, non dal manuale Autoterm; letti l'08/10/2026)</caption>
           <thead><tr><th scope="col">Caratteristica</th><th scope="col">PU-5</th><th scope="col">Comfort</th></tr></thead>
           <tbody>
-            <tr><th scope="row">Tipo</th><td>Pannello base</td><td>Pannello con display retroilluminato</td></tr>
-            <tr><th scope="row">Timer settimanale</th><td>Non indicato nella scheda</td><td>Sì</td></tr>
+            <tr><th scope="row">Tipo</th><td>Pannello analogico di base</td><td>Pannello digitale con display OLED</td></tr>
+            <tr><th scope="row">Timer programmabili</th><td>No</td><td>Sì, fino a tre</td></tr>
+            <tr><th scope="row">Sensore di temperatura nel pannello</th><td>No</td><td>Sì</td></tr>
             <tr><th scope="row">Riscaldatore</th><td>Autoterm Air 2D o 4D</td><td>Autoterm Air 2D o 4D (identico)</td></tr>
             <tr><th scope="row">Funzionamento garantito fino a</th><td>-45 °C</td><td>-45 °C</td></tr>
           </tbody>
@@ -882,13 +883,13 @@ function buildPanelCompare(products) {
           <thead><tr><th scope="col">Se...</th><th scope="col">Scegli</th><th scope="col">Perché</th></tr></thead>
           <tbody>
             <tr><th scope="row">Vuoi spendere meno</th><td>PU-5</td><td>Stesso riscaldatore, ${d(a2pu, a2co)} in meno sull'Air 2D</td></tr>
-            <tr><th scope="row">Vuoi programmare l'accensione</th><td>Comfort</td><td>Ha il timer settimanale</td></tr>
-            <tr><th scope="row">Lo usi spesso di sera</th><td>Comfort</td><td>Il display è retroilluminato</td></tr>
+            <tr><th scope="row">Vuoi programmare l'accensione</th><td>Comfort</td><td>Ha fino a tre timer programmabili</td></tr>
+            <tr><th scope="row">Vuoi un sensore di temperatura nel pannello</th><td>Comfort</td><td>Il sensore è integrato nel pannello</td></tr>
           </tbody>
         </table>
       </div>
 
-      <div class="guide-note"><strong>Non ancora provati in officina.</strong> Le funzioni dei pannelli sono quelle indicate nelle schede dei prodotti: non abbiamo ancora eseguito confronti sul nostro banco. Se lo faremo, i risultati verranno aggiunti qui con data e modello.</div>
+      <div class="guide-note"><strong>Non ancora provati in officina.</strong> Le funzioni dei pannelli sono quelle indicate nelle schede GES e dei rivenditori specializzati: non abbiamo ancora eseguito confronti sul nostro banco e prima di ordinare conviene verificarle nel manuale del tuo modello. Se lo faremo, i risultati verranno aggiunti qui con data e modello.</div>
 
       <h2>Spedizione, ritiro e montaggio</h2>
       <ul>
