@@ -392,7 +392,7 @@ ${rowsHtml(dieselRows)}
       </div>
 
       <h2>Stufa a gas</h2>
-      <p>La stufa a gas Truma SL è la soluzione per chi preferisce il gas del camper: calore immediato e costante, con accensione automatica.</p>
+      <p>La stufa a gas Truma S è la soluzione per chi preferisce il gas del camper: calore immediato e costante, con accensione automatica.</p>
       <div class="guide-table-wrap">
         <table class="guide-table">
           <thead><tr><th>Modello</th><th>Per chi</th><th>Prezzo</th><th>Spedizione</th></tr></thead>
@@ -415,7 +415,7 @@ ${rowsHtml(portableRows)}
 
       <h2>Come scegliere</h2>
       <ul>
-        <li><strong>Dimensioni del camper.</strong> Per furgonati e camper di dimensioni contenute è pensata la soluzione compatta (Air 2D o il riscaldatore a gasolio da 2 kW); per ambienti più grandi guarda l'Air 4D, il 4 kW o la Truma SL 5004.</li>
+        <li><strong>Dimensioni del camper.</strong> Per furgonati e camper di dimensioni contenute è pensata la soluzione compatta (Air 2D o il riscaldatore a gasolio da 2 kW); per ambienti più grandi guarda l'Air 4D, il 4 kW o la Truma S 5004.</li>
         <li><strong>Gasolio o gas?</strong> Il riscaldatore a gasolio funziona in modo indipendente; la stufa a gas usa l'impianto gas del camper. Scegli in base a quale combustibile preferisci avere a bordo.</li>
         <li><strong>Fisso o portatile?</strong> Il riscaldatore fisso va installato nel camper; il Travel Box si sposta dove serve e non richiede installazione fissa.</li>
         <li><strong>Pannello di controllo.</strong> Controlla sempre se è incluso (vedi riquadro sopra).</li>
@@ -448,7 +448,7 @@ ${rowsHtml(portableRows)}
         <a href="guida-climatizzatore-camper.html" class="btn btn-outline btn-sm">Guida al climatizzatore</a>
         <a href="guida-batteria-litio-camper.html" class="btn btn-outline btn-sm">Guida alle batterie al litio</a>
         <a href="guida-pannello-pu5-o-comfort-autoterm.html" class="btn btn-outline btn-sm">Autoterm: PU-5 o Comfort</a>
-        <a href="guida-stufa-truma-sl-3004-o-5004.html" class="btn btn-outline btn-sm">Truma SL 3004 o 5004</a>
+        <a href="guida-stufa-truma-s-3004-o-5004.html" class="btn btn-outline btn-sm">Truma S 3004 o 5004</a>
       </div>`
   };
 }
@@ -905,44 +905,44 @@ ${faq.map((f) => `        <dt>${esc(f[0])}</dt>\n        <dd>${esc(f[1])}</dd>`)
       <div class="guide-links">
         <a href="categoria-clima-riscaldatori-gasolio-gas.html" class="btn btn-primary btn-sm">Vedi tutti i riscaldatori</a>
         <a href="guida-riscaldamento-camper.html" class="btn btn-outline btn-sm">Guida al riscaldamento</a>
-        <a href="guida-stufa-truma-sl-3004-o-5004.html" class="btn btn-outline btn-sm">Truma SL 3004 o 5004</a>
+        <a href="guida-stufa-truma-s-3004-o-5004.html" class="btn btn-outline btn-sm">Truma S 3004 o 5004</a>
       </div>`
   };
 }
 
-// ---------- Pagina di confronto: stufa a gas Truma SL 3004 o SL 5004 ----------
+// ---------- Pagina di confronto: stufa a gas Truma S 3004 o S 5004 ----------
 function buildTrumaCompare(products) {
   const find = (re) => {
     const p = products.find((x) => re.test(x.name));
     if (!p) throw new Error('Confronto Truma: prodotto non trovato nel catalogo: ' + re);
     return p;
   };
-  const s3 = find(/Truma SL 3004/i);
-  const s5 = find(/Truma SL 5004/i);
+  const s3 = find(/Truma S 3004/i);
+  const s5 = find(/Truma S 5004/i);
   const kg = (p) => (p.weight_kg ? String(p.weight_kg).replace('.', ',') + ' kg' : 'non indicato');
   const link = (p, label) => `<a href="prodotto-${esc(p.slug)}.html">${esc(label)}</a>`;
   const faq = [
-    ['Qual è la differenza tra la Truma SL 3004 e la SL 5004?', 'La potenza termica nominale: 3.500 W contro 6.000 W. La SL 5004 consuma più gas (da 60 a 480 g/h contro 30-280 g/h), è più grande e pesante ed è indicata dal fornitore per i camper più grandi.'],
+    ['Qual è la differenza tra la Truma S 3004 e la S 5004?', 'La potenza termica nominale: 3.500 W contro 6.000 W. La S 5004 consuma più gas (da 60 a 480 g/h contro 30-280 g/h), è più grande e pesante ed è indicata dal fornitore per i camper più grandi.'],
     ['Il pannello è incluso?', 'No: entrambe le stufe sono fornite senza pannello, come indicato dal fornitore.'],
     ['Che gas usano?', 'GPL a 30 mbar, con accensione automatica.'],
     ['Si può aggiungere un ventilatore?', 'Sì, entrambe sono predisposte per un ventilatore 012 TEB/TEN.'],
     ['Le montate voi?', 'Sì, nel nostro centro tecnico di Tivoli, solo per le stufe acquistate da noi.']
   ];
   return {
-    file: 'guida-stufa-truma-sl-3004-o-5004.html',
-    shortTitle: 'Truma SL 3004 o SL 5004',
-    title: 'Truma SL 3004 o SL 5004: quale stufa a gas scegliere',
-    description: 'Confronto tra le stufe a gas Truma SL 3004 e SL 5004 a catalogo: potenza, consumo di gas, dimensioni, peso e prezzi aggiornati.',
-    h1: 'Stufa a gas Truma: SL 3004 o SL 5004?',
+    file: 'guida-stufa-truma-s-3004-o-5004.html',
+    shortTitle: 'Truma S 3004 o S 5004',
+    title: 'Truma S 3004 o S 5004: quale stufa a gas scegliere',
+    description: 'Confronto tra le stufe a gas Truma S 3004 e S 5004 a catalogo: potenza, consumo di gas, dimensioni, peso e prezzi aggiornati.',
+    h1: 'Stufa a gas Truma: S 3004 o S 5004?',
     lead: 'Due stufe Truma a GPL con accensione automatica: cosa cambia in potenza, consumi, ingombro e prezzo.',
     faq,
-    body: `      <p><strong>In breve:</strong> la Truma SL 3004 ha una potenza termica nominale di 3.500 W e costa ${eur(s3.price_cents)}; la SL 5004 arriva a 6.000 W, è indicata dal fornitore per i camper più grandi e costa ${eur(s5.price_cents)}. Entrambe sono a GPL a 30 mbar, con accensione automatica e senza pannello.</p>
+    body: `      <p><strong>In breve:</strong> la Truma S 3004 ha una potenza termica nominale di 3.500 W e costa ${eur(s3.price_cents)}; la S 5004 arriva a 6.000 W, è indicata dal fornitore per i camper più grandi e costa ${eur(s5.price_cents)}. Entrambe sono a GPL a 30 mbar, con accensione automatica e senza pannello.</p>
 
       <h2>Le due stufe a confronto</h2>
       <div class="guide-table-wrap">
         <table class="guide-table">
           <caption>Stufe a gas Truma a catalogo CDA, prezzi IVA inclusa (dati dalle schede del fornitore e dal nostro catalogo, letti l'08/10/2026)</caption>
-          <thead><tr><th scope="col">Caratteristica</th><th scope="col">${link(s3, 'Truma SL 3004')}</th><th scope="col">${link(s5, 'Truma SL 5004')}</th></tr></thead>
+          <thead><tr><th scope="col">Caratteristica</th><th scope="col">${link(s3, 'Truma S 3004')}</th><th scope="col">${link(s5, 'Truma S 5004')}</th></tr></thead>
           <tbody>
             <tr><th scope="row">Potenza termica nominale</th><td>3.500 W</td><td>6.000 W</td></tr>
             <tr><th scope="row">Consumo di gas</th><td>da 30 a 280 g/h</td><td>da 60 a 480 g/h</td></tr>
@@ -964,9 +964,9 @@ function buildTrumaCompare(products) {
           <caption>Quale stufa per quale camper</caption>
           <thead><tr><th scope="col">Se...</th><th scope="col">Scegli</th><th scope="col">Perché</th></tr></thead>
           <tbody>
-            <tr><th scope="row">Il camper è di dimensioni contenute o medie</th><td>SL 3004</td><td>3.500 W, ingombro e peso minori, consumo da 30 a 280 g/h</td></tr>
-            <tr><th scope="row">Il camper è grande</th><td>SL 5004</td><td>6.000 W, indicata dal fornitore per i camper più grandi</td></tr>
-            <tr><th scope="row">Hai poco spazio per il vano stufa</th><td>SL 3004</td><td>503 × 545 × 373 mm contro 533 × 568 × 496 mm</td></tr>
+            <tr><th scope="row">Il camper è di dimensioni contenute o medie</th><td>S 3004</td><td>3.500 W, ingombro e peso minori, consumo da 30 a 280 g/h</td></tr>
+            <tr><th scope="row">Il camper è grande</th><td>S 5004</td><td>6.000 W, indicata dal fornitore per i camper più grandi</td></tr>
+            <tr><th scope="row">Hai poco spazio per il vano stufa</th><td>S 3004</td><td>503 × 545 × 373 mm contro 533 × 568 × 496 mm</td></tr>
           </tbody>
         </table>
       </div>
