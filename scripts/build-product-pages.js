@@ -90,7 +90,7 @@ function buildPage(template, p, dupDesc) {
   const shortDesc = descSource.slice(0, 200);
   // Descrizione meta: unica per pagina e entro ~158 caratteri. Se due prodotti condividono lo stesso testo
   // (es. versione con e senza blister) si antepone il nome, che li distingue.
-  const metaBase = (dupDesc && dupDesc.has(normDesc(descSource))) ? (p.name + '. ' + descSource) : descSource;
+  const metaBase = (dupDesc && dupDesc.has(normDesc(cutAt(descSource, 158)))) ? (p.name + '. ' + descSource) : descSource;
   const metaDesc = cutAt(metaBase, 158);
   // image_url in Supabase è quasi sempre un URL assoluto (fornitore o
   // Supabase Storage), ma alcune foto caricate a mano (Ultimatron) sono
@@ -230,7 +230,7 @@ async function main() {
 
   // Testi descrizione condivisi da piu' prodotti (varianti blister, frigoriferi gemelli...): servono a rendere unica la meta description.
   const descCount = new Map();
-  for (const p of products) { const k = normDesc(p.description); if (k) descCount.set(k, (descCount.get(k) || 0) + 1); }
+  for (const p of products) { const k = normDesc(cutAt(p.description, 158)); if (k) descCount.set(k, (descCount.get(k) || 0) + 1); }
   const dupDesc = new Set([...descCount].filter(([, n]) => n > 1).map(([k]) => k));
 
   const generatedFiles = [];
