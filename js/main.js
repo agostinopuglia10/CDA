@@ -343,7 +343,8 @@ var CATEGORIES_DATA = {
       verande: { name: 'Verande', description: 'Verande e tende avvolgibili per vivere all\'aperto accanto al tuo camper.', img: 'images/sottocategorie/esterni-verande.jpg' },
       portaggio: { name: 'Portaggio', description: 'Prese e connettori elettrici per il traino e il portaggio del camper.', img: 'images/sottocategorie/esterni-portaggio.jpg' },
       sicurezza: { name: 'Segnaletica e Sicurezza', description: 'Catadiottri e dotazioni di sicurezza per il tuo camper.' },
-      illuminazione: { name: 'Illuminazione Esterna', description: "Luci solari da parete e da giardino per l'esterno del camper, senza bisogno di cablaggio." }
+      illuminazione: { name: 'Illuminazione Esterna', description: "Luci solari da parete e da giardino per l'esterno del camper, senza bisogno di cablaggio." },
+      'adesivi-sigillanti': { name: 'Adesivi e Sigillanti', description: 'Sigillanti elastici, adesivi strutturali e detergenti/attivatori per incollaggi e sigillature su tetto, finestre, carrozzeria e plastiche del camper.' }
     }
   },
   energia: {
