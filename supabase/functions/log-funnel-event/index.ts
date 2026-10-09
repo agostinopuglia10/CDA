@@ -21,7 +21,7 @@ const CORS_HEADERS = {
   'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
 };
 
-const ALLOWED_EVENTS = new Set(['view_item', 'add_to_cart', 'begin_checkout']);
+const ALLOWED_EVENTS = new Set(['view_item', 'add_to_cart', 'begin_checkout', 'contact_click']);
 
 // Crawler e strumenti automatici (Googlebot, Bing, PageSpeed, Lighthouse, browser headless...)
 // eseguono il JavaScript del sito e mandavano eventi falsi: il 03-04/10/2026 risultavano
@@ -47,7 +47,7 @@ Deno.serve(async (req) => {
   }
 
   try {
-    const { event_name, visit_id, product_id } = await req.json();
+    const { event_name, visit_id, product_id, detail } = await req.json();
 
     if (!ALLOWED_EVENTS.has(event_name) || typeof visit_id !== 'string' || !visit_id) {
       return new Response(JSON.stringify({ error: 'Parametri non validi' }), {
@@ -61,6 +61,8 @@ Deno.serve(async (req) => {
       event_name,
       visit_id: visit_id.slice(0, 100),
       product_id: typeof product_id === 'string' ? product_id : null,
+      // Solo per contact_click: "metodo|pagina" (es. "phone|/camper-usato-arca-america-430").
+      detail: event_name === 'contact_click' && typeof detail === 'string' ? detail.slice(0, 120) : null,
     });
 
     return new Response(JSON.stringify({ ok: true }), {

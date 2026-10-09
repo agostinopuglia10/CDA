@@ -1,4 +1,5 @@
 document.addEventListener('DOMContentLoaded', function () {
+  initContactClickTracking();
   initMobileMenu();
   initSearch();
   initCookieBanner();
@@ -1443,8 +1444,28 @@ var META_EVENT_MAP = {
   begin_checkout: 'InitiateCheckout',
   purchase: 'Purchase',
   generate_lead: 'Lead',
-  newsletter_signup: 'Subscribe'
+  newsletter_signup: 'Subscribe',
+  contact_click: 'Contact'
 };
+
+// Contatti dal sito oltre al modulo (generate_lead): clic su telefono, WhatsApp ed email.
+// Per un'officina sono il risultato che conta davvero. Un solo evento "contact_click" con
+// method = phone | whatsapp | email e la pagina di provenienza. Passa da trackEvent, quindi va
+// a GA4/Meta solo con il consenso e non parte mai per il traffico interno (?interno=1).
+// Da segnare come "evento chiave" in GA4.
+function initContactClickTracking() {
+  document.addEventListener('click', function (e) {
+    var a = e.target && e.target.closest ? e.target.closest('a[href]') : null;
+    if (!a) return;
+    var href = a.getAttribute('href') || '';
+    var method = null;
+    if (/^tel:/i.test(href)) method = 'phone';
+    else if (/wa\.me|api\.whatsapp\.com/i.test(href) || /^whatsapp:/i.test(href)) method = 'whatsapp';
+    else if (/^mailto:/i.test(href)) method = 'email';
+    if (!method) return;
+    trackEvent('contact_click', { method: method, page: location.pathname });
+  }, true);
+}
 
 // Id anonimo di visita (solo per la scheda corrente: sparisce alla chiusura,
 // non è un cookie, non incrocia mai identità). Serve solo a collegare tra loro
@@ -1466,7 +1487,7 @@ function getVisitId() {
 // consenso cookie che carica GA4/Meta solo dopo "Accetta tutti" — senza questo
 // la maggior parte delle sessioni reali risultava invisibile nel funnel GA4).
 // Nessun dato personale, mai un errore qui deve bloccare l'esperienza utente.
-var FUNNEL_LOG_EVENTS = { view_item: 1, add_to_cart: 1, begin_checkout: 1 };
+var FUNNEL_LOG_EVENTS = { view_item: 1, add_to_cart: 1, begin_checkout: 1, contact_click: 1 };
 function logFunnelEvent(name, params) {
   if (!FUNNEL_LOG_EVENTS[name]) return;
   if (isInternalVisitor()) return; // traffico interno: non registrare nel funnel
@@ -1475,7 +1496,12 @@ function logFunnelEvent(name, params) {
     fetch(SUPABASE_URL + '/functions/v1/log-funnel-event', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + SUPABASE_ANON_KEY },
-      body: JSON.stringify({ event_name: name, visit_id: getVisitId(), product_id: productId }),
+      body: JSON.stringify({
+        event_name: name,
+        visit_id: getVisitId(),
+        product_id: productId,
+        detail: (name === 'contact_click' && params) ? (params.method + '|' + params.page) : null
+      }),
       keepalive: true
     }).catch(function () {});
   } catch (e) {}
