@@ -10,7 +10,7 @@
   # reale — vedi scripts/build-product-pages.js per il motivo.
   # build-guide-pages.js rigenera poi le guide all'acquisto (guida-*.html) con i
   # prezzi veri del catalogo, e le aggiunge alla sitemap.
-  command = "node scripts/build-product-pages.js && node scripts/build-guide-pages.js"
+  command = "node scripts/build-product-pages.js && node scripts/build-guide-pages.js && node scripts/build-camper-usati.js"
 
 # Header di sicurezza HTTP standard, mancavano tutti tranne HSTS (di
 # default su Netlify). Il dominio consentito per script/connessioni

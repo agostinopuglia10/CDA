@@ -1133,3 +1133,25 @@ button.ba-card:focus-visible{outline:2px solid var(--red);outline-offset:2px;}
 .guide-hub-list li a{text-decoration:none;color:var(--ink);}
 .guide-hub-list li a:hover strong{color:var(--red);}
 .guide-hub-list li span{color:var(--steel);font-size:14.5px;}
+
+/* Camper usati: schede dell'elenco della stessa altezza, con prezzo e pulsante sempre allineati in basso */
+.used-card{display:flex;flex-direction:column;}
+.used-card .product-body{display:flex;flex-direction:column;flex:1;}
+.used-card .product-body p{flex:1;}
+.used-card .product-price{margin-top:12px;gap:12px;flex-wrap:wrap;}
+.used-card .product-thumb{aspect-ratio:4/3;overflow:hidden;}
+
+/* Camper usati: galleria e scheda veicolo */
+.used-detail{display:grid;grid-template-columns:minmax(0,1.1fr) minmax(0,1fr);gap:36px;align-items:start;}
+.used-gallery{min-width:0;}
+.used-main{width:100%;aspect-ratio:4/3;object-fit:contain;background:var(--line);display:block;}
+.used-thumbs{display:grid;grid-template-columns:repeat(5,1fr);gap:8px;margin-top:10px;}
+.used-thumb{padding:0;border:2px solid transparent;background:none;cursor:pointer;line-height:0;min-width:0;}
+.used-thumb img{width:100%;aspect-ratio:4/3;object-fit:cover;display:block;}
+.used-thumb.is-active,.used-thumb:hover{border-color:var(--red);}
+.used-info{max-width:none;margin:0;}
+.guide-table th[scope=row]{text-align:left;font-weight:600;width:38%;}
+.used-info .guide-table{min-width:0;width:100%;}
+.used-info .guide-table th,.used-info .guide-table td{white-space:normal;}
+.used-info .guide-table caption{text-align:left;font-size:13px;padding:8px 12px;}
+@media (max-width:860px){.used-detail{grid-template-columns:1fr;}.used-thumbs{grid-template-columns:repeat(4,1fr);}}
