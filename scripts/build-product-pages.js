@@ -81,6 +81,41 @@ function fitTitle(name) {
 
 function normDesc(d) { return String(d || '').replace(/\s+/g, ' ').trim().toLowerCase(); }
 
+// Guide che citano ogni prodotto: lette dai file guida-*.html già generati (committati nel repo),
+// così il collegamento scheda → guida segue sempre le tabelle delle guide, senza duplicarne le regole.
+// Serve a Google (link interni pertinenti) e a chi legge (dalla scheda alla guida che spiega la scelta).
+let guideLinksCache = null;
+function loadGuideLinks() {
+  if (guideLinksCache) return guideLinksCache;
+  const bySlug = {};
+  let files = [];
+  try { files = fs.readdirSync(ROOT).filter((f) => /^guida-.*\.html$/.test(f)).sort(); } catch (e) {}
+  files.forEach((f) => {
+    let src = '';
+    try { src = fs.readFileSync(path.join(ROOT, f), 'utf8'); } catch (e) { return; }
+    const h1 = src.match(/<h1[^>]*>([\s\S]*?)<\/h1>/);
+    const label = h1 ? h1[1].replace(/<[^>]+>/g, '').replace(/\s+/g, ' ').trim() : '';
+    if (!label) return;
+    const seen = {};
+    const re = /href=["']?(?:\/)?prodotto-([a-z0-9-]+)\.html/g;
+    let m;
+    while ((m = re.exec(src))) {
+      if (seen[m[1]]) continue;
+      seen[m[1]] = true;
+      (bySlug[m[1]] = bySlug[m[1]] || []).push({ file: f, label: label });
+    }
+  });
+  guideLinksCache = bySlug;
+  return bySlug;
+}
+
+function guideBoxFor(slug) {
+  const guides = (loadGuideLinks()[slug] || []).slice(0, 2);
+  if (!guides.length) return '';
+  const items = guides.map((g) => '<li><a href="' + g.file + '">' + escapeHtml(g.label) + '</a></li>').join('');
+  return '<div class="product-guide-box"><strong>Prima di scegliere</strong><ul>' + items + '</ul></div>';
+}
+
 function buildPage(template, p, dupDesc) {
   const relPath = 'prodotto-' + p.slug + '.html';
   const pageUrl = SITE_URL + '/' + relPath;
@@ -175,6 +210,8 @@ function buildPage(template, p, dupDesc) {
   setById('product-cat', escapeHtml(topName && catName && topName !== catName ? topName + ' · ' + catName : catName));
   setById('spec-category', escapeHtml(catName));
   setById('product-desc', escapeHtml(descSource));
+  const guideBox = guideBoxFor(p.slug);
+  if (guideBox) html = html.replace(/(<p class="desc" id="product-desc"[^>]*>[\s\S]*?<\/p>)/, (m) => m + '\n        ' + guideBox);
   if (!priceNotSet) setById('product-price', '<strong>' + priceText + '</strong>');
   if (topSlug) {
     html = html.replace(/(<a href=")categoria-energia\.html(" id="product-breadcrumb-cat">)[^<]*(<\/a>)/, '$1categoria-' + topSlug + '.html$2' + escapeHtml(topName) + '$3');

@@ -415,6 +415,11 @@ section{padding:80px 0;}
 .store-only-box{border:2px solid var(--ink);padding:18px 20px;margin:0 0 20px;}
 .store-only-box strong{display:block;font-family:var(--font-display);font-size:18px;letter-spacing:.04em;text-transform:uppercase;margin-bottom:6px;}
 .store-only-box p{margin:0 0 12px;}
+.product-guide-box{border-left:3px solid var(--red);padding:2px 0 2px 14px;margin:0 0 20px;font-size:14px;}
+.product-guide-box strong{display:block;font-family:var(--font-display);font-size:13px;letter-spacing:.08em;text-transform:uppercase;margin-bottom:4px;}
+.product-guide-box ul{list-style:none;margin:0;padding:0;}
+.product-guide-box li{margin:2px 0;}
+.product-guide-box a{text-decoration:underline;text-underline-offset:2px;}
 .price-pending{font-family:var(--font-body);font-style:italic;font-size:16px;color:var(--steel);}
 .desc-warning{
   display:inline-block;background:var(--red);color:var(--pure-white);
