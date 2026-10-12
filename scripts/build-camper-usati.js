@@ -175,6 +175,46 @@ function siteShell() {
   };
 }
 
+// Dati strutturati del veicolo usato (schema.org Product + Vehicle): anno, chilometri, condizione e,
+// se il prezzo è numerico, l'offerta. Legge tutto dalle specifiche già scritte in CAMPER, così non
+// c'è nulla da mantenere in doppio. "Trattativa in privato" => nessuna offerta (non c'è un prezzo).
+function vehicleLd(c) {
+  const spec = (k) => { const r = c.specs.find((s) => s[0] === k); return r ? r[1] : null; };
+  const num = (s) => { const m = s && String(s).match(/[\d.]+/); return m ? Number(m[0].replace(/\./g, '')) : null; };
+  const marcaModello = spec('Marca e modello');
+  const brand = spec('Marca') || (marcaModello ? marcaModello.split(' ')[0] : null);
+  const model = marcaModello ? marcaModello.split(' ').slice(1).join(' ') : null;
+  const url = SITE_URL + '/camper-usato-' + c.slug + '.html';
+  const ld = {
+    '@context': 'https://schema.org',
+    '@type': ['Product', 'Vehicle'],
+    name: c.title,
+    description: c.description.join(' '),
+    url,
+    image: c.photos.map((p) => SITE_URL + '/images/camper-usati/' + p[0]),
+    itemCondition: 'https://schema.org/UsedCondition'
+  };
+  if (brand) ld.brand = { '@type': 'Brand', name: brand };
+  if (model) ld.model = model;
+  if (num(spec('Anno'))) ld.vehicleModelDate = String(num(spec('Anno')));
+  if (num(spec('Chilometri'))) ld.mileageFromOdometer = { '@type': 'QuantitativeValue', value: num(spec('Chilometri')), unitCode: 'KMT' };
+  if (spec('Alimentazione')) ld.fuelType = spec('Alimentazione');
+  if (num(spec('Posti in viaggio'))) ld.vehicleSeatingCapacity = num(spec('Posti in viaggio'));
+  const price = /^\d[\d.]*\s*€$/.test(c.price) ? num(c.price) : null;
+  if (price) {
+    ld.offers = {
+      '@type': 'Offer',
+      price: String(price),
+      priceCurrency: 'EUR',
+      availability: 'https://schema.org/InStock',
+      itemCondition: 'https://schema.org/UsedCondition',
+      url,
+      seller: { '@id': SITE_URL + '/#attivita' }
+    };
+  }
+  return JSON.stringify(ld).replace(/</g, '\\u003c');
+}
+
 function page(shell, o) {
   const url = SITE_URL + '/' + o.file;
   const crumbs = [
@@ -206,7 +246,7 @@ function page(shell, o) {
 <link rel="stylesheet" href="stile.css">
 <script type="application/ld+json">
 ${ld}
-</script>
+</script>${o.vehicleLd ? '\n<script type="application/ld+json">\n' + o.vehicleLd + '\n</script>' : ''}
 </head>
 <body>
 
@@ -353,6 +393,7 @@ function main() {
       description: c.metaDescription,
       ogImage: 'images/camper-usati/' + c.photos[0][0],
       crumbName: c.shortTitle,
+      vehicleLd: vehicleLd(c),
       h1: c.title,
       lead: c.summary + ' ' + c.price + '.',
       body: detailBody(c)
