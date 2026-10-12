@@ -76,6 +76,9 @@ function fitTitle(name) {
   for (const suffix of [' | Shop CDA Tivoli', ' | CDA Tivoli']) {
     if ((name + suffix).length <= MAX) return name + suffix;
   }
+  // Nomi lunghi: meglio il nome intero con il suffisso minimo che un nome troncato. Il troncamento tagliava
+  // proprio la parte che distingue prodotti simili (es. "(blister)", "2000W" / "2700W") e produceva titoli uguali.
+  if ((name + ' | CDA').length <= MAX + 4) return name + ' | CDA';
   return cutAt(name, MAX - ' | CDA Tivoli'.length) + ' | CDA Tivoli';
 }
 
@@ -437,6 +440,8 @@ function buildCategoryPages() {
   const template = fs.readFileSync(path.join(ROOT, 'categoria.html'), 'utf8');
   const data = loadCategoriesData();
   const all = walkCategories(data, '', []);
+  const nameCount = {};
+  all.forEach(function (c) { nameCount[c.node.name] = (nameCount[c.node.name] || 0) + 1; });
 
   for (const c of all) {
     const segs = c.path.split('.');
@@ -450,7 +455,9 @@ function buildCategoryPages() {
     const desc = cutAt(rawDesc.length < 90 ? rawDesc.replace(/\.?$/, '.') + ' Spedizione in tutta Italia, ritiro gratis a Tivoli.' : rawDesc, 158);
     const file = categoryFileName(c.path);
     const url = SITE_URL + '/' + file;
-    const title = name + ' — Shop Camper | CDA Tivoli';
+    // Le sottocategorie con lo stesso nome (es. "Aperture" in Esterni e in Interni) devono avere titoli diversi.
+    const parentName = (names.length > 1 && nameCount[name] > 1) ? names[names.length - 2].name : '';
+    const title = name + (parentName ? ' (' + parentName + ')' : '') + ' — Shop Camper | CDA Tivoli';
 
     const items = [
       { '@type': 'ListItem', position: 1, name: 'Home', item: SITE_URL + '/' },

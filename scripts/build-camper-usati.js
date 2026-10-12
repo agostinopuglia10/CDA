@@ -92,7 +92,7 @@ const CAMPER = [
     shortTitle: 'Laika Ecovip 1995',
     metaTitle: 'Camper usato Laika Ecovip 1995, 19.000 € | CDA Tivoli',
     summary: '6 posti in viaggio, 7 posti letto, 6,80 m. Motore rifatto, climatizzatore con pompa di calore, batteria al litio.',
-    metaDescription: 'Camper usato Laika Ecovip del 1995 a 19.000 euro: motore rifatto, gomme nuove, climatizzatore con pompa di calore, batteria al litio e inverter a onda pura. Contatta CDA a Tivoli.',
+    metaDescription: 'Camper usato Laika Ecovip del 1995 a 19.000 euro: motore rifatto, gomme nuove, clima con pompa di calore, batteria al litio, inverter. Contatta CDA a Tivoli.',
     price: '19.000 €',
     specs: [
       ['Marca e modello', 'Laika Ecovip'],
@@ -124,7 +124,7 @@ const CAMPER = [
     slug: 'volkswagen-t4-tetto-sollevabile-1993',
     title: 'Volkswagen T4 con tetto sollevabile, anno 1993',
     shortTitle: 'Volkswagen T4 1993',
-    metaTitle: 'Camper usato Volkswagen T4 con tetto sollevabile, 18.000 € | CDA Tivoli',
+    metaTitle: 'Volkswagen T4 usato con tetto sollevabile, 18.000 € | CDA Tivoli',
     summary: '4 posti in viaggio, 4 posti letto, 284.000 km. Tetto sollevabile, cucina con lavello e frigorifero, 4,66 m.',
     metaDescription: 'Camper usato Volkswagen T4 con tetto sollevabile del 1993 a 18.000 euro: 284.000 km, diesel 2.4, 4 posti in viaggio e 4 letto, lungo 4,66 m. Contatta CDA a Tivoli.',
     price: '18.000 €',
