@@ -119,6 +119,43 @@ const CAMPER = [
       ['laika-ecovip-1995-08.jpg', 'Bagno con WC, doppio lavabo e doccia']
     ],
     note: 'Le informazioni sono quelle fornite dal venditore e quelle che si vedono nelle foto: prima dell\'acquisto il camper si può vedere di persona e controllare con i nostri tecnici.'
+  },
+  {
+    slug: 'volkswagen-t4-tetto-sollevabile-1993',
+    title: 'Volkswagen T4 con tetto sollevabile, anno 1993',
+    shortTitle: 'Volkswagen T4 1993',
+    metaTitle: 'Camper usato Volkswagen T4 con tetto sollevabile, 18.000 € | CDA Tivoli',
+    summary: 'Tetto sollevabile con letto, cucina con lavello e frigorifero, lunghezza 4,66 m. Diesel 2.4.',
+    metaDescription: 'Camper usato Volkswagen T4 con tetto sollevabile del 1993 a 18.000 euro: diesel 2.4, lunghezza 4,66 m, cucina e letto nel tetto. Contatta CDA a Tivoli per vederlo.',
+    price: '18.000 €',
+    specs: [
+      ['Marca e modello', 'Volkswagen T4'],
+      ['Tipologia', 'Autocaravan con tetto sollevabile'],
+      ['Anno', '1993'],
+      ['Alimentazione', 'Diesel'],
+      ['Cilindrata e potenza', '2.370 cc, 57 kW'],
+      ['Cambio', 'Meccanico'],
+      ['Lunghezza', '4,66 m'],
+      ['Larghezza', '1,84 m'],
+      ['Posti a sedere', '4'],
+      ['Prezzo', '18.000 €']
+    ],
+    description: [
+      'Volkswagen T4 con tetto sollevabile del 1993, diesel 2.4 da 57 kW con cambio meccanico, lungo 4,66 m. Compatto e facile da guidare e da parcheggiare, ha un letto nel tetto sollevabile e un divano posteriore che si trasforma in letto.',
+      'Dalle foto si vedono la cucina con lavello, fornello e frigorifero, i sedili con monitor nei poggiatesta, le tende ai finestrini, le prese a 230 V, le casse audio, il portabici posteriore e due rampe in alluminio.'
+    ],
+    photos: [
+      ['vw-t4-1993-01.jpg', 'Volkswagen T4 con tetto sollevabile aperto, vista laterale'],
+      ['vw-t4-1993-02.jpg', 'Volkswagen T4 con tetto sollevabile, vista anteriore sinistra'],
+      ['vw-t4-1993-03.jpg', 'Vista posteriore con portabici e rampe in alluminio'],
+      ['vw-t4-1993-04.jpg', 'Interno: cucina con lavello e fornello, frigorifero e divano'],
+      ['vw-t4-1993-05.jpg', 'Interno con il tetto sollevabile aperto, dalla cucina alla cabina'],
+      ['vw-t4-1993-06.jpg', 'Divano posteriore con tavolo, presa a 230 V e casse audio'],
+      ['vw-t4-1993-07.jpg', 'Letto posteriore preparato con il divano abbassato'],
+      ['vw-t4-1993-08.jpg', 'Letto nel tetto sollevabile'],
+      ['vw-t4-1993-09.jpg', 'Rampe in alluminio']
+    ],
+    note: 'Le informazioni sono quelle del libretto di circolazione e quelle che si vedono nelle foto: prima dell\'acquisto il camper si può vedere di persona e controllare con i nostri tecnici.'
   }
 ];
 
