@@ -415,6 +415,7 @@ section{padding:80px 0;}
 .store-only-box{border:2px solid var(--ink);padding:18px 20px;margin:0 0 20px;}
 .store-only-box strong{display:block;font-family:var(--font-display);font-size:18px;letter-spacing:.04em;text-transform:uppercase;margin-bottom:6px;}
 .store-only-box p{margin:0 0 12px;}
+.install-note{margin:10px 0 0;font-size:13px;color:var(--ink-soft,var(--ink));opacity:.8;}
 .product-guide-box{border-left:3px solid var(--red);padding:2px 0 2px 14px;margin:0 0 20px;font-size:14px;}
 .product-guide-box strong{display:block;font-family:var(--font-display);font-size:13px;letter-spacing:.08em;text-transform:uppercase;margin-bottom:4px;}
 .product-guide-box ul{list-style:none;margin:0;padding:0;}
