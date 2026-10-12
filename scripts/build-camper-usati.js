@@ -125,23 +125,25 @@ const CAMPER = [
     title: 'Volkswagen T4 con tetto sollevabile, anno 1993',
     shortTitle: 'Volkswagen T4 1993',
     metaTitle: 'Camper usato Volkswagen T4 con tetto sollevabile, 18.000 € | CDA Tivoli',
-    summary: 'Tetto sollevabile con letto, cucina con lavello e frigorifero, lunghezza 4,66 m. Diesel 2.4.',
-    metaDescription: 'Camper usato Volkswagen T4 con tetto sollevabile del 1993 a 18.000 euro: diesel 2.4, lunghezza 4,66 m, cucina e letto nel tetto. Contatta CDA a Tivoli per vederlo.',
+    summary: '4 posti in viaggio, 4 posti letto, 284.000 km. Tetto sollevabile, cucina con lavello e frigorifero, 4,66 m.',
+    metaDescription: 'Camper usato Volkswagen T4 con tetto sollevabile del 1993 a 18.000 euro: 284.000 km, diesel 2.4, 4 posti in viaggio e 4 letto, lungo 4,66 m. Contatta CDA a Tivoli.',
     price: '18.000 €',
     specs: [
       ['Marca e modello', 'Volkswagen T4'],
       ['Tipologia', 'Autocaravan con tetto sollevabile'],
       ['Anno', '1993'],
+      ['Chilometri', '284.000 km'],
       ['Alimentazione', 'Diesel'],
       ['Cilindrata e potenza', '2.370 cc, 57 kW'],
       ['Cambio', 'Meccanico'],
       ['Lunghezza', '4,66 m'],
       ['Larghezza', '1,84 m'],
-      ['Posti a sedere', '4'],
+      ['Posti in viaggio', '4'],
+      ['Posti letto', '4'],
       ['Prezzo', '18.000 €']
     ],
     description: [
-      'Volkswagen T4 con tetto sollevabile del 1993, diesel 2.4 da 57 kW con cambio meccanico, lungo 4,66 m. Compatto e facile da guidare e da parcheggiare, ha un letto nel tetto sollevabile e un divano posteriore che si trasforma in letto.',
+      'Volkswagen T4 con tetto sollevabile del 1993, diesel 2.4 da 57 kW con cambio meccanico, 284.000 km e lungo 4,66 m. Ha 4 posti in viaggio e 4 posti letto: compatto e facile da guidare e da parcheggiare, ha un letto nel tetto sollevabile e un divano posteriore che si trasforma in letto.',
       'Dalle foto si vedono la cucina con lavello, fornello e frigorifero, i sedili con monitor nei poggiatesta, le tende ai finestrini, le prese a 230 V, le casse audio, il portabici posteriore e due rampe in alluminio.'
     ],
     photos: [
