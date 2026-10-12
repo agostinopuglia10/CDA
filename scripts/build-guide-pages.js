@@ -561,10 +561,11 @@ function buildPowerGuide(products) {
   if (chargers.length === 0 || mppt.length === 0 || inverters.length === 0) throw new Error('Guida elettrico: mancano caricabatterie, regolatori o inverter nel catalogo');
   const row = (p, mid) => [`<a href="prodotto-${esc(p.slug)}.html">${esc(p.name)}</a>`, esc(mid), eur(p.price_cents), esc(shippingNote(p))];
   const chargerRows = chargers.map((p) => row(p, /26A/.test(p.name) ? 'Batterie da 25 a 500 Ah, incluse LiFePO4' : 'Batterie da 4 a 240 Ah, incluse LiFePO4'));
-  const mpptRows = mppt.map((p) => row(p, 'Impianti solari 12-24 V, con display LCD per monitorare la ricarica'));
+  const mpptRows = mppt.map((p) => row(p, /Victron/i.test(p.name) ? 'Impianti solari 12-24 V: 30 A di carica, fino a 100 V dal pannello' : 'Impianti solari 12-24 V, con display LCD per monitorare la ricarica'));
   const invRows = inverters.map((p) => {
     const input = (p.name.match(/\b(12|24|48)V\b/) || [])[1] || (/Onda Sinusoidale/i.test(p.name) ? '12' : '');
-    const mid = (/Onda Sinusoidale/i.test(p.name)) ? 'Ingresso 12 V, uscita 220 V, onda sinusoidale pura: per dispositivi sensibili'
+    const mid = /by-pass/i.test(p.name) ? 'Ingresso 12 V, onda sinusoidale pura da 3000 W (picco 5900 W), con by-pass sulla rete esterna a 230 V'
+      : (/Onda Sinusoidale/i.test(p.name)) ? 'Ingresso 12 V, uscita 220 V, onda sinusoidale pura: per dispositivi sensibili'
       : 'Ingresso ' + input + ' V con regolatore MPPT integrato' + ((p.name.match(/MPPT (\d+)A/) || [])[1] ? ' da ' + (p.name.match(/MPPT (\d+)A/) || [])[1] + ' A' : '');
     return row(p, mid);
   });
@@ -574,11 +575,11 @@ function buildPowerGuide(products) {
     title: 'Inverter, MPPT e caricabatterie per camper: guida | CDA Tivoli',
     description: 'Come scegliere inverter, regolatore MPPT e caricabatterie per il camper: tensioni 12, 24 e 48 V, onda sinusoidale pura, prezzi aggiornati.',
     h1: 'Inverter, regolatore MPPT e caricabatterie per camper',
-    lead: 'Che cosa fa ogni componente dell\'impianto elettrico, come abbinarli e quali modelli Alcapower abbiamo a catalogo, con prezzi aggiornati.',
-    body: `      <p>Per avere corrente a bordo senza dipendere dalla rete servono tre pezzi che lavorano insieme: un <strong>caricabatterie</strong> (da rete o generatore), un <strong>regolatore di carica MPPT</strong> (dal pannello solare) e un <strong>inverter</strong> (che trasforma la corrente della batteria in corrente di rete a 220-230 V). Qui trovi i modelli Alcapower che teniamo a catalogo e come sceglierli. I prezzi si aggiornano da soli.</p>
+    lead: 'Che cosa fa ogni componente dell\'impianto elettrico, come abbinarli e quali modelli abbiamo a catalogo, con prezzi aggiornati.',
+    body: `      <p>Per avere corrente a bordo senza dipendere dalla rete servono tre pezzi che lavorano insieme: un <strong>caricabatterie</strong> (da rete o generatore), un <strong>regolatore di carica MPPT</strong> (dal pannello solare) e un <strong>inverter</strong> (che trasforma la corrente della batteria in corrente di rete a 220-230 V). Qui trovi i modelli che teniamo a catalogo e come sceglierli. I prezzi si aggiornano da soli.</p>
 
       <h2>La regola da non dimenticare: la tensione</h2>
-      <p>Batterie, inverter e regolatori devono parlare la <strong>stessa tensione</strong>: 12, 24 o 48 V. Nei nostri modelli, l'inverter a onda sinusoidale pura da 1500 W ha ingresso a 12 V, gli inverter da 2,4 e 3,5 kW a 24 V, il 5,5 kW a 48 V. Scegli prima la tensione del tuo impianto, poi il modello.</p>
+      <p>Batterie, inverter e regolatori devono parlare la <strong>stessa tensione</strong>: 12, 24 o 48 V. Nei nostri modelli, gli inverter a onda sinusoidale pura da 1500 e da 3000 W hanno ingresso a 12 V, gli inverter da 2,4 e 3,5 kW a 24 V, il 5,5 kW a 48 V. Scegli prima la tensione del tuo impianto, poi il modello.</p>
 
       <h2>Caricabatterie</h2>
       <p>I caricabatterie switching sono automatici, compatibili 12/24 V e adatti anche alle batterie al litio LiFePO4. Cambia il range di capacità delle batterie che possono caricare.</p>
@@ -592,7 +593,7 @@ ${tableRows(chargerRows)}
       </div>
 
       <h2>Regolatore di carica MPPT</h2>
-      <p>Il regolatore MPPT gestisce la ricarica dal pannello solare e si adatta alla produzione, per sfruttare meglio il sole. Il modello a catalogo ha un display LCD per controllare la ricarica.</p>
+      <p>Il regolatore MPPT gestisce la ricarica dal pannello solare e si adatta alla produzione, per sfruttare meglio il sole. A catalogo abbiamo il Victron BlueSolar 100/30 e un Alcapower da 40 A con display LCD per controllare la ricarica.</p>
       <div class="guide-table-wrap">
         <table class="guide-table">
           <thead><tr><th>Modello</th><th>Per chi</th><th>Prezzo</th><th>Spedizione</th></tr></thead>
@@ -998,8 +999,10 @@ ${faq.map((f) => `        <dt>${esc(f[0])}</dt>\n        <dd>${esc(f[1])}</dd>`)
 
 // ---------- Pagina di confronto: regolatore di carica MPPT o PWM ----------
 function buildMpptCompare(products) {
-  const mppt = products.find((x) => /^Regolatore di Carica MPPT/i.test(x.name));
-  if (!mppt) throw new Error('Confronto MPPT/PWM: regolatore MPPT non trovato nel catalogo');
+  const mpptList = products.filter((x) => /^Regolatore di Carica MPPT/i.test(x.name)).sort((a, b) => a.price_cents - b.price_cents);
+  if (mpptList.length === 0) throw new Error('Confronto MPPT/PWM: regolatore MPPT non trovato nel catalogo');
+  const mpptN = mpptList.length === 1 ? 'un regolatore' : mpptList.length + ' regolatori';
+  const mpptPrezzi = mpptList.map((p) => eur(p.price_cents)).join(' e ');
   const inverters = products.filter((x) => /^Inverter .*MPPT/i.test(x.name)).sort((a, b) => a.price_cents - b.price_cents);
   if (inverters.length === 0) throw new Error('Confronto MPPT/PWM: nessun inverter con MPPT nel catalogo');
   const link = (p, label) => `<a href="prodotto-${esc(p.slug)}.html">${esc(label || p.name)}</a>`;
@@ -1007,18 +1010,18 @@ function buildMpptCompare(products) {
   const faq = [
     ['Qual è la differenza tra regolatore MPPT e PWM?', 'Il regolatore PWM collega il pannello alla batteria adattandone la tensione a quella della batteria. L\'MPPT cerca invece il punto di lavoro migliore del pannello e converte la tensione in più in corrente di carica: di solito rende di più, soprattutto quando il pannello ha una tensione più alta di quella della batteria.'],
     ['Vendete regolatori PWM?', 'No: a catalogo abbiamo solo regolatori MPPT, compresi quelli integrati negli inverter.'],
-    ['Quale regolatore MPPT avete?', `Il ${mppt.name} da ${eur(mppt.price_cents)}, con display LCD per controllare la ricarica, e tre inverter con regolatore MPPT integrato.`],
+    ['Quale regolatore MPPT avete?', `${mpptList.map((p) => 'Il ' + p.name + ' da ' + eur(p.price_cents)).join('; ')}, e ${inverters.length === 3 ? 'tre' : inverters.length} inverter con regolatore MPPT integrato.`],
     ['Come scelgo la potenza?', 'Dipende dai pannelli e dalla tensione dell\'impianto (12, 24 o 48 V). Chiamaci al 348 990 5455 con i dati dei tuoi pannelli e ti consigliamo.']
   ];
   return {
     file: 'guida-regolatore-mppt-o-pwm.html',
     shortTitle: 'Regolatore di carica: MPPT o PWM',
     title: 'MPPT o PWM: quale regolatore di carica scegliere',
-    description: 'Differenza tra regolatore di carica MPPT e PWM per il camper, e i modelli MPPT a catalogo CDA: regolatore da 40 A e inverter con MPPT integrato.',
+    description: 'Differenza tra regolatore di carica MPPT e PWM per il camper, e i modelli MPPT a catalogo CDA: regolatori da 30 e 40 A e inverter con MPPT integrato.',
     h1: 'Regolatore di carica per il camper: MPPT o PWM?',
     lead: 'Come funzionano i due tipi di regolatore, quando conviene l\'MPPT e quali modelli MPPT abbiamo a catalogo.',
     faq,
-    body: `      <p><strong>In breve:</strong> il regolatore PWM è la soluzione semplice; l'MPPT è più sofisticato e di solito sfrutta meglio i pannelli. A catalogo abbiamo solo regolatori MPPT: un regolatore da ${eur(mppt.price_cents)} e tre inverter con MPPT integrato.</p>
+    body: `      <p><strong>In breve:</strong> il regolatore PWM è la soluzione semplice; l'MPPT è più sofisticato e di solito sfrutta meglio i pannelli. A catalogo abbiamo solo regolatori MPPT: ${mpptN} (${mpptPrezzi}) e ${inverters.length === 3 ? 'tre' : inverters.length} inverter con MPPT integrato.</p>
 
       <h2>Come funzionano</h2>
       <div class="guide-table-wrap">
@@ -1041,12 +1044,12 @@ function buildMpptCompare(products) {
           <caption>Regolatori MPPT a catalogo CDA, prezzi IVA inclusa, ultimo controllo 08/10/2026</caption>
           <thead><tr><th scope="col">Modello</th><th scope="col">Prezzo</th><th scope="col">Spedizione</th></tr></thead>
           <tbody>
-            <tr><td>${link(mppt)}</td><td class="num">${eur(mppt.price_cents)}</td><td>${esc(shippingNote(mppt))}</td></tr>
+            ${mpptList.map((m) => `<tr><td>${link(m)}</td><td class="num">${eur(m.price_cents)}</td><td>${esc(shippingNote(m))}</td></tr>`).join('\n            ')}
             ${invRows}
           </tbody>
         </table>
       </div>
-      <p>Il regolatore da 40 A funziona su impianti a 12-24 V; gli inverter con MPPT integrato uniscono la conversione a 230 V e la ricarica dai pannelli (nomi e tensioni nella tabella). Per il resto dell'impianto leggi la <a href="guida-impianto-elettrico-camper.html">guida all'impianto elettrico</a>.</p>
+      <p>I regolatori funzionano su impianti a 12-24 V (il Victron BlueSolar 100/30 fino a 30 A di carica e 100 V dal pannello, l'Alcapower fino a 40 A); gli inverter con MPPT integrato uniscono la conversione a 230 V e la ricarica dai pannelli (nomi e tensioni nella tabella). Per il resto dell'impianto leggi la <a href="guida-impianto-elettrico-camper.html">guida all'impianto elettrico</a>.</p>
 
       <div class="guide-note"><strong>Non ancora provati in officina.</strong> La differenza tra MPPT e PWM è quella dei principi di funzionamento generali: non abbiamo ancora misurato le rese sul nostro banco con un confronto diretto. Se lo faremo, i dati verranno aggiunti qui con data e impianto.</div>
 
