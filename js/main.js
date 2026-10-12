@@ -164,26 +164,47 @@ function initTestimonials() {
 // delivery_time_text). Il proprietario lo compila dal Table Editor di
 // Supabase quando ha un dato reale — finché il campo è vuoto, niente badge
 // né promessa sui tempi viene mostrata da nessuna parte del sito.
-function initDeliveryInfo() {
-  if (typeof supabaseClient === 'undefined' || !supabaseClient) return;
-  var tripItem = document.getElementById('trust-delivery-item');
-  var tripText = document.getElementById('trust-delivery-text');
+// Il testo vale per i prodotti su ordinazione (la quasi totalità del catalogo): sulla scheda prodotto
+// lo mostra renderProductPage solo se stock <= 0 (vedi applyProductDelivery), altrimenti si
+// prometterebbe un'attesa anche per i pochi prodotti disponibili subito.
+var deliveryTextPromise = null;
+function loadDeliveryText() {
+  if (!deliveryTextPromise) {
+    if (typeof supabaseClient === 'undefined' || !supabaseClient) return Promise.resolve('');
+    deliveryTextPromise = supabaseClient
+      .from('site_settings')
+      .select('delivery_time_text')
+      .eq('id', 1)
+      .single()
+      .then(function (res) { return (!res.error && res.data && res.data.delivery_time_text) || ''; })
+      .catch(function () { return ''; });
+  }
+  return deliveryTextPromise;
+}
+
+function applyProductDelivery(p) {
   var specRow = document.getElementById('spec-delivery-row');
   var specText = document.getElementById('spec-delivery');
-  if (!tripItem && !specRow) return; // nessun punto di questa pagina lo mostra
+  if (!specRow || !specText || p.in_store_only || (p.stock && p.stock > 0)) return;
+  loadDeliveryText().then(function (text) {
+    if (!text) return; // tempo di consegna non ancora definito
+    specText.textContent = text;
+    specRow.style.display = '';
+  });
+}
 
-  return supabaseClient
-    .from('site_settings')
-    .select('delivery_time_text')
-    .eq('id', 1)
-    .single()
-    .then(function (res) {
-      var text = res.data && res.data.delivery_time_text;
-      if (res.error || !text) return; // tempo di consegna non ancora definito
-      if (tripItem && tripText) { tripText.textContent = text; tripItem.style.display = ''; }
-      if (specRow && specText) { specText.textContent = text; specRow.style.display = ''; }
-    })
-    .catch(function () { /* dato non ancora impostato */ });
+function initDeliveryInfo() {
+  var tripItem = document.getElementById('trust-delivery-item');
+  var tripText = document.getElementById('trust-delivery-text');
+  var cartRow = document.getElementById('cart-delivery-row');
+  var cartText = document.getElementById('cart-delivery');
+  if (!tripItem && !cartRow) return; // la scheda prodotto è gestita da applyProductDelivery
+
+  return loadDeliveryText().then(function (text) {
+    if (!text) return;
+    if (tripItem && tripText) { tripText.textContent = text; tripItem.style.display = ''; }
+    if (cartRow && cartText) { cartText.textContent = text; cartRow.style.display = ''; }
+  });
 }
 
 // Prodotti non spedibili (aerosol, infiammabili): restano visibili sul sito ma non hanno il pulsante
@@ -828,6 +849,7 @@ function renderProductPage(p) {
         : 'Su ordinazione, spedizione diretta');
   }
   if (!priceNotSet) renderProductShipping(p);
+  applyProductDelivery(p);
 
   // Guida all'acquisto pertinente (collegamento interno utile ai visitatori e a Google).
   var guideWrap = document.getElementById('product-guide-link');
