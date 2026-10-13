@@ -311,6 +311,7 @@ ${tableRows(rows)}
         <a href="categoria-energia-batterie.html" class="btn btn-primary btn-sm">Vedi tutte le batterie</a>
         <a href="guida-batteria-200ah-ultimatron-extrapower.html" class="btn btn-outline btn-sm">Confronto batterie da 200 Ah</a>
         <a href="guida-kit-litio-620ah-promozione.html" class="btn btn-outline btn-sm">Kit litio 620 Ah in promozione</a>
+        <a href="guida-fotovoltaico-camper.html" class="btn btn-outline btn-sm">Fotovoltaico per camper</a>
         <a href="guida-climatizzatore-camper.html" class="btn btn-outline btn-sm">Guida al climatizzatore</a>
       </div>`
   };
@@ -637,6 +638,7 @@ ${tableRows(invRows)}
         <a href="categoria-elettronica-inverter-regolatori.html" class="btn btn-primary btn-sm">Vedi inverter e regolatori</a>
         <a href="guida-batteria-litio-camper.html" class="btn btn-outline btn-sm">Guida alle batterie al litio</a>
         <a href="guida-kit-litio-620ah-promozione.html" class="btn btn-outline btn-sm">Kit litio 620 Ah in promozione</a>
+        <a href="guida-fotovoltaico-camper.html" class="btn btn-outline btn-sm">Fotovoltaico per camper</a>
         <a href="guida-impianto-acqua-camper.html" class="btn btn-outline btn-sm">Guida all'impianto acqua</a>
         <a href="guida-regolatore-mppt-o-pwm.html" class="btn btn-outline btn-sm">MPPT o PWM</a>
       </div>`
@@ -1155,10 +1157,99 @@ ${faq.map((f) => `        <dt>${esc(f[0])}</dt>\n        <dd>${esc(f[1])}</dd>`)
   };
 }
 
+// ---------- Pagina madre: fotovoltaico per camper ----------
+// Collega le guide esistenti e i componenti a catalogo. Contiene solo principi generali di dimensionamento
+// (nessuna misura nostra) e dati dichiarati dai costruttori; i prezzi sono letti dal catalogo.
+function buildSolarPillar(panels, regulators, batteries, inverters, chargers) {
+  const link = (p) => `<a href="prodotto-${esc(p.slug)}.html">${esc(p.name)}</a>`;
+  const list = (arr) => arr.length === 0 ? '<em>al momento nessun modello a catalogo</em>'
+    : '<ul class="guide-hub-list">' + arr.map((p) => `<li>${link(p)}: ${eur(p.price_cents)}</li>`).join('') + '</ul>';
+  const dcdc = chargers.filter((p) => /DC\/DC/i.test(p.name));
+  const mains = chargers.filter((p) => !/DC\/DC/i.test(p.name));
+  const kitActive = new Date() <= new Date('2026-12-31T23:59:59');
+  const faq = [
+    ['Quanti pannelli solari servono per un camper?', 'Dipende da quanta energia consumi ogni giorno e dal sole della zona in cui viaggi. Si parte dai consumi in Wh al giorno (potenza in W per ore di uso) e da lì si sceglie la potenza dei pannelli. Scrivici i tuoi consumi e ti aiutiamo a fare il conto.'],
+    ['Meglio un regolatore MPPT o PWM?', 'Il regolatore MPPT di solito sfrutta meglio i pannelli, soprattutto quando hanno una tensione più alta di quella della batteria. Il PWM è più semplice. A catalogo abbiamo solo regolatori MPPT: il confronto è nella guida dedicata.'],
+    ['Posso ricaricare la batteria mentre guido?', 'Sì, con un caricabatterie DC/DC collegato all\'alternatore, che carica la batteria di servizio con la curva giusta mentre il motore è acceso.'],
+    ['Mi serve un inverter?', 'Solo se vuoi usare apparecchi a 230 V (per esempio un computer o piccoli elettrodomestici). Per i soli apparecchi a 12 V non serve.'],
+    ['Montate voi l\'impianto?', 'Su richiesta, il montaggio può essere eseguito presso la nostra officina di Tivoli; in alternativa, l\'installazione può essere effettuata in autonomia o da un tecnico di fiducia. La fornitura la spediamo in tutta Italia.']
+  ];
+  return {
+    file: 'guida-fotovoltaico-camper.html',
+    shortTitle: 'Fotovoltaico per camper',
+    title: 'Fotovoltaico per camper: pannelli, regolatore, batteria | CDA',
+    description: 'Come funziona un impianto fotovoltaico per camper: pannelli, regolatore MPPT, batteria, inverter e ricarica da alternatore, con errori da evitare e modelli a catalogo.',
+    h1: 'Fotovoltaico per camper: come funziona e come scegliere i componenti',
+    lead: 'Pannelli, regolatore di carica, batteria e inverter: che cosa fa ciascun pezzo, come abbinarli e quali errori evitare.',
+    faq,
+    body: `      <p><strong>In breve:</strong> un impianto fotovoltaico per camper è una catena di pezzi che devono andare d'accordo: i <strong>pannelli</strong> producono corrente, il <strong>regolatore</strong> la porta alla batteria nel modo giusto, la <strong>batteria</strong> la conserva e l'<strong>inverter</strong> la trasforma in corrente a 230 V. Per ricaricare anche in viaggio e da rete si aggiungono un <strong>caricabatterie DC/DC</strong> (dall'alternatore) e un <strong>caricabatterie da rete</strong>.</p>
+
+      <h2>Che cosa fa ogni componente</h2>
+      <div class="guide-table-wrap">
+        <table class="guide-table">
+          <caption>I componenti di un impianto solare per camper e cosa guardare nella scelta</caption>
+          <thead><tr><th scope="col">Componente</th><th scope="col">Che cosa fa</th><th scope="col">Cosa guardare</th><th scope="col">Approfondimento</th></tr></thead>
+          <tbody>
+            <tr><th scope="row">Pannello solare</th><td>Trasforma la luce in corrente</td><td>Potenza in watt (W), dimensioni e peso sul tetto, tensione</td><td><a href="guida-regolatore-mppt-o-pwm.html">MPPT o PWM</a></td></tr>
+            <tr><th scope="row">Regolatore di carica</th><td>Porta la corrente dei pannelli alla batteria con la curva di carica giusta</td><td>Corrente massima in ampere (A) e tensione massima del pannello in volt (V)</td><td><a href="guida-regolatore-mppt-o-pwm.html">MPPT o PWM</a></td></tr>
+            <tr><th scope="row">Batteria</th><td>Conserva l'energia</td><td>Capacità in Ah e tensione in V: Wh = V × Ah; litio o piombo</td><td><a href="guida-batteria-litio-camper.html">Batteria al litio</a>, <a href="guida-batteria-200ah-ultimatron-extrapower.html">confronto 200 Ah</a></td></tr>
+            <tr><th scope="row">Caricabatterie DC/DC</th><td>Ricarica la batteria di servizio dall'alternatore mentre il motore è acceso</td><td>Corrente in ampere (A), compatibilità con l'alternatore</td><td><a href="guida-impianto-elettrico-camper.html">Impianto elettrico</a></td></tr>
+            <tr><th scope="row">Caricabatterie da rete</th><td>Ricarica la batteria da colonnina o presa a 230 V</td><td>Corrente in ampere (A), profilo per il tipo di batteria</td><td><a href="guida-impianto-elettrico-camper.html">Impianto elettrico</a></td></tr>
+            <tr><th scope="row">Inverter</th><td>Trasforma i 12 V della batteria in 230 V</td><td>Potenza continua e di picco in watt, onda sinusoidale pura, tensione di ingresso</td><td><a href="guida-impianto-elettrico-camper.html">Impianto elettrico</a></td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <h2>Da dove partire: i consumi</h2>
+      <p>Il punto di partenza è quanta energia usi in un giorno. Per ogni apparecchio moltiplica la <strong>potenza in watt per le ore di utilizzo</strong>: il risultato è in Wh. La somma di tutti gli apparecchi è il consumo giornaliero. La capacità della batteria si calcola con <strong>Wh = V × Ah</strong>: per esempio, una batteria da 200 Ah a 12,8 V contiene 2.560 Wh. Dal consumo giornaliero si ricavano batteria e pannelli: scrivici i tuoi consumi e ti aiutiamo a fare il conto.</p>
+
+      <h2>I tre errori più comuni</h2>
+      <ol>
+        <li><strong>Tensioni che non si parlano.</strong> Batteria, regolatore e inverter devono lavorare alla stessa tensione (12, 24 o 48 V). Collegando più pannelli in serie la tensione si somma: controlla che resti sotto il massimo del regolatore.</li>
+        <li><strong>Regolatore sottodimensionato.</strong> Se i pannelli possono produrre più di quanto il regolatore riesce a gestire, il regolatore limita la produzione: non si rompe niente, ma si perde energia nelle giornate di sole pieno. Come ordine di grandezza, la potenza massima dei pannelli gestita è la corrente del regolatore per la tensione di carica della batteria (circa 14,6 V per una batteria al litio da 12,8 V): un regolatore da 30 A su un impianto a 12 V gestisce circa 440 W. È un dato indicativo: verifica sempre la scheda del costruttore.</li>
+        <li><strong>Cavi e protezioni sottodimensionati.</strong> La sezione dei cavi dipende dalla corrente e dalla lunghezza del percorso, e ogni linea ha bisogno del suo fusibile vicino alla batteria. Cavi troppo sottili scaldano e fanno perdere tensione. Il dimensionamento lo definiamo caso per caso, sul tuo mezzo.</li>
+      </ol>
+
+      <h2>I componenti che vendiamo</h2>
+      <h3>Pannelli solari</h3>
+${list(panels)}
+      <h3>Regolatori di carica MPPT</h3>
+${list(regulators)}
+      <h3>Batterie al litio</h3>
+${list(batteries)}
+      <h3>Caricabatterie DC/DC (dall'alternatore)</h3>
+${list(dcdc)}
+      <h3>Caricabatterie da rete</h3>
+${list(mains)}
+      <h3>Inverter</h3>
+${list(inverters)}
+${kitActive ? `
+      <h2>Il kit completo in promozione</h2>
+      <p>Per un impianto al litio da 620 Ah (7.936 Wh) con ricarica da alternatore, dal sole e da rete e inverter a 230 V abbiamo un kit completo a ${eur(KIT620.supplyCents)} (fornitura, IVA inclusa), valido fino al ${KIT620.validUntil}. <a href="guida-kit-litio-620ah-promozione.html">Vedi cosa comprende</a>.</p>
+` : ''}
+      <h2>Fornitura e montaggio</h2>
+      <p>Spediamo in tutta Italia. Su richiesta, il montaggio può essere eseguito presso la nostra officina di Tivoli (Strada Arci 24); in alternativa, l'installazione può essere effettuata in autonomia o da un tecnico di fiducia.</p>
+
+      <div class="guide-note"><strong>Non ancora provato in officina.</strong> Questa pagina riporta i principi generali di dimensionamento e i dati dichiarati dai costruttori. Non contiene misure fatte da noi su impianti montati: se le aggiungeremo, saranno indicate con data e mezzo.</div>
+
+      <h2>Domande frequenti</h2>
+      <dl class="guide-faq">
+${faq.map((f) => `        <dt>${esc(f[0])}</dt>\n        <dd>${esc(f[1])}</dd>`).join('\n')}
+      </dl>
+
+      <div class="guide-links">
+        <a href="contatti.html" class="btn btn-primary btn-sm">Chiedi un consiglio</a>
+        <a href="guida-impianto-elettrico-camper.html" class="btn btn-outline btn-sm">Guida all'impianto elettrico</a>
+        <a href="guida-regolatore-mppt-o-pwm.html" class="btn btn-outline btn-sm">MPPT o PWM</a>
+        <a href="guida-batteria-litio-camper.html" class="btn btn-outline btn-sm">Batteria al litio</a>
+      </div>`
+  };
+}
+
 // ---------- Pagina indice: tutte le guide e i confronti ----------
 function buildGuideHub(guides) {
   const groups = [
-    ['Energia e batterie', ['guida-kit-litio-620ah-promozione.html', 'guida-batteria-litio-camper.html', 'guida-batteria-200ah-ultimatron-extrapower.html', 'guida-impianto-elettrico-camper.html', 'guida-regolatore-mppt-o-pwm.html']],
+    ['Energia e batterie', ['guida-fotovoltaico-camper.html', 'guida-kit-litio-620ah-promozione.html', 'guida-batteria-litio-camper.html', 'guida-batteria-200ah-ultimatron-extrapower.html', 'guida-impianto-elettrico-camper.html', 'guida-regolatore-mppt-o-pwm.html']],
     ['Clima e riscaldamento', ['guida-climatizzatore-camper.html', 'guida-riscaldamento-camper.html', 'guida-pannello-pu5-o-comfort-autoterm.html', 'guida-stufa-truma-s-3004-o-5004.html']],
     ['Acqua e frigorifero', ['guida-impianto-acqua-camper.html', 'guida-frigorifero-camper.html']]
   ];
@@ -1189,17 +1280,19 @@ function buildGuideHub(guides) {
 
 async function main() {
   const shell = siteShell();
-  const [dometic, batterie, riscaldamento, acqua, elettrico, frigoriferi, kitProdotti] = await Promise.all([
+  const [dometic, batterie, riscaldamento, acqua, elettrico, frigoriferi, kitProdotti, pannelli, caricabatterie] = await Promise.all([
     fetchProducts('name=ilike.*fresh*'),
     fetchProducts('name=ilike.batteria*'),
     fetchProducts('or=(name.ilike.*riscald*,name.ilike.*stufa*,name.ilike.*autoterm*,name.ilike.*travel box*)'),
     fetchProducts('or=(name.ilike.pompa*,name.ilike.serbatoio*)'),
     fetchProducts('or=(name.ilike.inverter*,name.ilike.regolatore*,name.ilike.carica batterie*)'),
     fetchProducts('name=ilike.frigorifero*'),
-    fetchProducts('slug=in.(cda-0177-batteria-litio-ultimatron-ulm-12-620,cda-0190-regolatore-mppt-victron-100-30,cda-0191-pannello-solare-all-black-300w,cda-0192-inverter-onda-pura-3000w-bypass,cda-0193-caricabatterie-dc-dc-victron-orion-xs-50a,cda-0194-caricabatterie-mestic-mbc-1040-40a)')
+    fetchProducts('slug=in.(cda-0177-batteria-litio-ultimatron-ulm-12-620,cda-0190-regolatore-mppt-victron-100-30,cda-0191-pannello-solare-all-black-300w,cda-0192-inverter-onda-pura-3000w-bypass,cda-0193-caricabatterie-dc-dc-victron-orion-xs-50a,cda-0194-caricabatterie-mestic-mbc-1040-40a)'),
+    fetchProducts('name=ilike.pannello solare*'),
+    fetchProducts('or=(name.ilike.caricabatterie*,name.ilike.carica batterie*)')
   ]);
 
-  const guides = [buildClimateGuide(dometic), buildBatteryGuide(batterie), buildHeatingGuide(riscaldamento), buildWaterGuide(acqua), buildPowerGuide(elettrico), buildFridgeGuide(frigoriferi), buildBattery200Compare(batterie), buildPanelCompare(riscaldamento), buildTrumaCompare(riscaldamento), buildMpptCompare(elettrico), buildKitLitio620(kitProdotti)];
+  const guides = [buildClimateGuide(dometic), buildBatteryGuide(batterie), buildHeatingGuide(riscaldamento), buildWaterGuide(acqua), buildPowerGuide(elettrico), buildFridgeGuide(frigoriferi), buildBattery200Compare(batterie), buildPanelCompare(riscaldamento), buildTrumaCompare(riscaldamento), buildMpptCompare(elettrico), buildKitLitio620(kitProdotti), buildSolarPillar(pannelli, elettrico.filter((p) => /^Regolatore/i.test(p.name)), batterie, elettrico.filter((p) => /^Inverter/i.test(p.name)), caricabatterie)];
   guides.forEach((g) => {
     fs.writeFileSync(path.join(ROOT, g.file), pageHtml(shell, g), 'utf8');
     console.log('Generata', g.file);

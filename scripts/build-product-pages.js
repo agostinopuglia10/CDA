@@ -92,7 +92,8 @@ function loadGuideLinks() {
   if (guideLinksCache) return guideLinksCache;
   const bySlug = {};
   let files = [];
-  try { files = fs.readdirSync(ROOT).filter((f) => /^guida-.*\.html$/.test(f)).sort(); } catch (e) {}
+  // La promozione (guida-kit-*) va per prima: ogni scheda mostra al massimo 2 guide.
+  try { files = fs.readdirSync(ROOT).filter((f) => /^guida-.*\.html$/.test(f)).sort((a, b) => (/^guida-kit-/.test(b) - /^guida-kit-/.test(a)) || a.localeCompare(b)); } catch (e) {}
   files.forEach((f) => {
     let src = '';
     try { src = fs.readFileSync(path.join(ROOT, f), 'utf8'); } catch (e) { return; }
