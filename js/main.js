@@ -2531,11 +2531,27 @@ function initCarousels() {
     if (prev) prev.addEventListener('click', function () { scrollByAmount(-1); });
     if (next) next.addEventListener('click', function () { scrollByAmount(1); });
 
+    // Frecce nascoste agli estremi (niente "avanti" all'ultima card, niente "indietro" alla prima)
+    function updateArrows() {
+      var maxScroll = track.scrollWidth - track.clientWidth;
+      // soglia di 6 px: con lo scatto (snap) la prima card si ferma a ~4 px dal bordo
+      if (prev) prev.classList.toggle('is-end', track.scrollLeft <= 6);
+      if (next) next.classList.toggle('is-end', maxScroll <= 6 || track.scrollLeft >= maxScroll - 6);
+    }
+    track.addEventListener('scroll', updateArrows, { passive: true });
+    window.addEventListener('resize', updateArrows);
+    new MutationObserver(updateArrows).observe(track, { childList: true }); // le card arrivano da Supabase dopo
+    updateArrows();
+
     if (reduceMotion) return; // rispetta la preferenza di sistema "riduci le animazioni"
 
     var direction = 1;
     var paused = false;
     var lastTime = null;
+    // Posizione tenuta in decimali: con la scala di Windows (125%, 150%) il browser
+    // arrotonda scrollLeft ai pixel fisici e un passo di ~0,4 px per fotogramma
+    // andrebbe perso del tutto (il carosello resterebbe fermo).
+    var pos = track.scrollLeft;
 
     function tick(timestamp) {
       if (lastTime === null) lastTime = timestamp;
@@ -2548,9 +2564,12 @@ function initCarousels() {
         var maxScroll = track.scrollWidth - track.clientWidth;
         if (maxScroll > 1) {
           track.classList.add('no-snap');
-          track.scrollLeft += direction * AUTO_SCROLL_SPEED * delta;
-          if (direction === 1 && track.scrollLeft >= maxScroll - 1) { track.scrollLeft = maxScroll; direction = -1; }
-          else if (direction === -1 && track.scrollLeft <= 1) { track.scrollLeft = 0; direction = 1; }
+          // se l'utente ha spostato il carosello (frecce, trascinamento) si riparte da lì
+          if (Math.abs(track.scrollLeft - pos) > 2) pos = track.scrollLeft;
+          pos += direction * AUTO_SCROLL_SPEED * delta;
+          if (direction === 1 && pos >= maxScroll - 1) { pos = maxScroll; direction = -1; }
+          else if (direction === -1 && pos <= 1) { pos = 0; direction = 1; }
+          track.scrollLeft = pos;
         }
       }
       requestAnimationFrame(tick);
@@ -2566,7 +2585,11 @@ function initCarousels() {
     wrap.addEventListener('mouseleave', resume);
     wrap.addEventListener('touchstart', pause, { passive: true });
     wrap.addEventListener('touchend', function () { setTimeout(resume, 3000); });
-    wrap.addEventListener('focusin', pause);
+    // Pausa solo per il focus da tastiera: dopo un clic col mouse su una freccia o su "+"
+    // il pulsante resta a fuoco e lo scorrimento automatico non ripartirebbe più.
+    wrap.addEventListener('focusin', function (e) {
+      if (e.target.matches && e.target.matches(':focus-visible')) pause();
+    });
     wrap.addEventListener('focusout', resume);
   });
 }

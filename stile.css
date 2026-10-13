@@ -893,6 +893,7 @@ section{padding:80px 0;}
   font-size:18px;font-family:var(--font-display);
 }
 .scroll-arrow:hover{border-color:var(--red);color:var(--red);}
+.scroll-arrow.is-end{opacity:0;visibility:hidden;pointer-events:none;}
 .scroll-arrow.prev{left:-10px;}
 .scroll-arrow.next{right:-10px;}
 @media (max-width:768px){.scroll-arrow{display:none;}}
