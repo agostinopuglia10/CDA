@@ -906,6 +906,11 @@
     <priority>0.5</priority>
   </url>
   <url>
+    <loc>https://cda-camper.it/prodotto-cda-0194-caricabatterie-mestic-mbc-1040-40a.html</loc>
+    <changefreq>weekly</changefreq>
+    <priority>0.5</priority>
+  </url>
+  <url>
     <loc>https://cda-camper.it/prodotto-cda-bundle-0001-kit-toilette-da-viaggio.html</loc>
     <changefreq>weekly</changefreq>
     <priority>0.5</priority>
@@ -1216,6 +1221,9 @@
     <priority>0.6</priority>
   </url>
 </urlset>
+
+
+
 
 
 
