@@ -1066,10 +1066,97 @@ ${faq.map((f) => `        <dt>${esc(f[0])}</dt>\n        <dd>${esc(f[1])}</dd>`)
   };
 }
 
+// ---------- Promozione: kit batteria al litio 620 Ah ----------
+// Prezzi e totali sono letti dal catalogo; il prezzo del kit e la scadenza sono quelli della promozione
+// approvata da Maria (documento "PROMOZIONE PER IMPIANTO LITIO 620A"): se il catalogo cambia al punto che
+// il kit non conviene piu' dei pezzi singoli, la build si ferma invece di pubblicare un risparmio falso.
+const KIT620 = { supplyCents: 455000, withInstallCents: 650000, validUntil: '31 dicembre 2026' };
+
+function buildKitLitio620(kitProducts) {
+  const bySlug = {};
+  kitProducts.forEach((p) => { bySlug[p.slug] = p; });
+  const parts = [
+    ['cda-0177-batteria-litio-ultimatron-ulm-12-620', 1, 'Batteria al litio LiFePO4 da 620 Ah a 12,8 V: 7.936 Wh di energia'],
+    ['cda-0193-caricabatterie-dc-dc-victron-orion-xs-50a', 1, 'Ricarica la batteria dall\'alternatore mentre il motore è acceso (50 A)'],
+    ['cda-0190-regolatore-mppt-victron-100-30', 1, 'Gestisce la ricarica dai pannelli solari (30 A, fino a 100 V dal pannello)'],
+    ['cda-0191-pannello-solare-all-black-300w', 2, 'Ricarica la batteria dal sole: due pannelli da 300 W'],
+    ['cda-0192-inverter-onda-pura-3000w-bypass', 1, 'Porta la corrente a 230 V a bordo: onda sinusoidale pura, 3000 W (picco 5.900 W), con by-pass sulla rete esterna'],
+    ['cda-0194-caricabatterie-mestic-mbc-1040-40a', 1, 'Ricarica da rete a 230 V: 40 A, con profilo per batterie al litio']
+  ];
+  parts.forEach((x) => { if (!bySlug[x[0]]) throw new Error('Kit litio 620: componente non trovato nel catalogo: ' + x[0]); });
+  const sum = parts.reduce((t, x) => t + bySlug[x[0]].price_cents * x[1], 0);
+  const saving = sum - KIT620.supplyCents;
+  if (saving <= 0) throw new Error('Kit litio 620: il prezzo del kit non e\' inferiore alla somma dei pezzi (' + eur(sum) + '): promozione non pubblicabile');
+  const pct = Math.round(saving / sum * 100);
+  const rows = parts.map((x) => {
+    const p = bySlug[x[0]];
+    return `            <tr><td><a href="prodotto-${esc(p.slug)}.html">${esc(p.name)}</a></td><td>${esc(x[2])}</td><td class="num">${x[1]}</td><td class="num">${eur(p.price_cents * x[1])}</td></tr>`;
+  }).join('\n');
+  const faq = [
+    ['Fino a quando vale la promozione?', 'Fino al ' + KIT620.validUntil + '.'],
+    ['Quanto costa il kit?', 'La fornitura completa costa ' + eur(KIT620.supplyCents) + ' IVA inclusa. Con il montaggio nella nostra officina di Tivoli il totale è ' + eur(KIT620.withInstallCents) + '.'],
+    ['Gli accessori di posa sono inclusi?', 'Sì, sono compresi gli accessori di posa necessari al montaggio.'],
+    ['Posso comprare solo alcuni componenti?', 'Sì: ogni componente è in catalogo al prezzo indicato in tabella. Il prezzo del kit vale per l\'insieme completo.'],
+    ['Quanti kWh sono 620 Ah?', 'A 12,8 V, 620 Ah sono 7.936 Wh (Wh = V × Ah), cioè circa 7,9 kWh.'],
+    ['Il kit è adatto al mio camper?', 'Dipende da tensione dell\'impianto, spazio disponibile e consumi. Scrivici modello e anno del mezzo e come lo usi: ti diciamo se il kit va bene.']
+  ];
+  return {
+    file: 'guida-kit-litio-620ah-promozione.html',
+    shortTitle: 'Kit litio 620 Ah in promozione',
+    title: 'Kit batteria al litio 620 Ah in promozione | CDA Tivoli',
+    description: 'Impianto completo al litio da 620 Ah (7.936 Wh) con ricarica da alternatore, dal sole e da rete e inverter 3000 W: ' + eur(KIT620.supplyCents) + ' fino al 31/12/2026.',
+    h1: 'Kit batteria al litio 620 Ah: impianto completo in promozione',
+    lead: 'Batteria, ricarica da alternatore, solare e rete, inverter a 230 V e accessori di posa in un unico kit, fino al ' + KIT620.validUntil + '.',
+    faq,
+    body: `      <p><strong>In breve:</strong> impianto completo al litio da 620 Ah (7.936 Wh) a <strong>${eur(KIT620.supplyCents)}</strong> IVA inclusa. Con il montaggio nella nostra officina di Tivoli il totale è <strong>${eur(KIT620.withInstallCents)}</strong>. Promozione valida <strong>fino al ${KIT620.validUntil}</strong>. Gli accessori di posa sono inclusi.</p>
+
+      <h2>Cosa comprende il kit</h2>
+      <div class="guide-table-wrap">
+        <table class="guide-table">
+          <caption>Componenti del kit e prezzi singoli a catalogo (IVA inclusa, letti dal catalogo CDA)</caption>
+          <thead><tr><th scope="col">Componente</th><th scope="col">A cosa serve</th><th scope="col">Quantità</th><th scope="col">Prezzo singolo</th></tr></thead>
+          <tbody>
+${rows}
+            <tr><td>Accessori di posa</td><td>Cavi e staffe per il montaggio</td><td class="num">incluso</td><td class="num">incluso</td></tr>
+            <tr><th scope="row" colspan="3">Somma dei prezzi singoli a catalogo</th><td class="num">${eur(sum)}</td></tr>
+            <tr><th scope="row" colspan="3">Prezzo del kit completo (fornitura)</th><td class="num"><strong>${eur(KIT620.supplyCents)}</strong></td></tr>
+          </tbody>
+        </table>
+      </div>
+      <p>Rispetto ai pezzi acquistati uno a uno si risparmiano <strong>${eur(saving)}</strong> (circa il ${pct}%), con la certezza che i componenti sono compatibili tra loro. I dati tecnici dei singoli componenti sono quelli dichiarati dai costruttori.</p>
+
+      <h2>Fornitura o fornitura più montaggio</h2>
+      <ul>
+        <li><strong>Solo fornitura: ${eur(KIT620.supplyCents)}.</strong> Spediamo in tutta Italia; il costo e i tempi di consegna te li confermiamo nel preventivo.</li>
+        <li><strong>Fornitura e montaggio: ${eur(KIT620.withInstallCents)}.</strong> Su richiesta, il montaggio può essere eseguito presso la nostra officina di Tivoli (Strada Arci 24); in alternativa, l'installazione può essere effettuata in autonomia o da un tecnico di fiducia.</li>
+      </ul>
+
+      <h2>Per chi è</h2>
+      <p>Per chi vuole stare più a lungo lontano dalle colonnine: la batteria si ricarica dall'alternatore mentre si viaggia, dal sole e dalla rete, e l'inverter porta a bordo le prese a 230 V.</p>
+
+      <h2>Come richiederlo</h2>
+      <ol>
+        <li>Scrivici o chiamaci: marca, modello e anno del tuo camper e come lo usi.</li>
+        <li>Ti confermiamo se il kit è adatto e il totale per il tuo caso.</li>
+        <li>Se vai avanti, ordiniamo e, se lo hai scelto, fissiamo il montaggio in officina.</li>
+      </ol>
+      <div class="guide-links">
+        <a href="contatti.html" class="btn btn-primary btn-sm">Richiedi un preventivo</a>
+        <a href="guida-batteria-litio-camper.html" class="btn btn-outline btn-sm">Guida alla batteria al litio</a>
+        <a href="guida-impianto-elettrico-camper.html" class="btn btn-outline btn-sm">Guida all'impianto elettrico</a>
+      </div>
+
+      <h2>Domande frequenti</h2>
+      <dl class="guide-faq">
+${faq.map((f) => `        <dt>${esc(f[0])}</dt>\n        <dd>${esc(f[1])}</dd>`).join('\n')}
+      </dl>`
+  };
+}
+
 // ---------- Pagina indice: tutte le guide e i confronti ----------
 function buildGuideHub(guides) {
   const groups = [
-    ['Energia e batterie', ['guida-batteria-litio-camper.html', 'guida-batteria-200ah-ultimatron-extrapower.html', 'guida-impianto-elettrico-camper.html', 'guida-regolatore-mppt-o-pwm.html']],
+    ['Energia e batterie', ['guida-kit-litio-620ah-promozione.html', 'guida-batteria-litio-camper.html', 'guida-batteria-200ah-ultimatron-extrapower.html', 'guida-impianto-elettrico-camper.html', 'guida-regolatore-mppt-o-pwm.html']],
     ['Clima e riscaldamento', ['guida-climatizzatore-camper.html', 'guida-riscaldamento-camper.html', 'guida-pannello-pu5-o-comfort-autoterm.html', 'guida-stufa-truma-s-3004-o-5004.html']],
     ['Acqua e frigorifero', ['guida-impianto-acqua-camper.html', 'guida-frigorifero-camper.html']]
   ];
@@ -1100,16 +1187,17 @@ function buildGuideHub(guides) {
 
 async function main() {
   const shell = siteShell();
-  const [dometic, batterie, riscaldamento, acqua, elettrico, frigoriferi] = await Promise.all([
+  const [dometic, batterie, riscaldamento, acqua, elettrico, frigoriferi, kitProdotti] = await Promise.all([
     fetchProducts('name=ilike.*fresh*'),
     fetchProducts('name=ilike.batteria*'),
     fetchProducts('or=(name.ilike.*riscald*,name.ilike.*stufa*,name.ilike.*autoterm*,name.ilike.*travel box*)'),
     fetchProducts('or=(name.ilike.pompa*,name.ilike.serbatoio*)'),
     fetchProducts('or=(name.ilike.inverter*,name.ilike.regolatore*,name.ilike.carica batterie*)'),
-    fetchProducts('name=ilike.frigorifero*')
+    fetchProducts('name=ilike.frigorifero*'),
+    fetchProducts('slug=in.(cda-0177-batteria-litio-ultimatron-ulm-12-620,cda-0190-regolatore-mppt-victron-100-30,cda-0191-pannello-solare-all-black-300w,cda-0192-inverter-onda-pura-3000w-bypass,cda-0193-caricabatterie-dc-dc-victron-orion-xs-50a,cda-0194-caricabatterie-mestic-mbc-1040-40a)')
   ]);
 
-  const guides = [buildClimateGuide(dometic), buildBatteryGuide(batterie), buildHeatingGuide(riscaldamento), buildWaterGuide(acqua), buildPowerGuide(elettrico), buildFridgeGuide(frigoriferi), buildBattery200Compare(batterie), buildPanelCompare(riscaldamento), buildTrumaCompare(riscaldamento), buildMpptCompare(elettrico)];
+  const guides = [buildClimateGuide(dometic), buildBatteryGuide(batterie), buildHeatingGuide(riscaldamento), buildWaterGuide(acqua), buildPowerGuide(elettrico), buildFridgeGuide(frigoriferi), buildBattery200Compare(batterie), buildPanelCompare(riscaldamento), buildTrumaCompare(riscaldamento), buildMpptCompare(elettrico), buildKitLitio620(kitProdotti)];
   guides.forEach((g) => {
     fs.writeFileSync(path.join(ROOT, g.file), pageHtml(shell, g), 'utf8');
     console.log('Generata', g.file);
