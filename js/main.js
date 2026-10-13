@@ -1562,6 +1562,14 @@ function initContactForm() {
   var status = document.getElementById('form-status');
   var button = form.querySelector('button[type="submit"]');
 
+  // Arrivo dal kit in promozione (?motivo=kit-litio-620): motivo e messaggio già pronti, il cliente scrive solo il suo mezzo.
+  try {
+    if (new URLSearchParams(window.location.search).get('motivo') === 'kit-litio-620') {
+      form.motivo.value = 'Kit batteria al litio 620 Ah (promozione)';
+      if (!form.messaggio.value) form.messaggio.value = 'Vorrei un preventivo per il kit batteria al litio 620 Ah. Il mio camper è (marca, modello e anno): ';
+    }
+  } catch (e) {}
+
   function showStatus(type, message) {
     status.textContent = message;
     status.className = 'form-status show ' + type;

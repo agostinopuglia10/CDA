@@ -415,6 +415,8 @@ section{padding:80px 0;}
 .store-only-box{border:2px solid var(--ink);padding:18px 20px;margin:0 0 20px;}
 .store-only-box strong{display:block;font-family:var(--font-display);font-size:18px;letter-spacing:.04em;text-transform:uppercase;margin-bottom:6px;}
 .store-only-box p{margin:0 0 12px;}
+.help-line{margin:12px 0 0;font-size:14px;}
+.help-line a{text-decoration:underline;text-underline-offset:2px;font-weight:600;}
 .install-note{margin:10px 0 0;font-size:13px;color:var(--ink-soft,var(--ink));opacity:.8;}
 .product-guide-box{border-left:3px solid var(--red);padding:2px 0 2px 14px;margin:0 0 20px;font-size:14px;}
 .product-guide-box strong{display:block;font-family:var(--font-display);font-size:13px;letter-spacing:.08em;text-transform:uppercase;margin-bottom:4px;}
@@ -806,6 +808,10 @@ section{padding:80px 0;}
 .cta-band{background:var(--red);color:var(--pure-white);padding:64px 0;text-align:center;}
 .cta-band h2{color:var(--pure-white);}
 .cta-band p{color:rgba(255,255,255,.85);max-width:520px;margin:0 auto 28px;}
+.cta-band.promo{padding:30px 0;}
+.cta-band.promo h2{font-size:clamp(22px,3vw,30px);margin:0 0 8px;}
+.cta-band.promo p{max-width:680px;margin:0 auto 16px;}
+.cta-band.promo .btn{margin:4px;}
  
 /* =========================================================
    FOOTER

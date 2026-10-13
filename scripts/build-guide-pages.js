@@ -1145,7 +1145,7 @@ ${rows}
         <li>Se vai avanti, ordiniamo e, se lo hai scelto, fissiamo il montaggio in officina.</li>
       </ol>
       <div class="guide-links">
-        <a href="contatti.html" class="btn btn-primary btn-sm">Richiedi un preventivo</a>
+        <a href="contatti.html?motivo=kit-litio-620" class="btn btn-primary btn-sm">Richiedi un preventivo</a>
         <a href="guida-batteria-litio-camper.html" class="btn btn-outline btn-sm">Guida alla batteria al litio</a>
         <a href="guida-impianto-elettrico-camper.html" class="btn btn-outline btn-sm">Guida all'impianto elettrico</a>
       </div>
@@ -1155,6 +1155,24 @@ ${rows}
 ${faq.map((f) => `        <dt>${esc(f[0])}</dt>\n        <dd>${esc(f[1])}</dd>`).join('\n')}
       </dl>`
   };
+}
+
+// Riquadro del kit in home: compare solo fino alla scadenza della promozione e poi si svuota da solo.
+function injectHomeKitPromo() {
+  const file = path.join(ROOT, 'index.html');
+  const html = fs.readFileSync(file, 'utf8');
+  const start = '<!-- KIT-LITIO-HOME:START -->';
+  const end = '<!-- KIT-LITIO-HOME:END -->';
+  const i = html.indexOf(start), j = html.indexOf(end);
+  if (i < 0 || j < 0) { console.log('index.html: marcatori del kit non trovati, riquadro non inserito'); return false; }
+  const active = new Date() <= new Date('2026-12-31T23:59:59');
+  const block = active
+    ? `${start}\n<div class="cta-band promo">\n  <div class="container">\n    <h2>Kit batteria al litio 620 Ah: ${eur(KIT620.supplyCents)} fino al 31 dicembre</h2>\n    <p>Batteria da 7.936 Wh, ricarica da alternatore, dal sole e da rete, inverter a 230 V e accessori di posa. Con il montaggio nella nostra officina di Tivoli: ${eur(KIT620.withInstallCents)}.</p>\n    <a href="guida-kit-litio-620ah-promozione.html" class="btn btn-outline on-dark">Cosa comprende</a>\n    <a href="contatti.html?motivo=kit-litio-620" class="btn btn-outline on-dark">Richiedi un preventivo</a>\n  </div>\n</div>\n${end}`
+    : `${start}\n${end}`;
+  const out = html.slice(0, i) + block + html.slice(j + end.length);
+  if (out !== html) fs.writeFileSync(file, out, 'utf8');
+  console.log(active ? 'Home: riquadro del kit aggiornato.' : 'Home: promozione scaduta, riquadro rimosso.');
+  return true;
 }
 
 // ---------- Pagina madre: fotovoltaico per camper ----------
@@ -1297,6 +1315,7 @@ async function main() {
     fs.writeFileSync(path.join(ROOT, g.file), pageHtml(shell, g), 'utf8');
     console.log('Generata', g.file);
   });
+  injectHomeKitPromo();
   const hubPage = buildGuideHub(guides);
   fs.writeFileSync(path.join(ROOT, hubPage.file), pageHtml(shell, hubPage), 'utf8');
   console.log('Generata', hubPage.file);
