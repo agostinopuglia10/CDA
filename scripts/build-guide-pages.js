@@ -310,6 +310,7 @@ ${tableRows(rows)}
       <div class="guide-links">
         <a href="categoria-energia-batterie.html" class="btn btn-primary btn-sm">Vedi tutte le batterie</a>
         <a href="guida-batteria-200ah-ultimatron-extrapower.html" class="btn btn-outline btn-sm">Confronto batterie da 200 Ah</a>
+        <a href="guida-kit-litio-620ah-promozione.html" class="btn btn-outline btn-sm">Kit litio 620 Ah in promozione</a>
         <a href="guida-climatizzatore-camper.html" class="btn btn-outline btn-sm">Guida al climatizzatore</a>
       </div>`
   };
@@ -635,6 +636,7 @@ ${tableRows(invRows)}
       <div class="guide-links">
         <a href="categoria-elettronica-inverter-regolatori.html" class="btn btn-primary btn-sm">Vedi inverter e regolatori</a>
         <a href="guida-batteria-litio-camper.html" class="btn btn-outline btn-sm">Guida alle batterie al litio</a>
+        <a href="guida-kit-litio-620ah-promozione.html" class="btn btn-outline btn-sm">Kit litio 620 Ah in promozione</a>
         <a href="guida-impianto-acqua-camper.html" class="btn btn-outline btn-sm">Guida all'impianto acqua</a>
         <a href="guida-regolatore-mppt-o-pwm.html" class="btn btn-outline btn-sm">MPPT o PWM</a>
       </div>`
