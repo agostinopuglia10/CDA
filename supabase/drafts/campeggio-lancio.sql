@@ -2,9 +2,9 @@
 -- Preparato il 15/10/2026. Provato con rollback sul database reale il 15/10 (nessuna riga rimasta).
 --
 -- Blocco A = 3 frigo Invision in "Cucina" (categoria gia' esistente: nessuna pagina/menu nuovo, rischio minimo).
--- Blocco B = nuova categoria "Campeggio" (3 sottocategorie) con i 7 prodotti che hanno GIA' tutti i dati (peso incluso).
--- Blocco C = altri 7 prodotti per Campeggio, COMMENTATO: manca il peso (o altro) su GES. Il checkout usa 0,5 kg se il peso manca,
---            quindi un prodotto senza peso NON va attivato. Completare i dati, togliere i commenti, poi eseguire.
+-- Blocco B = nuova categoria "Campeggio" (3 sottocategorie) con 7 prodotti con tutti i dati (peso incluso).
+-- Blocco C = altri 7 prodotti GES per Campeggio con peso STIMATO (GES non lo indica; il checkout userebbe 0,5 kg se mancasse).
+-- Blocco D = 9 sedie/sdraio/tavoli da Euro Accessoires Italia (margini 17-66 euro), pesi dalle schede salvo 2 stimati.
 -- Mettere online Campeggio SOLO quando ha almeno 8-10 prodotti (B + parte di C): meno di cosi' e' una pagina debole.
 --
 -- LISTA PRIMA DI ESEGUIRE (metà gennaio, solo se indicizzazione >= 90% e almeno 1 ordine reale):
@@ -94,39 +94,89 @@ where not exists (select 1 from products p where p.slug = v.slug);
 
 commit;
 
--- ===================== BLOCCO C (COMMENTATO): mancano dati su GES =====================
--- Da chiedere a GES prima di attivare: peso e imballo di ognuno; per FRN01 quale bruciatore e' montato (standard o ceramica);
--- per FRN1405 se la cartuccia della foto e' inclusa e di che tipo (il testo parla di cartucce forabili, la foto ne mostra una a vite);
--- per SED111 la lunghezza del pacco chiuso (102 cm: vedere soglia "lungo").
--- Quando i dati arrivano: sostituire i NULL del peso con il valore, togliere i commenti ed eseguire come gli altri blocchi.
---
--- insert into products (slug, category_id, name, description, price_cents, image_url, stock, active, brand, weight_kg, dimensions_cm, google_product_category, gtin)
--- select v.slug, (select id from categories where path = v.cat_path), v.name, v.description, v.price_cents, v.image_url, 0, true, null, v.weight_kg, v.dimensions_cm, v.gcat, v.gtin
--- from (values
---   ('cda-0205-grill-butano-cartucce-227-g', 'campeggio.cucina-campeggio', 'Grill a butano per cartucce da 227 g',
---    'Griglia a gas con piastra di cottura antiaderente e bruciatore in acciaio inox da 1,9 kW (cod. FRN03). Ha la regolazione della fiamma e l''accensione piezo. Funziona con cartucce di butano da 227 g, non incluse. Comprende una sacca in plastica per il trasporto.',
---    11599, 'images/prodotti/cda-0205-grill-butano-cartucce-227-g.jpg', null::numeric, null::text, 'Home & Garden > Kitchen & Dining > Kitchen Appliances > Outdoor Grills', '8008004122560'),
---   ('cda-0206-fornello-campeggio-cartuccia', 'campeggio.cucina-campeggio', 'Fornello da campeggio a cartuccia',
---    'Fornello portatile a gas con piattello antivento in acciaio inox, che aumenta la potenza della fiamma (cod. FRN1405). Funziona con cartucce di butano forabili, estraibili solo quando completamente scariche; la base ha un sistema di sicurezza brevettato antisblocco della cartuccia. Accensione tradizionale, senza piezo. La cartuccia di gas non è inclusa.',
---    2899, 'images/prodotti/cda-0206-fornello-campeggio-cartuccia.jpg', null, null, 'Home & Garden > Kitchen & Dining > Kitchen Appliances > Portable Cooking Stoves', '8008004089009'),
---   ('cda-0207-barbecue-pieghevole', 'campeggio.cucina-campeggio', 'Barbecue pieghevole a carbonella',
---    'Barbecue a carbonella richiudibile in acciaio, con paratia antivento e gambe removibili: si ripone in poco spazio quando non si usa (cod. BBQ01). Dimensioni totali 36 x 31 x 45 cm.',
---    2399, 'images/prodotti/cda-0207-barbecue-pieghevole.jpg', null, null, 'Home & Garden > Kitchen & Dining > Kitchen Appliances > Outdoor Grills', null),
---   ('cda-0208-sedia-ombrello-deluxe-2', 'campeggio.tavoli-sedie', 'Sedia ombrello Deluxe 2',
---    'Sedia pieghevole tipo ombrello con ampia seduta, imbottita da un sottile strato di gommapiuma nel tessuto (cod. SED111). La struttura tubolare robusta e il sedile largo la rendono stabile. Si ripiega in pochi secondi e si porta con la custodia in dotazione. Dimensioni totali 60 x 88 x 110 cm, da piegata 18 x 18 x 102 cm.',
---    5799, 'images/prodotti/cda-0208-sedia-ombrello-deluxe-2.jpg', null, '18x18x102', 'Furniture > Outdoor Furniture > Outdoor Seating > Outdoor Chairs', null),
---   ('cda-0209-sedia-pieghevole-52x52', 'campeggio.tavoli-sedie', 'Sedia pieghevole con portabevande',
---    'Sedia pieghevole con robusto telaio in metallo, ampio schienale, seduta larga e braccioli con portabevande (cod. SED110). Si ripiega in pochi secondi. Dimensioni da aperta 52 x 52 x 68 cm, altezza della seduta da terra 30 cm.',
---    2599, 'images/prodotti/cda-0209-sedia-pieghevole-52x52.jpg', null, null, 'Furniture > Outdoor Furniture > Outdoor Seating > Outdoor Chairs', null),
---   ('cda-0210-tavolino-multiuso', 'campeggio.accessori-campeggio', 'Tavolino multiuso pieghevole',
---    'Tavolino pieghevole multifunzione per PC portatile, cibi e bevande, che si può appendere anche al volante (cod. TAV8515).',
---    1999, 'images/prodotti/cda-0210-tavolino-multiuso.jpg', null, null, 'Furniture > Outdoor Furniture > Outdoor Tables', '8711293489312'),
---   ('cda-0211-doccia-campeggio-pompetta-12v', 'campeggio.accessori-campeggio', 'Doccia da campeggio con pompa 12 V',
---    'Doccetta con pompa a immersione 12 V per taniche e ghirbe, da collegare alla presa accendisigari (cod. DCC03). Portata 8 litri al minuto, tubo da 2 m. Comprende supporto con ventosa per fissare il doccino alla parete del camper, gancio multifit e sacca per il trasporto.',
---    2599, 'images/prodotti/cda-0211-doccia-campeggio-pompetta-12v.jpg', null, null, 'Sporting Goods > Outdoor Recreation > Camping & Hiking > Portable Toilets & Showers > Portable Showers & Privacy Enclosures', null)
--- ) as v(slug, cat_path, name, description, price_cents, image_url, weight_kg, dimensions_cm, gcat, gtin)
--- where not exists (select 1 from products p where p.slug = v.slug);
+-- ===================== BLOCCO C: altri 7 prodotti GES per Campeggio (pesi STIMATI) =====================
+-- ATTENZIONE: i pesi di questo blocco sono STIME (15/10, GES non li indica), arrotondate per eccesso:
+--   FRN03 grill 3,0 kg | FRN1405 fornello 0,5 kg (modello Kemper simile: 0,5 kg) | BBQ01 barbecue 3,0 kg | SED111 sedia ombrello 3,0 kg
+--   SED110 sedia con braccioli 3,0 kg | TAV8515 tavolino 1,2 kg | DCC03 doccia con pompa 0,7 kg
+-- Sbagliare di poco sposta al piu' di una fascia di spedizione (8,99 / 14,99 €). Controllare il peso reale sui primi colli
+-- e correggere con un update. Da chiedere comunque a GES: quale bruciatore ha FRN01, se la cartuccia nella foto di FRN1405 e' inclusa.
+begin;
+
+insert into products (slug, category_id, name, description, price_cents, image_url, stock, active, brand, weight_kg, dimensions_cm, google_product_category, gtin)
+select v.slug, (select id from categories where path = v.cat_path), v.name, v.description, v.price_cents, v.image_url, 0, true, null, v.weight_kg, v.dimensions_cm, v.gcat, v.gtin
+from (values
+  ('cda-0205-grill-butano-cartucce-227-g', 'campeggio.cucina-campeggio', 'Grill a butano per cartucce da 227 g',
+   'Griglia a gas con piastra di cottura antiaderente e bruciatore in acciaio inox da 1,9 kW (cod. FRN03). Ha la regolazione della fiamma e l''accensione piezo. Funziona con cartucce di butano da 227 g, non incluse. Comprende una sacca in plastica per il trasporto.',
+   11599, 'images/prodotti/cda-0205-grill-butano-cartucce-227-g.jpg', 3.0::numeric, '45x28x15', 'Home & Garden > Kitchen & Dining > Kitchen Appliances > Outdoor Grills', '8008004122560'),
+  ('cda-0206-fornello-campeggio-cartuccia', 'campeggio.cucina-campeggio', 'Fornello da campeggio a cartuccia',
+   'Fornello portatile a gas con piattello antivento in acciaio inox, che aumenta la potenza della fiamma (cod. FRN1405). Funziona con cartucce di butano forabili, estraibili solo quando completamente scariche; la base ha un sistema di sicurezza brevettato antisblocco della cartuccia. Accensione tradizionale, senza piezo. La cartuccia di gas non è inclusa.',
+   2899, 'images/prodotti/cda-0206-fornello-campeggio-cartuccia.jpg', 0.5, '13x13x22', 'Home & Garden > Kitchen & Dining > Kitchen Appliances > Portable Cooking Stoves', '8008004089009'),
+  ('cda-0207-barbecue-pieghevole', 'campeggio.cucina-campeggio', 'Barbecue pieghevole a carbonella',
+   'Barbecue a carbonella richiudibile in acciaio, con paratia antivento e gambe removibili: si ripone in poco spazio quando non si usa (cod. BBQ01). Dimensioni totali 36 x 31 x 45 cm.',
+   2399, 'images/prodotti/cda-0207-barbecue-pieghevole.jpg', 3.0, '36x31x45', 'Home & Garden > Kitchen & Dining > Kitchen Appliances > Outdoor Grills', null),
+  ('cda-0208-sedia-ombrello-deluxe-2', 'campeggio.tavoli-sedie', 'Sedia ombrello Deluxe 2',
+   'Sedia pieghevole tipo ombrello con ampia seduta, imbottita da un sottile strato di gommapiuma nel tessuto (cod. SED111). La struttura tubolare robusta e il sedile largo la rendono stabile. Si ripiega in pochi secondi e si porta con la custodia in dotazione. Dimensioni totali 60 x 88 x 110 cm, da piegata 18 x 18 x 102 cm.',
+   5799, 'images/prodotti/cda-0208-sedia-ombrello-deluxe-2.jpg', 3.0, '18x18x102', 'Furniture > Outdoor Furniture > Outdoor Seating > Outdoor Chairs', null),
+  ('cda-0209-sedia-pieghevole-52x52', 'campeggio.tavoli-sedie', 'Sedia pieghevole con portabevande',
+   'Sedia pieghevole con robusto telaio in metallo, ampio schienale, seduta larga e braccioli con portabevande (cod. SED110). Si ripiega in pochi secondi. Dimensioni da aperta 52 x 52 x 68 cm, altezza della seduta da terra 30 cm.',
+   2599, 'images/prodotti/cda-0209-sedia-pieghevole-52x52.jpg', 3.0, '52x52x68', 'Furniture > Outdoor Furniture > Outdoor Seating > Outdoor Chairs', null),
+  ('cda-0210-tavolino-multiuso', 'campeggio.accessori-campeggio', 'Tavolino multiuso pieghevole',
+   'Tavolino pieghevole multifunzione per PC portatile, cibi e bevande, che si può appendere anche al volante (cod. TAV8515).',
+   1999, 'images/prodotti/cda-0210-tavolino-multiuso.jpg', 1.2, '40x30x5', 'Furniture > Outdoor Furniture > Outdoor Tables', '8711293489312'),
+  ('cda-0211-doccia-campeggio-pompetta-12v', 'campeggio.accessori-campeggio', 'Doccia da campeggio con pompa 12 V',
+   'Doccetta con pompa a immersione 12 V per taniche e ghirbe, da collegare alla presa accendisigari (cod. DCC03). Portata 8 litri al minuto, tubo da 2 m. Comprende supporto con ventosa per fissare il doccino alla parete del camper, gancio multifit e sacca per il trasporto.',
+   2599, 'images/prodotti/cda-0211-doccia-campeggio-pompetta-12v.jpg', 0.7, '25x15x10', 'Sporting Goods > Outdoor Recreation > Camping & Hiking > Portable Toilets & Showers > Portable Showers & Privacy Enclosures', null)
+) as v(slug, cat_path, name, description, price_cents, image_url, weight_kg, dimensions_cm, gcat, gtin)
+where not exists (select 1 from products p where p.slug = v.slug);
+
+commit;
+
+-- ===================== BLOCCO D: sedie, sdraio e tavoli da Euro Accessoires Italia =====================
+-- Costo da area rivenditori EAI 15/10/2026 (listino IVA esclusa meno sconto); prezzo = listino x 1,22 - 0,01.
+-- Costi: Ferio 31,50 | Ancona 45,78 | Barletta Cross 44,26 | Lettino 68,83 | Lago Cross 31,94 | Tavolo Barletta 71,31 |
+--        Sorrento 80 68,85 | Sorrento 120 DG 106,55 | Sorrento 100 Miele 88,52.
+-- Pesi: dalle schede EAI, tranne Lettino 6,0 kg e Lago Cross 3,5 kg che sono STIMATI (la scheda non li indica).
+-- Foto: dal sito EAI (nessuna filigrana). Esclusi per ora: Sedia Lucca (scheda senza foto), Monaco (senza misure),
+-- Tavolo Viamondo 4 posti (peso ignoto, margine 16 €), stuoie e tappeti (arrotolati 250 cm: spedizione "lungo" 32,99 €).
+-- Nessuno supera 150 cm: tutti "normale". Soglia "lungo" assunta oltre 150 cm (nel catalogo il Mega Bag da 140 cm non e' lungo,
+-- il pannello da 169,5 cm si'). Se la soglia scende, mettere long_package = true sui tavoli Sorrento 120.
+begin;
+
+insert into products (slug, category_id, name, description, price_cents, image_url, stock, active, brand, weight_kg, dimensions_cm, google_product_category)
+select v.slug, (select id from categories where path = v.cat_path), v.name, v.description, v.price_cents, v.image_url, 0, true, v.brand, v.weight_kg, v.dimensions_cm, v.gcat
+from (values
+  ('cda-0212-poltroncina-pieghevole-ferio', 'campeggio.tavoli-sedie', 'Poltroncina pieghevole Ferio color lampone', null::text,
+   'Poltroncina pieghevole da campeggio con tela in poliestere 600D, colore lampone. Dimensioni 101 x 64 x 72 cm, peso 4,3 kg.',
+   5489, 'images/prodotti/cda-0212-poltroncina-pieghevole-ferio.jpg', 4.3::numeric, '101x64x72', 'Furniture > Outdoor Furniture > Outdoor Seating > Outdoor Chairs'),
+  ('cda-0213-sedia-ancona-comfort-grey', 'campeggio.tavoli-sedie', 'Sedia pieghevole Ancona Comfort grigia', 'Travellife',
+   'Sedia pieghevole da campeggio Ancona Comfort, colore grigio. Il tessuto resiste all''acqua e ai raggi UV, si pulisce facilmente e asciuga in fretta. Dimensioni 100 x 64 x 10 cm, peso 5,5 kg.',
+   9308, 'images/prodotti/cda-0213-sedia-ancona-comfort-grey.png', 5.5, '100x64x10', 'Furniture > Outdoor Furniture > Outdoor Seating > Outdoor Chairs'),
+  ('cda-0214-sedia-barletta-cross-antracite', 'campeggio.tavoli-sedie', 'Sedia pieghevole Barletta Cross antracite', 'Travellife',
+   'Sedia pieghevole a croce con meccanismo di piegatura a fisarmonica: si chiude in dimensioni compatte di 93 x 28 x 22 cm. Lo schienale si regola in tre posizioni e l''imbottitura a nido d''ape ha delle aperture. Portata fino a 120 kg, peso 6 kg.',
+   8999, 'images/prodotti/cda-0214-sedia-barletta-cross-antracite.png', 6, '93x28x22', 'Furniture > Outdoor Furniture > Outdoor Seating > Outdoor Chairs'),
+  ('cda-0215-lettino-blend-grey', 'campeggio.tavoli-sedie', 'Lettino pieghevole Blend Grey', 'Travellife',
+   'Lettino pieghevole con telaio in alluminio e schienale regolabile, per rilassarsi e prendere il sole. Si ripiega in dimensioni compatte di 80 x 67 x 16 cm. Portata 110 kg.',
+   13994, 'images/prodotti/cda-0215-lettino-blend-grey.png', 6, '80x67x16', 'Furniture > Outdoor Furniture > Outdoor Seating > Outdoor Chairs'),
+  ('cda-0216-sedia-lago-cross-grey', 'campeggio.tavoli-sedie', 'Sedia da campeggio Lago Cross grigia', 'Travellife',
+   'Sedia da campeggio a croce in tessuto di poliestere imbottito, con schienale basso e chiuso che ripara la schiena dal vento. Il telaio in alluminio è leggero e la sedia si piega in dimensioni compatte, da riporre nella borsa per il trasporto inclusa. Dimensioni 45 x 63 x 86 cm, portata 120 kg.',
+   5994, 'images/prodotti/cda-0216-sedia-lago-cross-grey.png', 3.5, '45x63x86', 'Furniture > Outdoor Furniture > Outdoor Seating > Outdoor Chairs'),
+  ('cda-0217-tavolo-barletta-comfort-115', 'campeggio.tavoli-sedie', 'Tavolo da campeggio Barletta Comfort 115', 'Travellife',
+   'Tavolo da campeggio con gambe regolabili in altezza da 63 a 83 cm grazie al sistema Smartlock, per livellare il piano anche su fondo instabile. Dimensioni 115 x 70 x 85 cm, peso 12,7 kg.',
+   14499, 'images/prodotti/cda-0217-tavolo-barletta-comfort-115.png', 12.7, '115x70x85', 'Furniture > Outdoor Furniture > Outdoor Tables'),
+  ('cda-0218-tavolo-sorrento-80-dark-grey', 'campeggio.tavoli-sedie', 'Tavolo pieghevole Sorrento 80 cm Dark Grey', 'Travellife',
+   'Tavolo pieghevole da campeggio Sorrento da 80 cm, colore Dark Grey. Dimensioni da piegato 80 x 60 x 6,5 cm, peso 3,4 kg.',
+   13999, 'images/prodotti/cda-0218-tavolo-sorrento-80-dark-grey.png', 3.4, '80x60x6.5', 'Furniture > Outdoor Furniture > Outdoor Tables'),
+  ('cda-0219-tavolo-sorrento-120-dark-grey', 'campeggio.tavoli-sedie', 'Tavolo pieghevole Sorrento 120 cm Dark Grey', 'Travellife',
+   'Tavolo pieghevole da campeggio Sorrento da 120 cm, colore Dark Grey. Dimensioni da piegato 120 x 80 x 6,5 cm, peso 5,1 kg.',
+   19998, 'images/prodotti/cda-0219-tavolo-sorrento-120-dark-grey.png', 5.1, '120x80x6.5', 'Furniture > Outdoor Furniture > Outdoor Tables'),
+  ('cda-0220-tavolo-sorrento-100-miele', 'campeggio.tavoli-sedie', 'Tavolo pieghevole Sorrento 100 cm Miele', 'Travellife',
+   'Tavolo pieghevole da campeggio Sorrento da 100 cm, colore Miele. Dimensioni da piegato 100 x 70 x 6,5 cm, peso 4,2 kg.',
+   17999, 'images/prodotti/cda-0220-tavolo-sorrento-100-miele.png', 4.2, '100x70x6.5', 'Furniture > Outdoor Furniture > Outdoor Tables')
+) as v(slug, cat_path, name, brand, description, price_cents, image_url, weight_kg, dimensions_cm, gcat)
+where not exists (select 1 from products p where p.slug = v.slug);
+
+commit;
 
 -- ===================== CONTROLLI DOPO L'ESECUZIONE =====================
--- select slug, active, price_cents, weight_kg, category_id is not null as con_categoria from products where slug ~ '^cda-(019[5-9]|020[0-9]|021[01])';
+-- select slug, active, price_cents, weight_kg, category_id is not null as con_categoria from products where slug ~ '^cda-(019[5-9]|020[0-9]|021[0-9]|0220)';
 -- select path, depth, sort_order from categories where path like 'campeggio%' order by path;
