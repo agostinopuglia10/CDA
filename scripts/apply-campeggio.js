@@ -14,9 +14,10 @@ const files = fs.readdirSync(ROOT).filter((f) => f.endsWith('.html') && !generat
 const TREE = `  },
   campeggio: {
     name: 'Campeggio',
-    description: "Tavoli, sedie e accessori da campeggio pieghevoli, da portare in camper per le soste all'aperto.",
+    description: "Tavoli, sedie, fornelli e accessori da campeggio pieghevoli, da portare in camper per le soste all'aperto.",
     children: {
       'tavoli-sedie': { name: 'Tavoli e sedie', description: 'Tavoli pieghevoli in alluminio e sedie da campeggio, leggeri da trasportare e veloci da montare.' },
+      'cucina-campeggio': { name: 'Fornelli e cucina da campeggio', description: "Fornelli e grill a gas portatili per cucinare all'aperto durante le soste." },
       'accessori-campeggio': { name: 'Accessori da campeggio', description: 'Carrelli pieghevoli e piccoli accessori per organizzare le soste in campeggio.' }
     }
   }
