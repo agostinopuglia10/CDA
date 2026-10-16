@@ -378,7 +378,7 @@ var CATEGORIES_DATA = {
       oscuranti: { name: 'Oscuranti', description: 'Oscuranti a rullo per privacy e riparo dal sole nell\'abitacolo.', img: 'images/sottocategorie/interni-oscuranti.jpg' },
       zanzariere: { name: 'Zanzariere', description: 'Zanzariere su misura per porte e finestre del camper.', img: 'images/sottocategorie/interni-zanzariere.jpg' },
       aperture: { name: 'Aperture', description: 'Fermaporta e accessori per porte e sportelli del camper.', img: 'images/sottocategorie/interni-aperture.jpg' },
-      'cabina-guida': { name: 'Cabina Guida', description: 'Oscuranti termici e accessori dedicati alla cabina di guida.', img: 'images/sottocategorie/interni-cabina-guida.jpg' },
+      'cabina-guida': { name: 'Cabina Guida', description: 'Oscuranti termici per la cabina del camper, come i Thermoglas per Ducato in materiale isolante adatto alle basse temperature, ideali per l\'inverno. Qui trovi anche gli accessori dedicati alla cabina di guida.', img: 'images/sottocategorie/interni-cabina-guida.jpg' },
       utensili: { name: 'Utensili', description: 'Attrezzi e utensili per la manutenzione e le piccole riparazioni a bordo.', img: 'images/sottocategorie/interni-utensili.jpg' }
     }
   },
@@ -418,7 +418,7 @@ var CATEGORIES_DATA = {
     description: 'A tuo agio in ogni stagione: climatizzatori e riscaldatori a gasolio e gas.',
     children: {
       climatizzatori: { name: 'Climatizzatori', description: 'Climatizzatori da tetto per il camper, per viaggiare freschi in ogni stagione.', img: 'images/sottocategorie/clima-climatizzatori.jpg' },
-      'riscaldatori-gasolio-gas': { name: 'Riscaldatori a Gasolio e Gas', description: 'Riscaldatori a gasolio e stufe a gas per scaldare il camper anche in inverno.', img: 'images/sottocategorie/clima-riscaldatori-gasolio-gas.jpg' },
+      'riscaldatori-gasolio-gas': { name: 'Riscaldatori a Gasolio e Gas', description: 'Riscaldatori a gasolio per camper (Autoterm Air 2D e 4D, kit pronti da installare) e stufe a gas Trumatic S 3004 e S 5004 di Truma. Si montano nella nostra officina di Tivoli, spedizione in tutta Italia. Se non sai se scegliere gasolio o gas, parti dalle guide qui sotto.', img: 'images/sottocategorie/clima-riscaldatori-gasolio-gas.jpg' },
       'bombole-gpl': { name: 'Bombole e Serbatoi GPL', description: 'Bombola GPL con valvola automotive per il rifornimento dal benzinaio, e tutti i pezzi per installarla e collegarla all\'impianto del mezzo.', img: 'images/sottocategorie/clima-bombole-gpl.jpg' }
     }
   },
@@ -491,7 +491,7 @@ function applyCategoryData(pathStr, subcatGrid, grid) {
   var breadcrumbEl = document.getElementById('breadcrumb');
   if (nameEl) nameEl.textContent = node.name;
   if (descEl) descEl.textContent = node.description || '';
-  document.title = node.name + ' — Shop Camper | CDA Tivoli';
+  document.title = window.CDA_SEO_TITLE || (node.name + ' — Shop Camper | CDA Tivoli');
   if (metaDesc && node.description) metaDesc.setAttribute('content', node.description);
   updateCategorySeoTags(pathStr, node.name, node.description || '', ancestors);
 
@@ -571,7 +571,7 @@ function applyCategoryData(pathStr, subcatGrid, grid) {
 // pagine prodotto).
 function updateCategorySeoTags(pathStr, name, description, ancestors) {
   var pageUrl = 'https://cda-camper.it/' + categoryPageUrl(pathStr);
-  var title = name + ' — Shop Camper | CDA Tivoli';
+  var title = window.CDA_SEO_TITLE || (name + ' — Shop Camper | CDA Tivoli');
 
   var canonicalEl = document.getElementById('canonical-link');
   if (canonicalEl) canonicalEl.setAttribute('href', pageUrl);
@@ -627,7 +627,7 @@ function loadCategoryFromSupabase(pathStr, subcatGrid, grid) {
       var metaDesc = document.getElementById('meta-description');
       if (nameEl) nameEl.textContent = category.name;
       if (descEl && category.description) descEl.textContent = category.description;
-      document.title = category.name + ' — Shop Camper | CDA Tivoli';
+      document.title = window.CDA_SEO_TITLE || (category.name + ' — Shop Camper | CDA Tivoli');
       if (metaDesc && category.description) metaDesc.setAttribute('content', category.description);
       var resolvedForSeo = resolveCategoryPath(pathStr);
       updateCategorySeoTags(pathStr, category.name, category.description || '', resolvedForSeo ? resolvedForSeo.ancestors : []);
@@ -813,7 +813,7 @@ function renderProductPage(p) {
   var topName = (topSlug && CATEGORIES_DATA[topSlug]) ? CATEGORIES_DATA[topSlug].name : catName;
   var descText = p.description || (p.name + ' disponibile nello Shop Camper CDA. Spedizione in tutta Italia o ritiro a Tivoli (RM), installazione disponibile nel centro tecnico.');
 
-  document.title = p.name + ' | Shop CDA Tivoli';
+  document.title = window.CDA_SEO_TITLE || (p.name + ' | Shop CDA Tivoli');
   var metaDesc = document.querySelector('meta[name="description"]');
   if (metaDesc) metaDesc.setAttribute('content', descText.slice(0, 300));
   updateProductSeoTags(p, descText, topName, topSlug);
@@ -953,7 +953,7 @@ function updateProductSeoTags(p, descText, topName, topSlug) {
   var canonicalEl = document.getElementById('canonical-link');
   if (canonicalEl) canonicalEl.setAttribute('href', pageUrl);
   var ogTitleEl = document.getElementById('og-title');
-  if (ogTitleEl) ogTitleEl.setAttribute('content', p.name + ' | Shop CDA Tivoli');
+  if (ogTitleEl) ogTitleEl.setAttribute('content', window.CDA_SEO_TITLE || (p.name + ' | Shop CDA Tivoli'));
   var ogDescEl = document.getElementById('og-desc');
   if (ogDescEl) ogDescEl.setAttribute('content', shortDesc);
   var ogUrlEl = document.getElementById('og-url');
@@ -961,7 +961,7 @@ function updateProductSeoTags(p, descText, topName, topSlug) {
   var ogImageEl = document.getElementById('og-image');
   if (ogImageEl) ogImageEl.setAttribute('content', imageUrl);
   var twitterTitleEl = document.getElementById('twitter-title');
-  if (twitterTitleEl) twitterTitleEl.setAttribute('content', p.name + ' | Shop CDA Tivoli');
+  if (twitterTitleEl) twitterTitleEl.setAttribute('content', window.CDA_SEO_TITLE || (p.name + ' | Shop CDA Tivoli'));
   var twitterDescEl = document.getElementById('twitter-desc');
   if (twitterDescEl) twitterDescEl.setAttribute('content', shortDesc);
 

@@ -999,6 +999,9 @@ button.ba-card:focus-visible{outline:2px solid var(--red);outline-offset:2px;}
    (soprattutto su mobile). Bordo/colore coerenti col filter-bar, ma
    classe propria: qui il concetto è "sottocategoria di pagina", non
    "filtro categoria di shop". */
+.category-guides{font-size:14px;color:var(--steel);margin:10px 0 0;line-height:1.6;}
+.category-guides a{color:var(--red);text-decoration:underline;text-underline-offset:2px;}
+.category-guides a:hover{text-decoration:none;}
 .subcat-chips-label{
   font-family:var(--font-display);font-size:12px;letter-spacing:.1em;text-transform:uppercase;
   color:var(--steel);margin-bottom:10px;

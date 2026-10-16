@@ -82,6 +82,31 @@ function fitTitle(name) {
   return cutAt(name, MAX - ' | CDA Tivoli'.length) + ' | CDA Tivoli';
 }
 
+// Titoli SEO scelti a mano per le ricerche che oggi portano visite (Search Console 15/10/2026): il nome del
+// prodotto resta quello del carrello e degli ordini, cambia solo il titolo che Google mostra. Max ~62 caratteri.
+const SEO_TITLES = {
+  'autoterm-air-2d-comfort-ris9425': 'Autoterm Air 2D Comfort: riscaldatore a gasolio camper | CDA',
+  'cda-0146-autoterm-air-2d-pannello-pu5': 'Autoterm Air 2D PU-5: riscaldatore a gasolio per camper | CDA',
+  'cda-0148-kit-autoterm-air-2d-pannello-comfort': 'Kit Autoterm Air 2D Comfort pronto da installare | CDA Tivoli',
+  'cda-0144-riscaldatore-a-gasolio-2kw': 'Riscaldatore a gasolio 2 kW per camper e furgone | CDA Tivoli',
+  'truma-sl-3004-stf9039': 'Stufa Trumatic S 3004 Truma, accensione automatica | CDA',
+  'truma-sl-5004-stf9038': 'Stufa Trumatic S 5004 Truma, accensione automatica | CDA',
+  'cda-0140-thermoglas-ducato-windscreen': 'Thermoglas Ducato: oscurante termico parabrezza | CDA Tivoli',
+  'cda-0141-thermoglas-xxl-ducato-2006': 'Thermoglas XXL Ducato dal 2006: oscurante termico | CDA Tivoli'
+};
+// Titoli SEO delle categorie (chiave = percorso) e guide da collegare sotto la descrizione della categoria.
+const CATEGORY_SEO_TITLES = {
+  'clima.riscaldatori-gasolio-gas': 'Riscaldatori a gasolio per camper: Autoterm e Truma | CDA',
+  'interni.cabina-guida': 'Oscuranti termici per camper: Thermoglas Ducato | CDA Tivoli'
+};
+const CATEGORY_GUIDES = {
+  'clima.riscaldatori-gasolio-gas': [
+    ['guida-riscaldamento-camper.html', 'Riscaldamento camper: gasolio, gas o portatile'],
+    ['guida-stufa-truma-s-3004-o-5004.html', 'Stufa Truma S 3004 o 5004: quale scegliere'],
+    ['guida-pannello-pu5-o-comfort-autoterm.html', 'Pannello PU-5 o Comfort per Autoterm']
+  ]
+};
+
 function normDesc(d) { return String(d || '').replace(/\s+/g, ' ').trim().toLowerCase(); }
 
 // Guide che citano ogni prodotto: lette dai file guida-*.html già generati (committati nel repo),
@@ -123,7 +148,8 @@ function guideBoxFor(slug) {
 function buildPage(template, p, dupDesc) {
   const relPath = 'prodotto-' + p.slug + '.html';
   const pageUrl = SITE_URL + '/' + relPath;
-  const title = fitTitle(p.name);
+  const seoTitle = SEO_TITLES[p.slug] || '';
+  const title = seoTitle || fitTitle(p.name);
   const descSource = p.description
     || (p.name + ' disponibile nello Shop Camper CDA. Spedizione in tutta Italia o ritiro a Tivoli (RM), installazione disponibile nel centro tecnico.');
   const shortDesc = descSource.slice(0, 200);
@@ -258,7 +284,7 @@ function buildPage(template, p, dupDesc) {
   html = html.replace(/(<script type="application\/ld\+json" id="product-ld">)[\s\S]*?(<\/script>)/, '$1' + JSON.stringify(productLd) + '$2');
   html = html.replace(
     '<script src="js/supabase-config.js"></script>',
-    '<script>window.CDA_PRODUCT_ID = "' + escapeJsString(p.id) + '";</script>\n<script src="js/supabase-config.js"></script>'
+    '<script>window.CDA_PRODUCT_ID = "' + escapeJsString(p.id) + '";' + (seoTitle ? ' window.CDA_SEO_TITLE = "' + escapeJsString(seoTitle) + '";' : '') + '</script>\n<script src="js/supabase-config.js"></script>'
   );
 
   return { relPath, html };
@@ -458,7 +484,8 @@ function buildCategoryPages() {
     const url = SITE_URL + '/' + file;
     // Le sottocategorie con lo stesso nome (es. "Aperture" in Esterni e in Interni) devono avere titoli diversi.
     const parentName = (names.length > 1 && nameCount[name] > 1) ? names[names.length - 2].name : '';
-    const title = name + (parentName ? ' (' + parentName + ')' : '') + ' — Shop Camper | CDA Tivoli';
+    const seoTitle = CATEGORY_SEO_TITLES[c.path] || '';
+    const title = seoTitle || (name + (parentName ? ' (' + parentName + ')' : '') + ' — Shop Camper | CDA Tivoli');
 
     const items = [
       { '@type': 'ListItem', position: 1, name: 'Home', item: SITE_URL + '/' },
@@ -491,11 +518,13 @@ function buildCategoryPages() {
     html = html.replace(/(<meta id="twitter-description" name="twitter:description" content=")[^"]*(")/, '$1' + escapeHtml(desc) + '$2');
     html = html.replace(/(<script type="application\/ld\+json" id="breadcrumb-jsonld">)[\s\S]*?(<\/script>)/, '$1' + breadcrumbLd + '$2');
     html = html.replace(/(<h1 id="category-name">)[\s\S]*?(<\/h1>)/, '$1' + escapeHtml(name) + '$2');
-    html = html.replace(/(<p id="category-desc">)[\s\S]*?(<\/p>)/, '$1' + escapeHtml(c.node.description || '') + '$2');
+    const guideLinks = (CATEGORY_GUIDES[c.path] || []).map(function (g) { return '<a href="' + g[0] + '">' + escapeHtml(g[1]) + '</a>'; });
+    const guidesHtml = guideLinks.length ? '\n      <p class="category-guides"><strong>Guide:</strong> ' + guideLinks.join(' · ') + '</p>' : '';
+    html = html.replace(/(<p id="category-desc">)[\s\S]*?(<\/p>)/, function (m, a, b) { return a + escapeHtml(c.node.description || '') + b + guidesHtml; });
     html = html.replace(/(<div class="breadcrumb" id="breadcrumb">)[\s\S]*?(<\/div>)/, '$1' + trail + '$2');
     html = html.replace(
       '<script src="js/supabase-config.js"></script>',
-      '<script>window.CDA_CATEGORY_SLUG = "' + escapeJsString(c.path) + '";</script>\n<script src="js/supabase-config.js"></script>'
+      '<script>window.CDA_CATEGORY_SLUG = "' + escapeJsString(c.path) + '";' + (seoTitle ? ' window.CDA_SEO_TITLE = "' + escapeJsString(seoTitle) + '";' : '') + '</script>\n<script src="js/supabase-config.js"></script>'
     );
     fs.writeFileSync(path.join(ROOT, file), html, 'utf8');
   }
