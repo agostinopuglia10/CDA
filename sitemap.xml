@@ -216,6 +216,26 @@
     <priority>0.6</priority>
   </url>
   <url>
+    <loc>https://cda-camper.it/categoria-campeggio.html</loc>
+    <changefreq>weekly</changefreq>
+    <priority>0.8</priority>
+  </url>
+  <url>
+    <loc>https://cda-camper.it/categoria-campeggio-tavoli-sedie.html</loc>
+    <changefreq>weekly</changefreq>
+    <priority>0.6</priority>
+  </url>
+  <url>
+    <loc>https://cda-camper.it/categoria-campeggio-cucina-campeggio.html</loc>
+    <changefreq>weekly</changefreq>
+    <priority>0.6</priority>
+  </url>
+  <url>
+    <loc>https://cda-camper.it/categoria-campeggio-accessori-campeggio.html</loc>
+    <changefreq>weekly</changefreq>
+    <priority>0.6</priority>
+  </url>
+  <url>
     <loc>https://cda-camper.it/prodotto-autoterm-air-2d-comfort-ris9425.html</loc>
     <changefreq>weekly</changefreq>
     <priority>0.5</priority>
@@ -911,6 +931,131 @@
     <priority>0.5</priority>
   </url>
   <url>
+    <loc>https://cda-camper.it/prodotto-cda-0195-frigo-invision-22-l.html</loc>
+    <changefreq>weekly</changefreq>
+    <priority>0.5</priority>
+  </url>
+  <url>
+    <loc>https://cda-camper.it/prodotto-cda-0196-frigo-invision-28-l.html</loc>
+    <changefreq>weekly</changefreq>
+    <priority>0.5</priority>
+  </url>
+  <url>
+    <loc>https://cda-camper.it/prodotto-cda-0197-frigo-invision-41-l.html</loc>
+    <changefreq>weekly</changefreq>
+    <priority>0.5</priority>
+  </url>
+  <url>
+    <loc>https://cda-camper.it/prodotto-cda-0198-tavolo-silver-gapless-level-4.html</loc>
+    <changefreq>weekly</changefreq>
+    <priority>0.5</priority>
+  </url>
+  <url>
+    <loc>https://cda-camper.it/prodotto-cda-0199-sdraio-acapulco.html</loc>
+    <changefreq>weekly</changefreq>
+    <priority>0.5</priority>
+  </url>
+  <url>
+    <loc>https://cda-camper.it/prodotto-cda-0200-carrello-pieghevole-50-kg.html</loc>
+    <changefreq>weekly</changefreq>
+    <priority>0.5</priority>
+  </url>
+  <url>
+    <loc>https://cda-camper.it/prodotto-cda-0201-grill-butano-devil-double.html</loc>
+    <changefreq>weekly</changefreq>
+    <priority>0.5</priority>
+  </url>
+  <url>
+    <loc>https://cda-camper.it/prodotto-cda-0202-fornello-gas-portatile.html</loc>
+    <changefreq>weekly</changefreq>
+    <priority>0.5</priority>
+  </url>
+  <url>
+    <loc>https://cda-camper.it/prodotto-cda-0203-carrello-pieghevole-30-kg.html</loc>
+    <changefreq>weekly</changefreq>
+    <priority>0.5</priority>
+  </url>
+  <url>
+    <loc>https://cda-camper.it/prodotto-cda-0204-carrello-pieghevole-70-kg.html</loc>
+    <changefreq>weekly</changefreq>
+    <priority>0.5</priority>
+  </url>
+  <url>
+    <loc>https://cda-camper.it/prodotto-cda-0205-grill-butano-cartucce-227-g.html</loc>
+    <changefreq>weekly</changefreq>
+    <priority>0.5</priority>
+  </url>
+  <url>
+    <loc>https://cda-camper.it/prodotto-cda-0207-barbecue-pieghevole.html</loc>
+    <changefreq>weekly</changefreq>
+    <priority>0.5</priority>
+  </url>
+  <url>
+    <loc>https://cda-camper.it/prodotto-cda-0208-sedia-ombrello-deluxe-2.html</loc>
+    <changefreq>weekly</changefreq>
+    <priority>0.5</priority>
+  </url>
+  <url>
+    <loc>https://cda-camper.it/prodotto-cda-0209-sedia-pieghevole-52x52.html</loc>
+    <changefreq>weekly</changefreq>
+    <priority>0.5</priority>
+  </url>
+  <url>
+    <loc>https://cda-camper.it/prodotto-cda-0210-tavolino-multiuso.html</loc>
+    <changefreq>weekly</changefreq>
+    <priority>0.5</priority>
+  </url>
+  <url>
+    <loc>https://cda-camper.it/prodotto-cda-0211-doccia-campeggio-pompetta-12v.html</loc>
+    <changefreq>weekly</changefreq>
+    <priority>0.5</priority>
+  </url>
+  <url>
+    <loc>https://cda-camper.it/prodotto-cda-0212-poltroncina-pieghevole-ferio.html</loc>
+    <changefreq>weekly</changefreq>
+    <priority>0.5</priority>
+  </url>
+  <url>
+    <loc>https://cda-camper.it/prodotto-cda-0213-sedia-ancona-comfort-grey.html</loc>
+    <changefreq>weekly</changefreq>
+    <priority>0.5</priority>
+  </url>
+  <url>
+    <loc>https://cda-camper.it/prodotto-cda-0214-sedia-barletta-cross-antracite.html</loc>
+    <changefreq>weekly</changefreq>
+    <priority>0.5</priority>
+  </url>
+  <url>
+    <loc>https://cda-camper.it/prodotto-cda-0215-lettino-blend-grey.html</loc>
+    <changefreq>weekly</changefreq>
+    <priority>0.5</priority>
+  </url>
+  <url>
+    <loc>https://cda-camper.it/prodotto-cda-0216-sedia-lago-cross-grey.html</loc>
+    <changefreq>weekly</changefreq>
+    <priority>0.5</priority>
+  </url>
+  <url>
+    <loc>https://cda-camper.it/prodotto-cda-0217-tavolo-barletta-comfort-115.html</loc>
+    <changefreq>weekly</changefreq>
+    <priority>0.5</priority>
+  </url>
+  <url>
+    <loc>https://cda-camper.it/prodotto-cda-0218-tavolo-sorrento-80-dark-grey.html</loc>
+    <changefreq>weekly</changefreq>
+    <priority>0.5</priority>
+  </url>
+  <url>
+    <loc>https://cda-camper.it/prodotto-cda-0219-tavolo-sorrento-120-dark-grey.html</loc>
+    <changefreq>weekly</changefreq>
+    <priority>0.5</priority>
+  </url>
+  <url>
+    <loc>https://cda-camper.it/prodotto-cda-0220-tavolo-sorrento-100-miele.html</loc>
+    <changefreq>weekly</changefreq>
+    <priority>0.5</priority>
+  </url>
+  <url>
     <loc>https://cda-camper.it/prodotto-cda-bundle-0001-kit-toilette-da-viaggio.html</loc>
     <changefreq>weekly</changefreq>
     <priority>0.5</priority>
@@ -1231,6 +1376,9 @@
     <priority>0.6</priority>
   </url>
 </urlset>
+
+
+
 
 
 

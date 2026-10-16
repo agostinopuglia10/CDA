@@ -432,6 +432,15 @@ var CATEGORIES_DATA = {
       'inverter-regolatori': { name: 'Inverter e Regolatori di Carica', description: "Inverter per convertire la corrente e regolatori di carica MPPT per l'impianto solare." },
       compressori: { name: 'Compressori Portatili', description: 'Compressori portatili con power bank e torcia, per gonfiare le gomme ovunque tu sia.' }
     }
+  },
+  campeggio: {
+    name: 'Campeggio',
+    description: "Tavoli, sedie, fornelli e accessori da campeggio pieghevoli, da portare in camper per le soste all'aperto.",
+    children: {
+      'tavoli-sedie': { name: 'Tavoli e sedie', description: 'Tavoli pieghevoli in alluminio e sedie da campeggio, leggeri da trasportare e veloci da montare.' },
+      'cucina-campeggio': { name: 'Fornelli e cucina da campeggio', description: "Fornelli e grill a gas portatili per cucinare all'aperto durante le soste." },
+      'accessori-campeggio': { name: 'Accessori da campeggio', description: 'Carrelli pieghevoli e piccoli accessori per organizzare le soste in campeggio.' }
+    }
   }
 };
 

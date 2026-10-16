@@ -95,6 +95,7 @@ where not exists (select 1 from products p where p.slug = v.slug);
 commit;
 
 -- ===================== BLOCCO C: altri 7 prodotti GES per Campeggio (pesi STIMATI) =====================
+-- FRN1405 (fornello a cartuccia) ESCLUSO: le foto GES mostrano una bombola collegata e non e' chiaro se e' inclusa; da chiedere a GES.
 -- ATTENZIONE: i pesi di questo blocco sono STIME (15/10, GES non li indica), arrotondate per eccesso:
 --   FRN03 grill 3,0 kg | FRN1405 fornello 0,5 kg (modello Kemper simile: 0,5 kg) | BBQ01 barbecue 3,0 kg | SED111 sedia ombrello 3,0 kg
 --   SED110 sedia con braccioli 3,0 kg | TAV8515 tavolino 1,2 kg | DCC03 doccia con pompa 0,7 kg
@@ -108,9 +109,6 @@ from (values
   ('cda-0205-grill-butano-cartucce-227-g', 'campeggio.cucina-campeggio', 'Grill a butano per cartucce da 227 g',
    'Griglia a gas con piastra di cottura antiaderente e bruciatore in acciaio inox da 1,9 kW (cod. FRN03). Ha la regolazione della fiamma e l''accensione piezo. Funziona con cartucce di butano da 227 g, non incluse. Comprende una sacca in plastica per il trasporto.',
    11599, 'images/prodotti/cda-0205-grill-butano-cartucce-227-g.jpg', 3.0::numeric, '45x28x15', 'Home & Garden > Kitchen & Dining > Kitchen Appliances > Outdoor Grills', '8008004122560'),
-  ('cda-0206-fornello-campeggio-cartuccia', 'campeggio.cucina-campeggio', 'Fornello da campeggio a cartuccia',
-   'Fornello portatile a gas con piattello antivento in acciaio inox, che aumenta la potenza della fiamma (cod. FRN1405). Funziona con cartucce di butano forabili, estraibili solo quando completamente scariche; la base ha un sistema di sicurezza brevettato antisblocco della cartuccia. Accensione tradizionale, senza piezo. La cartuccia di gas non è inclusa.',
-   2899, 'images/prodotti/cda-0206-fornello-campeggio-cartuccia.jpg', 0.5, '13x13x22', 'Home & Garden > Kitchen & Dining > Kitchen Appliances > Portable Cooking Stoves', '8008004089009'),
   ('cda-0207-barbecue-pieghevole', 'campeggio.cucina-campeggio', 'Barbecue pieghevole a carbonella',
    'Barbecue a carbonella richiudibile in acciaio, con paratia antivento e gambe removibili: si ripone in poco spazio quando non si usa (cod. BBQ01). Dimensioni totali 36 x 31 x 45 cm.',
    2399, 'images/prodotti/cda-0207-barbecue-pieghevole.jpg', 3.0, '36x31x45', 'Home & Garden > Kitchen & Dining > Kitchen Appliances > Outdoor Grills', null),
