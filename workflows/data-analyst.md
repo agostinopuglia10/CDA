@@ -5,8 +5,12 @@ Procedure standard per analizzare le vendite di ricambi e accessori camper, incr
 ## Obiettivo
 Capire cosa si vende, quando e perché, per anticipare la stagionalità del settore camper e vanlife: riordini in tempo, scorte giuste e promozioni nel momento in cui servono.
 
+## Fasi di adozione
+- **Fase 1 (attuale): CSV esportati a mano.** Lavora solo sui file in `risorse/` (o `input/`). Non leggere il database e non chiamare API: serve a collaudare la qualità delle analisi e affinare queste istruzioni.
+- **Fase 2: fonti reali.** Parte solo quando l'utente conferma che la fase 1 è collaudata. Le fonti diventano gli ordini su Supabase (in sola lettura), GA4 e `prezzi-prodotti.csv` per i costi. Il briefing esistente `briefing-bot-analisi-dati.md` (sul branch del sito) va unito in questo file.
+
 ## Input attesi
-Tutti i file si trovano in `risorse/` (o `input/`).
+In fase 1 tutti i file si trovano in `risorse/` (o `input/`).
 
 | File | Contenuto minimo | Colonne tipiche |
 |---|---|---|
