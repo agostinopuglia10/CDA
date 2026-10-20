@@ -2422,11 +2422,15 @@ function initCartPage() {
         return;
       }
 
-      trackEvent('begin_checkout', {
-        currency: 'EUR',
-        value: realItems.reduce(function (sum, it) { return sum + (it.price_cents * it.quantity) / 100; }, 0),
-        items: realItems.map(function (it) { return { item_id: it.id, item_name: it.name, quantity: it.quantity, price: it.price_cents / 100 }; })
-      });
+      // begin_checkout si registra solo quando il modulo e' valido e l'ordine sta davvero partendo (prima partiva
+      // anche a modulo incompleto e sovrastimava i checkout: caso 1/10/2026, due eventi senza nessun ordine).
+      function trackBeginCheckout() {
+        trackEvent('begin_checkout', {
+          currency: 'EUR',
+          value: realItems.reduce(function (sum, it) { return sum + (it.price_cents * it.quantity) / 100; }, 0),
+          items: realItems.map(function (it) { return { item_id: it.id, item_name: it.name, quantity: it.quantity, price: it.price_cents / 100 }; })
+        });
+      }
 
       if (method === 'cod') {
         var codName = document.getElementById('cod-name').value.trim();
@@ -2442,6 +2446,7 @@ function initCartPage() {
           return;
         }
 
+        trackBeginCheckout();
         checkoutBtn.disabled = true;
         var codOriginalText = checkoutBtn.textContent;
         checkoutBtn.textContent = 'Attendere...';
@@ -2473,6 +2478,7 @@ function initCartPage() {
         return;
       }
 
+      trackBeginCheckout();
       checkoutBtn.disabled = true;
       var originalText = checkoutBtn.textContent;
       checkoutBtn.textContent = 'Attendere...';
