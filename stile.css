@@ -928,6 +928,8 @@ section{padding:80px 0;}
 .ba-body p{font-size:13px;color:var(--steel);margin:0;}
 
 button.ba-card{
+  /* un <button> centra il contenuto in verticale: con schede alte uguali le foto restavano staccate dal bordo superiore */
+  display:flex;flex-direction:column;justify-content:flex-start;align-items:stretch;
   padding:0;font:inherit;text-align:left;color:inherit;cursor:pointer;
   -webkit-appearance:none;appearance:none;transition:transform .15s ease,box-shadow .15s ease;
 }
