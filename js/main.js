@@ -1,5 +1,6 @@
 document.addEventListener('DOMContentLoaded', function () {
   initContactClickTracking();
+  initWhatsappFloat();
   initMobileMenu();
   initSearch();
   initCookieBanner();
@@ -1496,6 +1497,28 @@ function initContactClickTracking() {
     if (!method) return;
     trackEvent('contact_click', { method: method, page: location.pathname });
   }, true);
+}
+
+// Pulsante WhatsApp fisso su tutte le pagine pubbliche (non nel pannello admin, nel carrello e nella conferma ordine).
+// Il testo e' precompilato col titolo della pagina cosi' sappiamo di che prodotto parla il cliente.
+// Il clic e' gia' contato come contact_click (method = whatsapp) da initContactClickTracking().
+function initWhatsappFloat() {
+  if (/admin|ordine-confermato|carrello/i.test(location.pathname)) return;
+  if (document.querySelector('.wa-float')) return;
+  var title = (document.title || '').split(/\s[|—-]\s/)[0].slice(0, 80);
+  var text = 'Ciao CDA, vi scrivo dal sito. Vorrei informazioni su: ' + title;
+  var a = document.createElement('a');
+  a.className = 'wa-float' + (document.getElementById('buy-bar-sticky') ? ' wa-float-lift' : '');
+  a.href = 'https://wa.me/393489905455?text=' + encodeURIComponent(text);
+  a.rel = 'noopener';
+  a.setAttribute('aria-label', 'Scrivici su WhatsApp');
+  a.innerHTML = '<svg viewBox="0 0 32 32" width="24" height="24" aria-hidden="true" focusable="false"><path fill="currentColor" d="M4 4h24v18H14l-7 6v-6H4z"/></svg><span>WhatsApp</span>';
+  // Il titolo della scheda prodotto puo' cambiare dopo il caricamento (JS): lo rileggo al clic.
+  a.addEventListener('click', function () {
+    var t = (document.title || '').split(/\s[|—-]\s/)[0].slice(0, 80);
+    a.href = 'https://wa.me/393489905455?text=' + encodeURIComponent('Ciao CDA, vi scrivo dal sito. Vorrei informazioni su: ' + t);
+  });
+  document.body.appendChild(a);
 }
 
 // Id anonimo di visita (solo per la scheda corrente: sparisce alla chiusura,

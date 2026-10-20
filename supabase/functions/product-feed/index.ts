@@ -157,7 +157,29 @@ function buildFeedTitle(p: { name: string; brand?: string | null; is_bundle?: bo
     title = `${title} - ${category}`;
   }
 
-  return title;
+  return addProductType(title, p);
+}
+
+// Titoli piu' "cercabili" per le due sottocategorie con piu' ricerche reali (Search Console, ultimi 3 mesi:
+// riscaldatori Autoterm/Truma e climatizzatori Dometic): il tipo di prodotto davanti se il nome non lo dice,
+// e "per camper" in coda se non c'e' gia' camper/van/caravan. Solo il feed: il nome sul sito non cambia.
+// Nessun dato inventato: il tipo e' generico ("Climatizzatore", "Riscaldatore a gasolio"), niente potenze o
+// modalita' di montaggio nel titolo. I kit/bundle e il riscaldatore portatile restano come sono.
+function addProductType(title: string, p: { name: string; is_bundle?: boolean | null; categories?: { name?: string } | null }): string {
+  const category = (p.categories?.name || '').trim();
+  if (p.is_bundle || !/^(Riscaldatori a Gasolio e Gas|Climatizzatori)$/.test(category)) return title;
+  if (/portatile|^kit\b/i.test(p.name)) return title;
+
+  let out = title;
+  if (category === 'Climatizzatori' && !/climatizzator|condizionator/i.test(out)) {
+    out = `Climatizzatore ${out}`;
+  } else if (category === 'Riscaldatori a Gasolio e Gas' && !/riscaldator|stufa/i.test(out)) {
+    out = `Riscaldatore a gasolio ${out}`;
+  }
+  // La Truma S 3004 e' venduta anche col nome Trumatic S 3004 (dato dalla scheda prodotto): e' come la cercano i clienti.
+  if (/Truma S 3004/i.test(out) && !/trumatic/i.test(out)) out = `${out} (Trumatic S 3004)`;
+  if (!/camper|\bvan\b|caravan|motorhome/i.test(out)) out = `${out} per camper`;
+  return out;
 }
 
 function escapeXml(value: string): string {

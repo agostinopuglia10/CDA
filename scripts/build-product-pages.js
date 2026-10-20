@@ -145,6 +145,37 @@ function guideBoxFor(slug) {
   return '<div class="product-guide-box"><strong>Prima di scegliere</strong><ul>' + items + '</ul></div>';
 }
 
+// Link interni statici (visibili anche senza JavaScript): le pagine categoria e prodotto
+// mostrano il resto del catalogo via JS, quindi senza questi blocchi Google non vede
+// i collegamenti tra categorie, sottocategorie e prodotti. Riempito da main().
+let ALL_PRODUCTS = [];
+
+function productsInPath(path) {
+  return ALL_PRODUCTS.filter(function (x) { return x.slug && x.categories && x.categories.path === path; });
+}
+
+// "Altri prodotti in questa categoria": 4 prodotti della stessa sottocategoria, scelti in modo
+// stabile (i successivi per nome, in cerchio) cosi' ogni prodotto riceve link in entrata da altri.
+function relatedLinksHtml(p) {
+  const path = p.categories && p.categories.path;
+  if (!path) return '';
+  const same = productsInPath(path).sort(function (a, b) { return a.name.localeCompare(b.name, 'it'); });
+  const idx = same.findIndex(function (x) { return x.id === p.id; });
+  const picks = [];
+  for (let i = 1; i < same.length && picks.length < 4; i++) picks.push(same[(idx + i) % same.length]);
+  const segs = path.split('.');
+  let out = '';
+  if (picks.length) {
+    out += '<h3>Altri prodotti in ' + escapeHtml(p.categories.name) + '</h3>\n    <ul>\n' + picks.map(function (x) {
+      return '      <li><a href="prodotto-' + x.slug + '.html">' + escapeHtml(x.name) + '</a></li>';
+    }).join('\n') + '\n    </ul>\n';
+  }
+  if (segs.length > 1) {
+    out += '    <p>Vedi tutta la categoria: <a href="' + categoryFileName(path) + '">' + escapeHtml(p.categories.name) + '</a></p>\n';
+  }
+  return out ? '<section class="static-links" aria-label="Altri prodotti">\n  <div class="container">\n    ' + out + '  </div>\n</section>\n\n' : '';
+}
+
 function buildPage(template, p, dupDesc) {
   const relPath = 'prodotto-' + p.slug + '.html';
   const pageUrl = SITE_URL + '/' + relPath;
@@ -282,6 +313,8 @@ function buildPage(template, p, dupDesc) {
   html = html.replace(/(<meta name="twitter:description" content=")[^"]*("\s*id="twitter-desc")/, '$1' + escapeHtml(shortDesc) + '$2');
   html = html.replace(/(<script type="application\/ld\+json" id="breadcrumb-ld">)[\s\S]*?(<\/script>)/, '$1' + breadcrumbLd + '$2');
   html = html.replace(/(<script type="application\/ld\+json" id="product-ld">)[\s\S]*?(<\/script>)/, '$1' + JSON.stringify(productLd) + '$2');
+  const relatedBlock = relatedLinksHtml(p);
+  if (relatedBlock) html = html.replace('<footer class="site-footer">', function () { return relatedBlock + '<footer class="site-footer">'; });
   html = html.replace(
     '<script src="js/supabase-config.js"></script>',
     '<script>window.CDA_PRODUCT_ID = "' + escapeJsString(p.id) + '";' + (seoTitle ? ' window.CDA_SEO_TITLE = "' + escapeJsString(seoTitle) + '";' : '') + '</script>\n<script src="js/supabase-config.js"></script>'
@@ -294,6 +327,7 @@ async function main() {
   const template = fs.readFileSync(TEMPLATE_PATH, 'utf8');
   const products = await fetchProducts();
   console.log('Prodotti attivi trovati: ' + products.length);
+  ALL_PRODUCTS = products;
 
   // Testi descrizione condivisi da piu' prodotti (varianti blister, frigoriferi gemelli...): servono a rendere unica la meta description.
   const descCount = new Map();
@@ -522,6 +556,31 @@ function buildCategoryPages() {
     const guidesHtml = guideLinks.length ? '\n      <p class="category-guides"><strong>Guide:</strong> ' + guideLinks.join(' · ') + '</p>' : '';
     html = html.replace(/(<p id="category-desc">)[\s\S]*?(<\/p>)/, function (m, a, b) { return a + escapeHtml(c.node.description || '') + b + guidesHtml; });
     html = html.replace(/(<div class="breadcrumb" id="breadcrumb">)[\s\S]*?(<\/div>)/, '$1' + trail + '$2');
+    // Elenco statico: sottocategorie e prodotti (anche delle sottocategorie) con link normali.
+    let staticOut = '';
+    const kids = Object.keys(c.node.children || {});
+    if (kids.length) {
+      staticOut += '<h3>Sottocategorie</h3>\n    <ul>\n' + kids.map(function (k) {
+        return '      <li><a href="' + categoryFileName(c.path + '.' + k) + '">' + escapeHtml(c.node.children[k].name) + '</a></li>';
+      }).join('\n') + '\n    </ul>\n';
+    }
+    const listItems = function (arr) {
+      return '    <ul>\n' + arr.slice().sort(function (a, b) { return a.name.localeCompare(b.name, 'it'); }).map(function (x) {
+        return '      <li><a href="prodotto-' + x.slug + '.html">' + escapeHtml(x.name) + '</a></li>';
+      }).join('\n') + '\n    </ul>\n';
+    };
+    const direct = productsInPath(c.path);
+    if (direct.length) staticOut += '<h3>Prodotti in ' + escapeHtml(name) + '</h3>\n' + listItems(direct);
+    // Le categorie principali elencano solo le sottocategorie (ogni prodotto e' gia' elencato nella sua sottocategoria):
+    // cosi' il blocco resta corto. Se una sottocategoria ha a sua volta figli, quei prodotti vanno sulla pagina di livello superiore.
+    all.filter(function (d) { return d.path.indexOf(c.path + '.') === 0 && d.path.split('.').length > 2 && d.path.indexOf('.', c.path.length + 1) === -1; }).forEach(function (d) {
+      const sub = productsInPath(d.path);
+      if (sub.length) staticOut += '<h3><a href="' + categoryFileName(d.path) + '">' + escapeHtml(d.node.name) + '</a></h3>\n' + listItems(sub);
+    });
+    if (staticOut) {
+      const staticBlock = '<section class="static-links" aria-label="Elenco prodotti">\n  <div class="container">\n    <h2>Tutti i prodotti: ' + escapeHtml(name) + '</h2>\n    ' + staticOut + '  </div>\n</section>\n\n';
+      html = html.replace('<footer class="site-footer">', function () { return staticBlock + '<footer class="site-footer">'; });
+    }
     html = html.replace(
       '<script src="js/supabase-config.js"></script>',
       '<script>window.CDA_CATEGORY_SLUG = "' + escapeJsString(c.path) + '";' + (seoTitle ? ' window.CDA_SEO_TITLE = "' + escapeJsString(seoTitle) + '";' : '') + '</script>\n<script src="js/supabase-config.js"></script>'
