@@ -29,7 +29,7 @@ const ROOT = path.join(__dirname, '..');
 const TEMPLATE_PATH = path.join(ROOT, 'prodotto.html');
 
 async function fetchProducts() {
-  const url = SUPABASE_URL + '/rest/v1/products?select=id,slug,name,description,price_cents,image_url,brand,is_bundle,in_store_only,category_id,categories(name,slug,path)&active=eq.true&order=slug.asc';
+  const url = SUPABASE_URL + '/rest/v1/products?select=id,slug,name,description,price_cents,image_url,brand,is_bundle,in_store_only,category_id,gtin,weight_kg,ships_on_pallet,long_package,shipping_included,categories(name,slug,path)&active=eq.true&order=slug.asc';
   const res = await fetch(url, {
     headers: {
       apikey: SUPABASE_ANON_KEY,
@@ -40,6 +40,15 @@ async function fetchProducts() {
     const body = await res.text();
     throw new Error('Fetch prodotti da Supabase fallita: ' + res.status + ' ' + body);
   }
+  return res.json();
+}
+
+// Fasce di spedizione reali (le stesse del checkout, tabella shipping_rate_bands): servono al costo di
+// spedizione nei dati strutturati delle schede prodotto.
+async function fetchShippingBands() {
+  const url = SUPABASE_URL + '/rest/v1/shipping_rate_bands?select=package_type,weight_min_kg,weight_max_kg,price_cents,zona&order=weight_min_kg.asc';
+  const res = await fetch(url, { headers: { apikey: SUPABASE_ANON_KEY, Authorization: 'Bearer ' + SUPABASE_ANON_KEY } });
+  if (!res.ok) throw new Error('Fetch fasce di spedizione fallita: ' + res.status + ' ' + (await res.text()));
   return res.json();
 }
 
@@ -92,7 +101,16 @@ const SEO_TITLES = {
   'truma-sl-3004-stf9039': 'Stufa Trumatic S 3004 Truma, accensione automatica | CDA',
   'truma-sl-5004-stf9038': 'Stufa Trumatic S 5004 Truma, accensione automatica | CDA',
   'cda-0140-thermoglas-ducato-windscreen': 'Thermoglas Ducato: oscurante termico parabrezza | CDA Tivoli',
-  'cda-0141-thermoglas-xxl-ducato-2006': 'Thermoglas XXL Ducato dal 2006: oscurante termico | CDA Tivoli'
+  'cda-0141-thermoglas-xxl-ducato-2006': 'Thermoglas XXL Ducato dal 2006: oscurante termico | CDA Tivoli',
+  // Nomi lunghi in categorie con ricerche ("batteria litio camper", "climatizzatore 12v camper"): il tipo davanti, il codice dopo.
+  'cda-0172-batteria-litio-ultimatron-ubl-12-100h-pro': 'Batteria al litio camper 100Ah Ultimatron UBL-12-100H-PRO',
+  'cda-0173-batteria-litio-ultimatron-ubl-12-200h-pro': 'Batteria al litio camper 200Ah riscaldata Ultimatron UBL PRO',
+  'cda-0174-batteria-litio-ultimatron-ubl-12-300h-pro': 'Batteria al litio camper 300Ah riscaldata Ultimatron UBL PRO',
+  'cda-0175-batteria-litio-ultimatron-ulm-12-200h': 'Batteria al litio sottosedile camper 200Ah Ultimatron ULM',
+  'cda-0176-batteria-litio-ultimatron-ulm-12-310h': 'Batteria al litio sottosedile camper 310Ah Ultimatron ULM',
+  'cda-0177-batteria-litio-ultimatron-ulm-12-620': 'Batteria al litio camper 620Ah Ultimatron ULM-12-620 | CDA',
+  'cda-0178-climatizzatore-ultimatron-france-ult-12-2000-pac': 'Climatizzatore 12V per camper 2000W Ultimatron | CDA Tivoli',
+  'cda-0179-climatizzatore-ultimatron-france-ult-12-2700-pac': 'Climatizzatore 12V per camper 2700W Ultimatron | CDA Tivoli'
 };
 // Titoli SEO delle categorie (chiave = percorso) e guide da collegare sotto la descrizione della categoria.
 const CATEGORY_SEO_TITLES = {
@@ -104,8 +122,118 @@ const CATEGORY_GUIDES = {
     ['guida-riscaldamento-camper.html', 'Riscaldamento camper: gasolio, gas o portatile'],
     ['guida-stufa-truma-s-3004-o-5004.html', 'Stufa Truma S 3004 o 5004: quale scegliere'],
     ['guida-pannello-pu5-o-comfort-autoterm.html', 'Pannello PU-5 o Comfort per Autoterm']
-  ]
+  ],
+  'clima': [
+    ['guida-riscaldamento-camper.html', 'Riscaldamento camper: gasolio, gas o portatile'],
+    ['guida-climatizzatore-camper.html', 'Climatizzatore per camper: come scegliere']
+  ],
+  'clima.climatizzatori': [['guida-climatizzatore-camper.html', 'Climatizzatore per camper: come scegliere']],
+  'interni.cucina': [['guida-frigorifero-camper.html', 'Frigorifero a compressore per camper: come scegliere']],
+  'energia': [
+    ['guida-batteria-litio-camper.html', 'Batteria al litio per camper: quanti Ah servono'],
+    ['guida-fotovoltaico-camper.html', 'Fotovoltaico per camper']
+  ],
+  'energia.batterie': [
+    ['guida-batteria-litio-camper.html', 'Batteria al litio per camper: quanti Ah servono'],
+    ['guida-batteria-200ah-ultimatron-extrapower.html', 'Batteria 200 Ah: Ultimatron o ExtraPOWER'],
+    ['guida-kit-litio-620ah-promozione.html', 'Kit litio 620 Ah in promozione']
+  ],
+  'energia.pannelli-solari': [
+    ['guida-fotovoltaico-camper.html', 'Fotovoltaico per camper'],
+    ['guida-regolatore-mppt-o-pwm.html', 'MPPT o PWM: quale regolatore']
+  ],
+  'elettronica.inverter-regolatori': [
+    ['guida-impianto-elettrico-camper.html', 'Inverter, MPPT e caricabatterie per camper'],
+    ['guida-regolatore-mppt-o-pwm.html', 'MPPT o PWM: quale regolatore']
+  ],
+  'elettronica.caricabatterie': [['guida-impianto-elettrico-camper.html', 'Inverter, MPPT e caricabatterie per camper']],
+  'acqua': [['guida-impianto-acqua-camper.html', 'Pompe e serbatoi acqua per camper: come scegliere']],
+  'acqua.pompe': [['guida-impianto-acqua-camper.html', 'Pompe e serbatoi acqua per camper: come scegliere']],
+  'acqua.serbatoi': [['guida-impianto-acqua-camper.html', 'Pompe e serbatoi acqua per camper: come scegliere']]
 };
+
+// Titoli delle altre categorie: tipo di prodotto + "camper", come lo cerca la gente. Max ~62 caratteri.
+Object.assign(CATEGORY_SEO_TITLES, {
+  'interni': 'Accessori interni per camper: cucina, frigo, toilette | CDA',
+  'interni.arredamento': 'Luci LED e arredamento interno per camper | CDA Tivoli',
+  'interni.toilette': 'WC portatile e toilette per camper | CDA Tivoli',
+  'interni.cucina': 'Frigorifero a compressore e cucina per camper | CDA Tivoli',
+  'interni.garage': 'Sistemi garage e fissaggio carico per camper | CDA Tivoli',
+  'interni.oscuranti': 'Oscuranti a rullo per finestre camper | CDA Tivoli',
+  'interni.zanzariere': 'Zanzariere per porta e finestre camper e van | CDA Tivoli',
+  'interni.aperture': 'Fermaporta e ferma porta per camper | CDA Tivoli',
+  'interni.utensili': 'Utensili per manutenzione camper | CDA Tivoli',
+  'esterni': 'Accessori esterni per camper: verande e sicurezza | CDA',
+  'esterni.aperture': 'Aperture esterne per camper | CDA Tivoli',
+  'esterni.verande': 'Verande per camper Thule e Fiamma | CDA Tivoli',
+  'esterni.portaggio': 'Prese traino 7 e 13 poli per camper | CDA Tivoli',
+  'esterni.sicurezza': 'Catadiottri e segnaletica per camper | CDA Tivoli',
+  'esterni.illuminazione': 'Luci LED solari da esterno | CDA Tivoli',
+  'esterni.adesivi-sigillanti': 'Sigillanti e adesivi per camper NPT | CDA Tivoli',
+  'energia': 'Energia per camper: batterie al litio e pannelli solari | CDA',
+  'energia.batterie': 'Batterie al litio per camper LiFePO4 | CDA Tivoli',
+  'energia.pannelli-solari': 'Pannelli solari per camper | CDA Tivoli',
+  'energia.strumentazioni': 'Strumenti di controllo impianto camper | CDA Tivoli',
+  'acqua': 'Impianto acqua camper: pompe, serbatoi, rubinetti | CDA',
+  'acqua.prodotti-chimici': 'Prodotti chimici per WC camper | CDA Tivoli',
+  'acqua.pompe': 'Pompe acqua a immersione per camper | CDA Tivoli',
+  'acqua.serbatoi': 'Serbatoi acqua per camper | CDA Tivoli',
+  'acqua.rubinetteria': 'Rubinetti e miscelatori per camper | CDA Tivoli',
+  'clima': 'Clima camper: climatizzatori e riscaldatori | CDA Tivoli',
+  'clima.climatizzatori': 'Climatizzatori per camper Dometic e 12V | CDA Tivoli',
+  'clima.bombole-gpl': 'Bombole GPL ricaricabili per camper | CDA Tivoli',
+  'elettronica': 'Elettronica per camper: inverter, caricabatterie | CDA',
+  'elettronica.avviatori': 'Avviatori di emergenza per camper | CDA Tivoli',
+  'elettronica.caricabatterie': 'Caricabatterie e DC/DC per camper | CDA Tivoli',
+  'elettronica.monitor-telecamere': 'Telecamere retromarcia e monitor per camper | CDA',
+  'elettronica.inverter-regolatori': 'Inverter e regolatori MPPT per camper | CDA Tivoli',
+  'elettronica.compressori': 'Compressori portatili 12V | CDA Tivoli',
+  'campeggio': 'Articoli da campeggio: tavoli, sedie, fornelli | CDA Tivoli',
+  'campeggio.tavoli-sedie': 'Tavoli e sedie da campeggio pieghevoli | CDA Tivoli',
+  'campeggio.cucina-campeggio': 'Fornelli e barbecue da campeggio | CDA Tivoli',
+  'campeggio.accessori-campeggio': 'Accessori da campeggio: carrelli, doccia | CDA Tivoli'
+});
+
+// Titolo SEO automatico per le schede senza titolo scelto a mano: la gente cerca "tipo di prodotto + camper"
+// (Search Console), mentre i nomi del catalogo quasi mai contengono "camper". Si aggiunge "per camper"
+// (o "da campeggio" nella categoria Campeggio) prima dell'eventuale parentesi finale, solo se il nome non
+// dice gia' camper/van/caravan/Ducato. Il nome del prodotto nel carrello e negli ordini non cambia.
+const NO_CAMPER_SUFFIX_PATHS = ['esterni.illuminazione'];
+function autoSeoTitle(p) {
+  const name = String(p.name || '').replace(/\s+/g, ' ').trim();
+  const cp = (p.categories && p.categories.path) || '';
+  let phrase = '';
+  if (cp.indexOf('campeggio') === 0) {
+    if (!/campeggio/i.test(name)) phrase = ' da campeggio';
+  } else if (NO_CAMPER_SUFFIX_PATHS.indexOf(cp) === -1 && !/48\s?V/i.test(name)
+    && !/camper|\bvan\b|caravan|motorhome|ducato|laika/i.test(name)) {
+    phrase = ' per camper';
+  }
+  if (!phrase) return fitTitle(name);
+  const m = name.match(/^(.*?)(\s*\([^()]*\))$/);
+  const withPhrase = m ? m[1] + phrase + m[2] : name + phrase;
+  for (const suffix of [' | CDA Tivoli', ' | CDA']) {
+    if ((withPhrase + suffix).length <= 62) return withPhrase + suffix;
+  }
+  // Nome lungo: meglio il nome con "per camper" senza marchio CDA (Google aggiunge comunque il nome del sito).
+  // Google mostra circa 60 caratteri ma legge tutto il titolo: fino a 70 resta utile.
+  if (withPhrase.length <= 70) return withPhrase;
+  return fitTitle(name);
+}
+
+// Costo di spedizione di una sola unita' con le stesse regole del checkout (create-checkout-session):
+// gratis da 1.500 EUR, gratis se la spedizione e' gia' nel prezzo, fascia "lungo" fissa, fascia "normale" a peso.
+// I prodotti su bancale costano di piu' sulle isole: per non dare un prezzo sbagliato restano senza dato.
+let SHIPPING_BANDS = [];
+function singleUnitShippingCents(p) {
+  if (p.ships_on_pallet) return null;
+  if (p.price_cents >= 150000 || p.shipping_included) return 0;
+  const type = p.long_package ? 'lungo' : 'normale';
+  const w = p.weight_kg != null ? Number(p.weight_kg) : 0.5;
+  const bands = SHIPPING_BANDS.filter(function (b) { return b.package_type === type && b.zona === 'tutte' && Number(b.weight_min_kg) <= w; })
+    .sort(function (a, b) { return Number(b.weight_min_kg) - Number(a.weight_min_kg); });
+  return bands.length ? bands[0].price_cents : null;
+}
 
 function normDesc(d) { return String(d || '').replace(/\s+/g, ' ').trim().toLowerCase(); }
 
@@ -179,8 +307,9 @@ function relatedLinksHtml(p) {
 function buildPage(template, p, dupDesc) {
   const relPath = 'prodotto-' + p.slug + '.html';
   const pageUrl = SITE_URL + '/' + relPath;
-  const seoTitle = SEO_TITLES[p.slug] || '';
-  const title = seoTitle || fitTitle(p.name);
+  // Titolo scelto a mano o automatico: passa sempre a js/main.js (CDA_SEO_TITLE), che altrimenti lo riscrive col solo nome.
+  const seoTitle = SEO_TITLES[p.slug] || autoSeoTitle(p);
+  const title = seoTitle;
   const descSource = p.description
     || (p.name + ' disponibile nello Shop Camper CDA. Spedizione in tutta Italia o ritiro a Tivoli (RM), installazione disponibile nel centro tecnico.');
   const shortDesc = descSource.slice(0, 200);
@@ -229,6 +358,7 @@ function buildPage(template, p, dupDesc) {
     sku: p.slug
   };
   if (p.brand && p.brand.trim()) productLd.brand = { '@type': 'Brand', name: p.brand.trim() };
+  if (p.gtin && /^\d{8,14}$/.test(String(p.gtin).trim())) productLd.gtin = String(p.gtin).trim();
   if (!priceNotSet) {
     productLd.offers = {
       '@type': 'Offer',
@@ -243,9 +373,20 @@ function buildPage(template, p, dupDesc) {
         '@type': 'MerchantReturnPolicy',
         applicableCountry: 'IT',
         returnPolicyCategory: 'https://schema.org/MerchantReturnFiniteReturnWindow',
-        merchantReturnDays: 14
+        merchantReturnDays: 14,
+        // Termini di vendita, punto 5: reso per posta, spese di restituzione a carico del cliente.
+        returnMethod: 'https://schema.org/ReturnByMail',
+        returnFees: 'https://schema.org/ReturnFeesCustomerResponsibility'
       }
     };
+    const shipCents = p.in_store_only ? null : singleUnitShippingCents(p);
+    if (shipCents != null) {
+      productLd.offers.shippingDetails = {
+        '@type': 'OfferShippingDetails',
+        shippingRate: { '@type': 'MonetaryAmount', value: (shipCents / 100).toFixed(2), currency: 'EUR' },
+        shippingDestination: { '@type': 'DefinedRegion', addressCountry: 'IT' }
+      };
+    }
   }
 
   let html = template;
@@ -326,6 +467,7 @@ function buildPage(template, p, dupDesc) {
 async function main() {
   const template = fs.readFileSync(TEMPLATE_PATH, 'utf8');
   const products = await fetchProducts();
+  SHIPPING_BANDS = await fetchShippingBands();
   console.log('Prodotti attivi trovati: ' + products.length);
   ALL_PRODUCTS = products;
 
@@ -497,6 +639,43 @@ function categoryFileName(cp) {
   return 'categoria-' + cp.replace(/\./g, '-') + '.html';
 }
 
+// Riepilogo reale della categoria (quanti prodotti, quali marchi, da quanto a quanto costano): testo utile a chi
+// arriva da Google e piu' contenuto unico su pagine che altrimenti hanno una sola frase. Solo dati del catalogo.
+function euro(cents) {
+  const parts = (cents / 100).toFixed(cents % 100 ? 2 : 0).split('.');
+  return parts[0].replace(/\B(?=(\d{3})+(?!\d))/g, '.') + (parts[1] ? ',' + parts[1] : '') + ' €';
+}
+function categoryItems(cp) {
+  return ALL_PRODUCTS.filter(function (x) { return x.categories && x.categories.path && (x.categories.path === cp || x.categories.path.indexOf(cp + '.') === 0); });
+}
+// Versione corta per la meta description: quanti prodotti e il prezzo di partenza.
+function categoryMetaSummary(cp) {
+  const prices = categoryItems(cp).map(function (x) { return x.price_cents; }).filter(function (c) { return c > 0; });
+  if (!prices.length) return '';
+  return (prices.length === 1 ? '1 prodotto' : prices.length + ' prodotti') + ' da ' + euro(Math.min.apply(null, prices)) + ', spedizione in tutta Italia o ritiro a Tivoli.';
+}
+function categorySummary(cp, name) {
+  const items = categoryItems(cp);
+  if (!items.length) return '';
+  const prices = items.map(function (x) { return x.price_cents; }).filter(function (c) { return c > 0; });
+  const brands = [];
+  items.forEach(function (x) {
+    const b = (x.brand || '').trim();
+    if (b && b.toUpperCase() !== 'CDA' && brands.indexOf(b) === -1) brands.push(b);
+  });
+  let out = items.length === 1 ? '1 prodotto' : items.length + ' prodotti';
+  out += ' in ' + name;
+  if (brands.length) {
+    const shown = brands.slice(0, 5);
+    out += ' ' + (shown.length === 1 ? 'del marchio ' + shown[0] : 'dei marchi ' + shown.slice(0, -1).join(', ') + ' e ' + shown[shown.length - 1]);
+  }
+  if (prices.length) {
+    const lo = Math.min.apply(null, prices), hi = Math.max.apply(null, prices);
+    out += lo === hi ? ', a ' + euro(lo) : ', da ' + euro(lo) + ' a ' + euro(hi);
+  }
+  return out + '. Spedizione in tutta Italia o ritiro nella nostra officina di Tivoli (RM).';
+}
+
 function buildCategoryPages() {
   const template = fs.readFileSync(path.join(ROOT, 'categoria.html'), 'utf8');
   const data = loadCategoriesData();
@@ -513,13 +692,15 @@ function buildCategoryPages() {
     const name = c.node.name;
     const rawDesc = c.node.description || (name + ' - accessori per camper, spedizione in tutta Italia, installazione nel centro tecnico CDA di Tivoli.');
     // Meta description: se il testo di categoria e' troppo breve per Google lo si completa con i dati reali del servizio.
-    const desc = cutAt(rawDesc.length < 90 ? rawDesc.replace(/\.?$/, '.') + ' Spedizione in tutta Italia, ritiro gratis a Tivoli.' : rawDesc, 158);
+    const summary = categorySummary(c.path, name);
+    const metaSummary = categoryMetaSummary(c.path);
+    const desc = cutAt(rawDesc.length < 120 && metaSummary ? rawDesc.replace(/\.?$/, '.') + ' ' + metaSummary : rawDesc.length < 90 ? rawDesc.replace(/\.?$/, '.') + ' Spedizione in tutta Italia, ritiro gratis a Tivoli.' : rawDesc, 158);
     const file = categoryFileName(c.path);
     const url = SITE_URL + '/' + file;
     // Le sottocategorie con lo stesso nome (es. "Aperture" in Esterni e in Interni) devono avere titoli diversi.
     const parentName = (names.length > 1 && nameCount[name] > 1) ? names[names.length - 2].name : '';
-    const seoTitle = CATEGORY_SEO_TITLES[c.path] || '';
-    const title = seoTitle || (name + (parentName ? ' (' + parentName + ')' : '') + ' — Shop Camper | CDA Tivoli');
+    const title = CATEGORY_SEO_TITLES[c.path] || (name + (parentName ? ' (' + parentName + ')' : '') + ' per camper | CDA Tivoli');
+    const seoTitle = title;
 
     const items = [
       { '@type': 'ListItem', position: 1, name: 'Home', item: SITE_URL + '/' },
@@ -554,7 +735,8 @@ function buildCategoryPages() {
     html = html.replace(/(<h1 id="category-name">)[\s\S]*?(<\/h1>)/, '$1' + escapeHtml(name) + '$2');
     const guideLinks = (CATEGORY_GUIDES[c.path] || []).map(function (g) { return '<a href="' + g[0] + '">' + escapeHtml(g[1]) + '</a>'; });
     const guidesHtml = guideLinks.length ? '\n      <p class="category-guides"><strong>Guide:</strong> ' + guideLinks.join(' · ') + '</p>' : '';
-    html = html.replace(/(<p id="category-desc">)[\s\S]*?(<\/p>)/, function (m, a, b) { return a + escapeHtml(c.node.description || '') + b + guidesHtml; });
+    const summaryHtml = summary ? '\n      <p class="category-guides category-summary">' + escapeHtml(summary) + '</p>' : '';
+    html = html.replace(/(<p id="category-desc">)[\s\S]*?(<\/p>)/, function (m, a, b) { return a + escapeHtml(c.node.description || '') + b + summaryHtml + guidesHtml; });
     html = html.replace(/(<div class="breadcrumb" id="breadcrumb">)[\s\S]*?(<\/div>)/, '$1' + trail + '$2');
     // Elenco statico: sottocategorie e prodotti (anche delle sottocategorie) con link normali.
     let staticOut = '';
@@ -583,7 +765,7 @@ function buildCategoryPages() {
     }
     html = html.replace(
       '<script src="js/supabase-config.js"></script>',
-      '<script>window.CDA_CATEGORY_SLUG = "' + escapeJsString(c.path) + '";' + (seoTitle ? ' window.CDA_SEO_TITLE = "' + escapeJsString(seoTitle) + '";' : '') + '</script>\n<script src="js/supabase-config.js"></script>'
+      '<script>window.CDA_CATEGORY_SLUG = "' + escapeJsString(c.path) + '";' + (seoTitle ? ' window.CDA_SEO_TITLE = "' + escapeJsString(seoTitle) + '";' : '') + ' window.CDA_META_DESC = "' + escapeJsString(desc) + '";</script>\n<script src="js/supabase-config.js"></script>'
     );
     fs.writeFileSync(path.join(ROOT, file), html, 'utf8');
   }

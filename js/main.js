@@ -502,7 +502,7 @@ function applyCategoryData(pathStr, subcatGrid, grid) {
   if (nameEl) nameEl.textContent = node.name;
   if (descEl) descEl.textContent = node.description || '';
   document.title = window.CDA_SEO_TITLE || (node.name + ' — Shop Camper | CDA Tivoli');
-  if (metaDesc && node.description) metaDesc.setAttribute('content', node.description);
+  if (metaDesc && (window.CDA_META_DESC || node.description)) metaDesc.setAttribute('content', window.CDA_META_DESC || node.description);
   updateCategorySeoTags(pathStr, node.name, node.description || '', ancestors);
 
   if (breadcrumbEl) {
@@ -638,7 +638,7 @@ function loadCategoryFromSupabase(pathStr, subcatGrid, grid) {
       if (nameEl) nameEl.textContent = category.name;
       if (descEl && category.description) descEl.textContent = category.description;
       document.title = window.CDA_SEO_TITLE || (category.name + ' — Shop Camper | CDA Tivoli');
-      if (metaDesc && category.description) metaDesc.setAttribute('content', category.description);
+      if (metaDesc && (window.CDA_META_DESC || category.description)) metaDesc.setAttribute('content', window.CDA_META_DESC || category.description);
       var resolvedForSeo = resolveCategoryPath(pathStr);
       updateCategorySeoTags(pathStr, category.name, category.description || '', resolvedForSeo ? resolvedForSeo.ancestors : []);
 
