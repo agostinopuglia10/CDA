@@ -375,9 +375,9 @@ function buildHeatingGuide(products) {
   return {
     file: 'guida-riscaldamento-camper.html',
     shortTitle: 'Guida al riscaldamento per camper',
-    title: 'Riscaldamento camper: gasolio, gas o portatile | CDA Tivoli',
-    description: 'Come scegliere il riscaldamento per il camper: riscaldatori a gasolio Autoterm, stufe a gas Truma, pannelli di controllo e prezzi aggiornati.',
-    h1: 'Riscaldamento per camper: gasolio, gas o portatile?',
+    title: 'Riscaldamento a gasolio per camper: consumi e prezzi | CDA',
+    description: 'Riscaldamento camper a gasolio o a gas: Autoterm Air 2D e 4D, stufe Truma (Trumatic) S 3004 e 5004, consumi per notte, pannelli e prezzi aggiornati.',
+    h1: 'Riscaldamento per camper: a gasolio, a gas o portatile?',
     lead: 'Le tre soluzioni che vendiamo, a confronto, con i prezzi aggiornati e le cose da controllare prima di ordinare (compreso il pannello di controllo).',
     body: `      <p>Con l'arrivo del freddo, scaldare il camper diventa la priorità. Le soluzioni che teniamo a catalogo sono tre: il <strong>riscaldatore a gasolio indipendente</strong> (Autoterm), la <strong>stufa a gas</strong> (Truma) e il <strong>riscaldatore portatile</strong> (Travel Box). Qui trovi come si differenziano. I prezzi sono letti dal nostro catalogo e si aggiornano da soli.</p>
 
@@ -415,6 +415,20 @@ ${rowsHtml(portableRows)}
         </table>
       </div>
 
+      <h2>Quanto consuma il riscaldamento del camper</h2>
+      <p>Dati delle schede tecniche dei modelli a catalogo, con il conto per una notte di 8 ore di funzionamento continuo. Nella pratica il riscaldatore alterna potenza alta e bassa, quindi il consumo reale sta tra i due valori.</p>
+      <div class="guide-table-wrap">
+        <table class="guide-table">
+          <thead><tr><th>Modello</th><th>Consumo combustibile</th><th>In 8 ore</th><th>Corrente a regime</th></tr></thead>
+          <tbody>
+<tr><td>Autoterm Air 2D (0,8-2 kW)</td><td>0,10-0,24 l/h di gasolio</td><td>0,8-1,9 litri</td><td>10-29 W</td></tr>
+<tr><td>Autoterm Air 4D (1-4 kW)</td><td>0,12-0,51 l/h di gasolio</td><td>1-4,1 litri</td><td>10-57 W</td></tr>
+<tr><td>Truma S 3004 (3,5 kW)</td><td>30-280 g/h di GPL</td><td>0,24-2,2 kg</td><td>—</td></tr>
+          </tbody>
+        </table>
+      </div>
+      <p>Il riscaldatore a gasolio prende il combustibile dal serbatoio del veicolo e la corrente dalla batteria dei servizi: con l'Air 2D al massimo, 8 ore sono circa 19 Ah a 12 V. Per notti lunghe al freddo conviene una batteria al litio adeguata (vedi la <a href="guida-batteria-litio-camper.html">guida alle batterie al litio</a>).</p>
+
       <h2>Come scegliere</h2>
       <ul>
         <li><strong>Dimensioni del camper.</strong> Per furgonati e camper di dimensioni contenute è pensata la soluzione compatta (Air 2D o il riscaldatore a gasolio da 2 kW); per ambienti più grandi guarda l'Air 4D, il 4 kW o la Truma S 5004.</li>
@@ -439,6 +453,8 @@ ${rowsHtml(portableRows)}
         <dd>Dipende dal modello: è incluso dove il nome riporta PU-5 o Comfort. Nei riscaldatori da 2 kW e 4 kW senza pannello e nel Kit Riscaldamento Invernale va aggiunto a parte.</dd>
         <dt>Che differenza c'è tra il pannello PU-5 e il Comfort?</dt>
         <dd>Il PU-5 è il pannello analogico di base; il Comfort è digitale, con display OLED e timer programmabili.</dd>
+        <dt>Quanto gasolio consuma un riscaldatore per camper in una notte?</dt>
+        <dd>L'Autoterm Air 2D consuma da 0,10 a 0,24 litri l'ora: in 8 ore da 0,8 a 1,9 litri. L'Air 4D da 0,12 a 0,51 litri l'ora.</dd>
         <dt>Fino a quale temperatura funzionano i riscaldatori Autoterm?</dt>
         <dd>Secondo la scheda, il funzionamento è garantito fino a −45 °C.</dd>
         <dt>Lo montate voi?</dt>
@@ -683,7 +699,7 @@ function buildFridgeGuide(products) {
   return {
     file: 'guida-frigorifero-camper.html',
     shortTitle: 'Guida al frigorifero per camper',
-    title: 'Frigorifero a compressore per camper: come scegliere | CDA Tivoli',
+    title: 'Frigorifero a compressore 12V per camper: come scegliere | CDA',
     description: 'Come scegliere il frigorifero a compressore a 12 V per il camper: litri, freezer, dimensioni e peso dei modelli ExtraCOOL, prezzi aggiornati.',
     h1: 'Frigorifero a compressore per camper: come scegliere',
     lead: 'I modelli ExtraCOOL a 12 V che vendiamo, con litri, freezer, dimensioni, peso e prezzi aggiornati.',
