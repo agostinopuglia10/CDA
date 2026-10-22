@@ -122,7 +122,34 @@ const CATEGORY_GUIDES = {
     ['guida-riscaldamento-camper.html', 'Riscaldamento camper: gasolio, gas o portatile'],
     ['guida-stufa-truma-s-3004-o-5004.html', 'Stufa Truma S 3004 o 5004: quale scegliere'],
     ['guida-pannello-pu5-o-comfort-autoterm.html', 'Pannello PU-5 o Comfort per Autoterm']
-  ]
+  ],
+  'clima': [
+    ['guida-riscaldamento-camper.html', 'Riscaldamento camper: gasolio, gas o portatile'],
+    ['guida-climatizzatore-camper.html', 'Climatizzatore per camper: come scegliere']
+  ],
+  'clima.climatizzatori': [['guida-climatizzatore-camper.html', 'Climatizzatore per camper: come scegliere']],
+  'interni.cucina': [['guida-frigorifero-camper.html', 'Frigorifero a compressore per camper: come scegliere']],
+  'energia': [
+    ['guida-batteria-litio-camper.html', 'Batteria al litio per camper: quanti Ah servono'],
+    ['guida-fotovoltaico-camper.html', 'Fotovoltaico per camper']
+  ],
+  'energia.batterie': [
+    ['guida-batteria-litio-camper.html', 'Batteria al litio per camper: quanti Ah servono'],
+    ['guida-batteria-200ah-ultimatron-extrapower.html', 'Batteria 200 Ah: Ultimatron o ExtraPOWER'],
+    ['guida-kit-litio-620ah-promozione.html', 'Kit litio 620 Ah in promozione']
+  ],
+  'energia.pannelli-solari': [
+    ['guida-fotovoltaico-camper.html', 'Fotovoltaico per camper'],
+    ['guida-regolatore-mppt-o-pwm.html', 'MPPT o PWM: quale regolatore']
+  ],
+  'elettronica.inverter-regolatori': [
+    ['guida-impianto-elettrico-camper.html', 'Inverter, MPPT e caricabatterie per camper'],
+    ['guida-regolatore-mppt-o-pwm.html', 'MPPT o PWM: quale regolatore']
+  ],
+  'elettronica.caricabatterie': [['guida-impianto-elettrico-camper.html', 'Inverter, MPPT e caricabatterie per camper']],
+  'acqua': [['guida-impianto-acqua-camper.html', 'Pompe e serbatoi acqua per camper: come scegliere']],
+  'acqua.pompe': [['guida-impianto-acqua-camper.html', 'Pompe e serbatoi acqua per camper: come scegliere']],
+  'acqua.serbatoi': [['guida-impianto-acqua-camper.html', 'Pompe e serbatoi acqua per camper: come scegliere']]
 };
 
 // Titoli delle altre categorie: tipo di prodotto + "camper", come lo cerca la gente. Max ~62 caratteri.
