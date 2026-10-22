@@ -109,6 +109,7 @@ const SEO_TITLES = {
   'cda-0175-batteria-litio-ultimatron-ulm-12-200h': 'Batteria al litio sottosedile camper 200Ah Ultimatron ULM',
   'cda-0176-batteria-litio-ultimatron-ulm-12-310h': 'Batteria al litio sottosedile camper 310Ah Ultimatron ULM',
   'cda-0177-batteria-litio-ultimatron-ulm-12-620': 'Batteria al litio camper 620Ah Ultimatron ULM-12-620 | CDA',
+  'cda-0221-victron-multiplus-ii-12-3000-120-32': 'Inverter caricabatterie Victron MultiPlus-II 12/3000 | CDA',
   'cda-0178-climatizzatore-ultimatron-france-ult-12-2000-pac': 'Climatizzatore 12V per camper 2000W Ultimatron | CDA Tivoli',
   'cda-0179-climatizzatore-ultimatron-france-ult-12-2700-pac': 'Climatizzatore 12V per camper 2700W Ultimatron | CDA Tivoli'
 };

@@ -1281,9 +1281,123 @@ ${faq.map((f) => `        <dt>${esc(f[0])}</dt>\n        <dd>${esc(f[1])}</dd>`)
 }
 
 // ---------- Pagina indice: tutte le guide e i confronti ----------
+// ---------- Guida: inverter caricabatterie Victron MultiPlus-II ----------
+// Dati dalla scheda tecnica del costruttore (come riportata dal rivenditore Manelservice, 22/10/2026) e
+// dall'etichetta dell'apparecchio fotografato in officina (12 V, 3000, 120 A, 32 A, 230 V, IP21).
+// Peso e dimensioni NON compaiono finche' non sono confermati. Se il prodotto non e' attivo la guida non viene generata.
+const MULTIPLUS_SLUG = 'cda-0221-victron-multiplus-ii-12-3000-120-32';
+function buildMultiPlusGuide(products) {
+  const mp = products.find((p) => p.slug === MULTIPLUS_SLUG);
+  if (!mp) return null;
+  const inv = products.find((p) => p.slug === 'cda-0192-inverter-onda-pura-3000w-bypass');
+  const chg = products.find((p) => p.slug === 'cda-0194-caricabatterie-mestic-mbc-1040-40a');
+  const mppt = products.find((p) => p.slug === 'cda-0190-regolatore-mppt-victron-100-30');
+  const faq = [
+    ['Che cos\'è un inverter caricabatterie?', 'È un apparecchio che fa tre lavori insieme: trasforma i 12 V della batteria in 230 V per le prese di bordo, ricarica la batteria quando c\'è la rete o il generatore e passa da una fonte all\'altra in automatico.'],
+    ['Quanta potenza dà davvero il MultiPlus-II 12/3000/120-32?', 'Dà 3000 VA, cioè 2400 W continui a 25 °C. Con il caldo la potenza continua scende: 2200 W a 40 °C e 1700 W a 65 °C. Il picco è di 5500 W.'],
+    ['Funziona con le batterie al litio?', 'Sì: sull\'etichetta dell\'apparecchio è indicato che si possono caricare batterie al piombo o al litio. Va sempre abbinato a una batteria a 12 V che regga la corrente richiesta.'],
+    ['Quanta corrente prende dalla batteria?', 'A pieno carico, 2400 W divisi per 12 V fanno circa 200 A, più le perdite. Per questo servono una batteria adatta, cavi di sezione adeguata e un fusibile giusto: è un lavoro da fare a regola d\'arte.'],
+    ['Posso usarlo con la colonnina del campeggio?', 'Sì: il commutatore di trasferimento è da 32 A. Con la rete disponibile i consumi passano dalla rete e la batteria si ricarica; con la funzione PowerAssist, se i consumi superano la rete disponibile, l\'apparecchio aggiunge la corrente della batteria.'],
+    ['Lo montate voi?', 'Sì, nel nostro centro tecnico di Tivoli, per i prodotti acquistati da noi. Il montaggio si fa soltanto in officina.']
+  ];
+  const sumAlt = inv && chg ? inv.price_cents + chg.price_cents : 0;
+  const altRows = [
+    [`<a href="prodotto-${esc(mp.slug)}.html">${esc(mp.name)}</a>`, 'Un solo apparecchio: inverter 3000 VA, caricabatterie fino a 120 A e commutatore rete/batteria da 32 A', eur(mp.price_cents), esc(shippingNote(mp))]
+  ];
+  if (inv && chg) {
+    altRows.push([`<a href="prodotto-${esc(inv.slug)}.html">${esc(inv.name)}</a><br>+ <a href="prodotto-${esc(chg.slug)}.html">${esc(chg.name)}</a>`, 'Due apparecchi: inverter a onda pura da 3000 W con by-pass sulla rete esterna e caricabatterie da 40 A', eur(sumAlt) + ' (somma dei due)', 'Spedizione calcolata nel carrello']);
+  }
+  return {
+    file: 'guida-inverter-caricabatterie-multiplus-ii-camper.html',
+    shortTitle: 'Inverter caricabatterie Victron MultiPlus-II',
+    title: 'Inverter caricabatterie camper: Victron MultiPlus-II | CDA',
+    description: 'Victron MultiPlus-II 12/3000/120-32: inverter, caricabatterie 120 A e commutatore rete/batteria in un solo apparecchio per il camper. Dati, consumi e prezzo.',
+    h1: 'Inverter caricabatterie per camper: Victron MultiPlus-II 12/3000/120-32',
+    lead: 'Che cosa fa, quanta potenza dà davvero, cosa serve per usarlo bene e quando conviene rispetto a inverter e caricabatterie separati.',
+    faq,
+    body: `      <p><strong>In breve:</strong> il Victron MultiPlus-II 12/3000/120-32 è un inverter, un caricabatterie e un commutatore rete/batteria in un solo apparecchio. Dà 3000 VA (2400 W continui a 25 °C, picco 5500 W), carica le batterie fino a 120 A e ha un commutatore di trasferimento da 32 A. Costa ${eur(mp.price_cents)}.</p>
+
+      <h2>Tre apparecchi in uno</h2>
+      <ul>
+        <li><strong>Inverter:</strong> trasforma i 12 V della batteria in 230 V (50 Hz) per le prese del camper.</li>
+        <li><strong>Caricabatterie:</strong> ricarica la batteria dalla colonnina o dal generatore con una corrente fino a 120 A.</li>
+        <li><strong>Commutatore automatico:</strong> con la rete disponibile i consumi passano dalla rete (fino a 32 A); se la rete manca, l'inverter prende la corrente dalla batteria.</li>
+      </ul>
+      <p>In più, la funzione <strong>PowerAssist</strong> aiuta la rete: se la colonnina o il generatore non bastano per i consumi del momento, l'apparecchio aggiunge la corrente della batteria.</p>
+
+      <h2>Dati tecnici</h2>
+      <div class="guide-table-wrap">
+        <table class="guide-table">
+          <thead><tr><th>Dato</th><th>Valore</th></tr></thead>
+          <tbody>
+<tr><td>Tensione della batteria</td><td>12 V (ingresso da 9,5 a 17 V)</td></tr>
+<tr><td>Potenza continua</td><td>3000 VA; 2400 W a 25 °C, 2200 W a 40 °C, 1700 W a 65 °C</td></tr>
+<tr><td>Potenza di picco</td><td>5500 W</td></tr>
+<tr><td>Uscita</td><td>230 V ±2%, 50 Hz</td></tr>
+<tr><td>Corrente di carica massima</td><td>120 A</td></tr>
+<tr><td>Commutatore di trasferimento</td><td>32 A</td></tr>
+<tr><td>Efficienza massima</td><td>93%</td></tr>
+<tr><td>Consumo a vuoto</td><td>13 W</td></tr>
+<tr><td>Batterie</td><td>Al piombo o al litio (come indicato sull'etichetta)</td></tr>
+<tr><td>Uso</td><td>Solo all'interno, grado di protezione IP21</td></tr>
+          </tbody>
+        </table>
+      </div>
+      <p>I dati sono quelli della scheda tecnica del costruttore e dell'etichetta dell'apparecchio. La potenza continua scende con il caldo: tienine conto se lo monti in un vano che si scalda.</p>
+
+      <h2>Cosa puoi alimentare</h2>
+      <p>Il limite è la potenza continua: <strong>somma i watt degli apparecchi che usi insieme</strong> (li trovi sull'etichetta di ciascuno) e tieni un po' di margine rispetto ai 2400 W. Piano a induzione, macchina del caffè o microonde possono stare dentro questo limite, ma non tutti insieme e non a ogni potenza: controlla i dati del tuo apparecchio. I carichi con un picco di avviamento alto, come un compressore, usano la riserva di potenza fino a 5500 W.</p>
+
+      <div class="guide-note"><strong>Occhio alla batteria.</strong> A pieno carico l'inverter prende dalla batteria circa 200 A (2400 W ÷ 12 V), più le perdite. Servono una batteria che regga quella corrente in scarica, cavi di sezione adeguata e un fusibile giusto. Prima di ordinare confronta i dati della tua batteria con la <a href="guida-batteria-litio-camper.html">guida alle batterie al litio</a>.</div>
+
+      <h2>Un apparecchio solo o due separati?</h2>
+      <p>Per avere inverter e caricabatterie si può scegliere anche la soluzione a due apparecchi. I numeri a catalogo:</p>
+      <div class="guide-table-wrap">
+        <table class="guide-table">
+          <thead><tr><th>Soluzione</th><th>Cosa offre</th><th>Prezzo</th><th>Spedizione</th></tr></thead>
+          <tbody>
+${tableRows(altRows)}
+          </tbody>
+        </table>
+      </div>
+      <ul>
+        <li><strong>MultiPlus-II:</strong> un solo apparecchio da installare, ricarica molto più veloce (120 A) e commutazione automatica rete/batteria integrata.</li>
+        <li><strong>Due apparecchi:</strong> più flessibili se hai già uno dei due o se ti basta una ricarica più lenta (40 A).</li>
+      </ul>
+
+      <h2>Come abbinarlo</h2>
+      <ul>
+        <li><strong>Batteria a 12 V al litio</strong> capace di erogare la corrente richiesta: vedi la <a href="guida-batteria-litio-camper.html">guida alle batterie al litio</a>.</li>
+        <li><strong>Solare:</strong> il MultiPlus-II non include un regolatore solare.${mppt ? ' Per i pannelli abbinalo a un regolatore MPPT come il <a href="prodotto-' + esc(mppt.slug) + '.html">' + esc(mppt.name) + '</a> (' + eur(mppt.price_cents) + ').' : ''} Vedi la <a href="guida-fotovoltaico-camper.html">guida al fotovoltaico</a> e quella all'<a href="guida-impianto-elettrico-camper.html">impianto elettrico</a>.</li>
+      </ul>
+
+      <h2>Domande frequenti</h2>
+      <dl class="guide-faq">
+${faq.map((f) => `        <dt>${esc(f[0])}</dt>\n        <dd>${esc(f[1])}</dd>`).join('\n')}
+      </dl>
+
+      <div class="guide-note"><strong>Impianto da dimensionare?</strong> Dicci cosa vuoi alimentare e per quanto tempo: chiamaci al <a href="tel:+393489905455">348 990 5455</a> e lo calcoliamo insieme prima di ordinare.</div>
+
+      <h2>Spedizione, ritiro e montaggio</h2>
+      <ul>
+        <li><strong>Spedizione in tutta Italia</strong>, con costo calcolato nel carrello.</li>
+        <li><strong>Ritiro gratis in officina a Tivoli</strong>, senza spedizione.</li>
+        <li><strong>Montaggio nel nostro centro tecnico</strong> per i prodotti acquistati da noi: un impianto elettrico va collegato a regola d'arte. Il montaggio lo facciamo soltanto per i prodotti acquistati da CDA, nella nostra officina.</li>
+        <li><strong>Reso entro 14 giorni</strong> e garanzia legale di 24 mesi.</li>
+      </ul>
+
+      <div class="guide-links">
+        <a href="prodotto-${esc(mp.slug)}.html" class="btn btn-primary btn-sm">Vedi il MultiPlus-II</a>
+        <a href="categoria-elettronica-inverter-regolatori.html" class="btn btn-outline btn-sm">Inverter e regolatori</a>
+        <a href="guida-impianto-elettrico-camper.html" class="btn btn-outline btn-sm">Guida all'impianto elettrico</a>
+        <a href="guida-batteria-litio-camper.html" class="btn btn-outline btn-sm">Guida alle batterie al litio</a>
+      </div>`
+  };
+}
+
 function buildGuideHub(guides) {
   const groups = [
-    ['Energia e batterie', ['guida-fotovoltaico-camper.html', 'guida-kit-litio-620ah-promozione.html', 'guida-batteria-litio-camper.html', 'guida-batteria-200ah-ultimatron-extrapower.html', 'guida-impianto-elettrico-camper.html', 'guida-regolatore-mppt-o-pwm.html']],
+    ['Energia e batterie', ['guida-fotovoltaico-camper.html', 'guida-kit-litio-620ah-promozione.html', 'guida-batteria-litio-camper.html', 'guida-batteria-200ah-ultimatron-extrapower.html', 'guida-impianto-elettrico-camper.html', 'guida-inverter-caricabatterie-multiplus-ii-camper.html', 'guida-regolatore-mppt-o-pwm.html']],
     ['Clima e riscaldamento', ['guida-climatizzatore-camper.html', 'guida-riscaldamento-camper.html', 'guida-pannello-pu5-o-comfort-autoterm.html', 'guida-stufa-truma-s-3004-o-5004.html']],
     ['Acqua e frigorifero', ['guida-impianto-acqua-camper.html', 'guida-frigorifero-camper.html']]
   ];
@@ -1314,7 +1428,7 @@ function buildGuideHub(guides) {
 
 async function main() {
   const shell = siteShell();
-  const [dometic, batterie, riscaldamento, acqua, elettrico, frigoriferi, kitProdotti, pannelli, caricabatterie] = await Promise.all([
+  const [dometic, batterie, riscaldamento, acqua, elettrico, frigoriferi, kitProdotti, pannelli, caricabatterie, multiplus] = await Promise.all([
     fetchProducts('name=ilike.*fresh*'),
     fetchProducts('name=ilike.batteria*'),
     fetchProducts('or=(name.ilike.*riscald*,name.ilike.*stufa*,name.ilike.*autoterm*,name.ilike.*travel box*)'),
@@ -1323,10 +1437,11 @@ async function main() {
     fetchProducts('name=ilike.frigorifero*'),
     fetchProducts('slug=in.(cda-0177-batteria-litio-ultimatron-ulm-12-620,cda-0190-regolatore-mppt-victron-100-30,cda-0191-pannello-solare-all-black-300w,cda-0192-inverter-onda-pura-3000w-bypass,cda-0193-caricabatterie-dc-dc-victron-orion-xs-50a,cda-0194-caricabatterie-mestic-mbc-1040-40a)'),
     fetchProducts('name=ilike.pannello solare*'),
-    fetchProducts('or=(name.ilike.caricabatterie*,name.ilike.carica batterie*)')
+    fetchProducts('or=(name.ilike.caricabatterie*,name.ilike.carica batterie*)'),
+    fetchProducts('slug=in.(' + MULTIPLUS_SLUG + ',cda-0192-inverter-onda-pura-3000w-bypass,cda-0194-caricabatterie-mestic-mbc-1040-40a,cda-0190-regolatore-mppt-victron-100-30)')
   ]);
 
-  const guides = [buildClimateGuide(dometic), buildBatteryGuide(batterie), buildHeatingGuide(riscaldamento), buildWaterGuide(acqua), buildPowerGuide(elettrico), buildFridgeGuide(frigoriferi), buildBattery200Compare(batterie), buildPanelCompare(riscaldamento), buildTrumaCompare(riscaldamento), buildMpptCompare(elettrico), buildKitLitio620(kitProdotti), buildSolarPillar(pannelli, elettrico.filter((p) => /^Regolatore/i.test(p.name)), batterie, elettrico.filter((p) => /^Inverter/i.test(p.name)), caricabatterie)];
+  const guides = [buildClimateGuide(dometic), buildBatteryGuide(batterie), buildHeatingGuide(riscaldamento), buildWaterGuide(acqua), buildPowerGuide(elettrico), buildFridgeGuide(frigoriferi), buildBattery200Compare(batterie), buildPanelCompare(riscaldamento), buildTrumaCompare(riscaldamento), buildMpptCompare(elettrico), buildKitLitio620(kitProdotti), buildSolarPillar(pannelli, elettrico.filter((p) => /^Regolatore/i.test(p.name)), batterie, elettrico.filter((p) => /^Inverter/i.test(p.name)), caricabatterie), buildMultiPlusGuide(multiplus)].filter(Boolean);
   guides.forEach((g) => {
     fs.writeFileSync(path.join(ROOT, g.file), pageHtml(shell, g), 'utf8');
     console.log('Generata', g.file);
