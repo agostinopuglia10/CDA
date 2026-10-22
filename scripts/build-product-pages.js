@@ -639,6 +639,43 @@ function categoryFileName(cp) {
   return 'categoria-' + cp.replace(/\./g, '-') + '.html';
 }
 
+// Riepilogo reale della categoria (quanti prodotti, quali marchi, da quanto a quanto costano): testo utile a chi
+// arriva da Google e piu' contenuto unico su pagine che altrimenti hanno una sola frase. Solo dati del catalogo.
+function euro(cents) {
+  const parts = (cents / 100).toFixed(cents % 100 ? 2 : 0).split('.');
+  return parts[0].replace(/\B(?=(\d{3})+(?!\d))/g, '.') + (parts[1] ? ',' + parts[1] : '') + ' €';
+}
+function categoryItems(cp) {
+  return ALL_PRODUCTS.filter(function (x) { return x.categories && x.categories.path && (x.categories.path === cp || x.categories.path.indexOf(cp + '.') === 0); });
+}
+// Versione corta per la meta description: quanti prodotti e il prezzo di partenza.
+function categoryMetaSummary(cp) {
+  const prices = categoryItems(cp).map(function (x) { return x.price_cents; }).filter(function (c) { return c > 0; });
+  if (!prices.length) return '';
+  return (prices.length === 1 ? '1 prodotto' : prices.length + ' prodotti') + ' da ' + euro(Math.min.apply(null, prices)) + ', spedizione in tutta Italia o ritiro a Tivoli.';
+}
+function categorySummary(cp, name) {
+  const items = categoryItems(cp);
+  if (!items.length) return '';
+  const prices = items.map(function (x) { return x.price_cents; }).filter(function (c) { return c > 0; });
+  const brands = [];
+  items.forEach(function (x) {
+    const b = (x.brand || '').trim();
+    if (b && b.toUpperCase() !== 'CDA' && brands.indexOf(b) === -1) brands.push(b);
+  });
+  let out = items.length === 1 ? '1 prodotto' : items.length + ' prodotti';
+  out += ' in ' + name;
+  if (brands.length) {
+    const shown = brands.slice(0, 5);
+    out += ' ' + (shown.length === 1 ? 'del marchio ' + shown[0] : 'dei marchi ' + shown.slice(0, -1).join(', ') + ' e ' + shown[shown.length - 1]);
+  }
+  if (prices.length) {
+    const lo = Math.min.apply(null, prices), hi = Math.max.apply(null, prices);
+    out += lo === hi ? ', a ' + euro(lo) : ', da ' + euro(lo) + ' a ' + euro(hi);
+  }
+  return out + '. Spedizione in tutta Italia o ritiro nella nostra officina di Tivoli (RM).';
+}
+
 function buildCategoryPages() {
   const template = fs.readFileSync(path.join(ROOT, 'categoria.html'), 'utf8');
   const data = loadCategoriesData();
@@ -655,7 +692,9 @@ function buildCategoryPages() {
     const name = c.node.name;
     const rawDesc = c.node.description || (name + ' - accessori per camper, spedizione in tutta Italia, installazione nel centro tecnico CDA di Tivoli.');
     // Meta description: se il testo di categoria e' troppo breve per Google lo si completa con i dati reali del servizio.
-    const desc = cutAt(rawDesc.length < 90 ? rawDesc.replace(/\.?$/, '.') + ' Spedizione in tutta Italia, ritiro gratis a Tivoli.' : rawDesc, 158);
+    const summary = categorySummary(c.path, name);
+    const metaSummary = categoryMetaSummary(c.path);
+    const desc = cutAt(rawDesc.length < 120 && metaSummary ? rawDesc.replace(/\.?$/, '.') + ' ' + metaSummary : rawDesc.length < 90 ? rawDesc.replace(/\.?$/, '.') + ' Spedizione in tutta Italia, ritiro gratis a Tivoli.' : rawDesc, 158);
     const file = categoryFileName(c.path);
     const url = SITE_URL + '/' + file;
     // Le sottocategorie con lo stesso nome (es. "Aperture" in Esterni e in Interni) devono avere titoli diversi.
@@ -696,7 +735,8 @@ function buildCategoryPages() {
     html = html.replace(/(<h1 id="category-name">)[\s\S]*?(<\/h1>)/, '$1' + escapeHtml(name) + '$2');
     const guideLinks = (CATEGORY_GUIDES[c.path] || []).map(function (g) { return '<a href="' + g[0] + '">' + escapeHtml(g[1]) + '</a>'; });
     const guidesHtml = guideLinks.length ? '\n      <p class="category-guides"><strong>Guide:</strong> ' + guideLinks.join(' · ') + '</p>' : '';
-    html = html.replace(/(<p id="category-desc">)[\s\S]*?(<\/p>)/, function (m, a, b) { return a + escapeHtml(c.node.description || '') + b + guidesHtml; });
+    const summaryHtml = summary ? '\n      <p class="category-guides category-summary">' + escapeHtml(summary) + '</p>' : '';
+    html = html.replace(/(<p id="category-desc">)[\s\S]*?(<\/p>)/, function (m, a, b) { return a + escapeHtml(c.node.description || '') + b + summaryHtml + guidesHtml; });
     html = html.replace(/(<div class="breadcrumb" id="breadcrumb">)[\s\S]*?(<\/div>)/, '$1' + trail + '$2');
     // Elenco statico: sottocategorie e prodotti (anche delle sottocategorie) con link normali.
     let staticOut = '';
@@ -725,7 +765,7 @@ function buildCategoryPages() {
     }
     html = html.replace(
       '<script src="js/supabase-config.js"></script>',
-      '<script>window.CDA_CATEGORY_SLUG = "' + escapeJsString(c.path) + '";' + (seoTitle ? ' window.CDA_SEO_TITLE = "' + escapeJsString(seoTitle) + '";' : '') + '</script>\n<script src="js/supabase-config.js"></script>'
+      '<script>window.CDA_CATEGORY_SLUG = "' + escapeJsString(c.path) + '";' + (seoTitle ? ' window.CDA_SEO_TITLE = "' + escapeJsString(seoTitle) + '";' : '') + ' window.CDA_META_DESC = "' + escapeJsString(desc) + '";</script>\n<script src="js/supabase-config.js"></script>'
     );
     fs.writeFileSync(path.join(ROOT, file), html, 'utf8');
   }
