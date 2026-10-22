@@ -160,21 +160,32 @@ function buildFeedTitle(p: { name: string; brand?: string | null; is_bundle?: bo
   return addProductType(title, p);
 }
 
-// Titoli piu' "cercabili" per le due sottocategorie con piu' ricerche reali (Search Console, ultimi 3 mesi:
-// riscaldatori Autoterm/Truma e climatizzatori Dometic): il tipo di prodotto davanti se il nome non lo dice,
+// Titoli piu' "cercabili" per le sottocategorie con ricerche reali (Search Console, ultimi 3 mesi: riscaldatori
+// Autoterm/Truma, climatizzatori Dometic; dal 22/10 anche frigo a compressore, batterie al litio e oscuranti
+// Thermoglas, vedi titoli-shopping.md): il tipo di prodotto davanti se il nome non lo dice,
 // e "per camper" in coda se non c'e' gia' camper/van/caravan. Solo il feed: il nome sul sito non cambia.
 // Nessun dato inventato: il tipo e' generico ("Climatizzatore", "Riscaldatore a gasolio"), niente potenze o
 // modalita' di montaggio nel titolo. I kit/bundle e il riscaldatore portatile restano come sono.
 function addProductType(title: string, p: { name: string; is_bundle?: boolean | null; categories?: { name?: string } | null }): string {
   const category = (p.categories?.name || '').trim();
-  if (p.is_bundle || !/^(Riscaldatori a Gasolio e Gas|Climatizzatori)$/.test(category)) return title;
+  if (p.is_bundle || !/^(Riscaldatori a Gasolio e Gas|Climatizzatori|Cucina|Batterie|Cabina Guida)$/.test(category)) return title;
   if (/portatile|^kit\b/i.test(p.name)) return title;
+  // In Cucina solo i frigoriferi a compressore ExtraCOOL (FRG...): gli altri prodotti restano come sono.
+  if (category === 'Cucina' && !/frg\d/i.test(p.name)) return title;
 
   let out = title;
   if (category === 'Climatizzatori' && !/climatizzator|condizionator/i.test(out)) {
     out = `Climatizzatore ${out}`;
   } else if (category === 'Riscaldatori a Gasolio e Gas' && !/riscaldator|stufa/i.test(out)) {
     out = `Riscaldatore a gasolio ${out}`;
+  } else if (category === 'Cucina' && !/compressore/i.test(out)) {
+    // Gli ExtraCOOL FRG sono tutti a compressore (descrizione della sottocategoria): "frigo compressore" e' la ricerca.
+    out = out.replace(/^Frigorifero\s+/i, '');
+    out = `Frigorifero a compressore ${out}`;
+  } else if (category === 'Batterie' && !/litio|lifepo4/i.test(out)) {
+    out = `Batteria al litio ${out.replace(/^Batteria\s+/i, '')}`;
+  } else if (category === 'Cabina Guida' && /thermoglas/i.test(out) && !/oscurant/i.test(out)) {
+    out = `Oscurante termico ${out}`;
   }
   // La Truma S 3004 e' venduta anche col nome Trumatic S 3004 (dato dalla scheda prodotto): e' come la cercano i clienti.
   if (/Truma S 3004/i.test(out) && !/trumatic/i.test(out)) out = `${out} (Trumatic S 3004)`;
