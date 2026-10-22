@@ -1056,6 +1056,11 @@
     <priority>0.5</priority>
   </url>
   <url>
+    <loc>https://cda-camper.it/prodotto-cda-0221-victron-multiplus-ii-12-3000-120-32.html</loc>
+    <changefreq>weekly</changefreq>
+    <priority>0.5</priority>
+  </url>
+  <url>
     <loc>https://cda-camper.it/prodotto-cda-bundle-0001-kit-toilette-da-viaggio.html</loc>
     <changefreq>weekly</changefreq>
     <priority>0.5</priority>
@@ -1346,6 +1351,11 @@
     <priority>0.6</priority>
   </url>
   <url>
+    <loc>https://cda-camper.it/guida-inverter-caricabatterie-multiplus-ii-camper.html</loc>
+    <changefreq>monthly</changefreq>
+    <priority>0.6</priority>
+  </url>
+  <url>
     <loc>https://cda-camper.it/guide.html</loc>
     <changefreq>monthly</changefreq>
     <priority>0.6</priority>
@@ -1376,6 +1386,9 @@
     <priority>0.6</priority>
   </url>
 </urlset>
+
+
+
 
 
 
