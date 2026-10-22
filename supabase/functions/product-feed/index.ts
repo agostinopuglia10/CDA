@@ -59,7 +59,7 @@ Deno.serve(async (req) => {
 
     const { data: products, error } = await supabase
       .from('products')
-      .select('id, slug, name, description, price_cents, currency, image_url, brand, stock, is_bundle, long_package, ships_on_pallet, weight_kg, google_product_category, gtin, categories(name, path)')
+      .select('id, slug, name, description, price_cents, compare_at_price_cents, currency, image_url, brand, stock, is_bundle, long_package, ships_on_pallet, weight_kg, google_product_category, gtin, categories(name, path)')
       .eq('active', true)
       .eq('in_store_only', false) // aerosol/infiammabili: acquistabili solo in officina, niente Google Shopping
       .gt('price_cents', 0)
@@ -82,6 +82,8 @@ Deno.serve(async (req) => {
         // il prodotto dal feed.
         const imageLink = p.image_url.startsWith('http') ? p.image_url : `${SITE_URL}/${p.image_url}`;
         const priceEUR = (p.price_cents / 100).toFixed(2);
+        // Prezzo ribassato (lo stesso prezzo barrato mostrato sul sito): Google Shopping mostra il ribasso.
+        const onSale = p.compare_at_price_cents && p.compare_at_price_cents > p.price_cents;
         const currency = (p.currency || 'EUR').toUpperCase();
         const availability = p.stock && p.stock > 0 ? 'in stock' : 'in stock'; // drop-ship: si spedisce dal fornitore alla ricezione dell'ordine
         const productType = p.categories?.path
@@ -107,7 +109,8 @@ Deno.serve(async (req) => {
     <link>${escapeXml(link)}</link>
     <g:image_link>${escapeXml(imageLink)}</g:image_link>
     <g:availability>${availability}</g:availability>
-    <g:price>${priceEUR} ${currency}</g:price>
+    <g:price>${onSale ? (p.compare_at_price_cents / 100).toFixed(2) : priceEUR} ${currency}</g:price>
+    ${onSale ? `<g:sale_price>${priceEUR} ${currency}</g:sale_price>` : ''}
     <g:condition>new</g:condition>
     ${p.gtin ? `<g:gtin>${escapeXml(p.gtin)}</g:gtin>` : `<g:identifier_exists>no</g:identifier_exists>`}
     <g:shipping_label>${escapeXml(shippingLabel)}</g:shipping_label>
