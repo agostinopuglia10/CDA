@@ -1339,7 +1339,8 @@ function buildMultiPlusGuide(products) {
 <tr><td>Efficienza massima</td><td>93%</td></tr>
 <tr><td>Consumo a vuoto</td><td>13 W</td></tr>
 <tr><td>Batterie</td><td>Al piombo o al litio (come indicato sull'etichetta)</td></tr>
-<tr><td>Uso</td><td>Solo all'interno, grado di protezione IP21</td></tr>
+<tr><td>Uso</td><td>Solo all'interno; grado di protezione IP21 secondo l'etichetta dell'apparecchio</td></tr>
+<tr><td>Dimensioni e peso</td><td>546 x 275 x 147 mm, 19 kg (scheda tecnica Victron)</td></tr>
           </tbody>
         </table>
       </div>
