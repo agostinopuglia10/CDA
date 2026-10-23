@@ -385,7 +385,13 @@ function buildPage(template, p, dupDesc) {
       productLd.offers.shippingDetails = {
         '@type': 'OfferShippingDetails',
         shippingRate: { '@type': 'MonetaryAmount', value: (shipCents / 100).toFixed(2), currency: 'EUR' },
-        shippingDestination: { '@type': 'DefinedRegion', addressCountry: 'IT' }
+        shippingDestination: { '@type': 'DefinedRegion', addressCountry: 'IT' },
+        // Preparazione 1-2 giorni lavorativi (Agostino, 23/10/2026) + transito 2-5 giorni lavorativi (norme di spedizione in Merchant Center, dati Global Service).
+        deliveryTime: {
+          '@type': 'ShippingDeliveryTime',
+          handlingTime: { '@type': 'QuantitativeValue', minValue: 1, maxValue: 2, unitCode: 'DAY' },
+          transitTime: { '@type': 'QuantitativeValue', minValue: 2, maxValue: 5, unitCode: 'DAY' }
+        }
       };
     }
   }
