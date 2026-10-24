@@ -29,7 +29,7 @@ const ROOT = path.join(__dirname, '..');
 const TEMPLATE_PATH = path.join(ROOT, 'prodotto.html');
 
 async function fetchProducts() {
-  const url = SUPABASE_URL + '/rest/v1/products?select=id,slug,name,description,price_cents,image_url,brand,is_bundle,in_store_only,category_id,gtin,weight_kg,ships_on_pallet,long_package,shipping_included,categories(name,slug,path)&active=eq.true&order=slug.asc';
+  const url = SUPABASE_URL + '/rest/v1/products?select=id,slug,name,description,price_cents,image_url,brand,is_bundle,featured,in_store_only,category_id,gtin,weight_kg,ships_on_pallet,long_package,shipping_included,categories(name,slug,path)&active=eq.true&order=slug.asc';
   const res = await fetch(url, {
     headers: {
       apikey: SUPABASE_ANON_KEY,
@@ -564,6 +564,39 @@ async function main() {
 
   buildCatalogPage(products);
   buildCategoryPages();
+  buildHomeFeatured(products);
+}
+
+// Home: i prodotti "in evidenza" nel codice della pagina, con link veri alle schede. Prima c'erano segnaposto
+// ("Nome prodotto placeholder") e Google, che legge la home piu' di ogni altra pagina, non trovava nessun link
+// a un prodotto. Il JavaScript (initFeaturedCarousel in js/main.js) li sostituisce con gli stessi dati, con carrello.
+function buildHomeFeatured(products) {
+  const homePath = path.join(ROOT, 'index.html');
+  if (!fs.existsSync(homePath)) return;
+  let html = fs.readFileSync(homePath, 'utf8');
+  if (html.indexOf('<!--HOME-FEATURED-START-->') === -1) return;
+
+  const featured = products
+    .filter(function (p) { return p.slug && p.featured && p.price_cents > 0; })
+    .sort(function (a, b) { return a.price_cents - b.price_cents; }); // stesso ordine del carosello in js/main.js
+  let out = '';
+  for (const p of featured) {
+    const href = 'prodotto-' + p.slug + '.html';
+    const price = '€ ' + (p.price_cents / 100).toLocaleString('it-IT', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+    const thumb = p.image_url ? '<img src="' + escapeHtml(p.image_url) + '" alt="' + escapeHtml(p.name) + '" style="width:100%;height:100%;object-fit:cover;">' : 'Foto prodotto';
+    out +=
+      '        <div class="product-card promo-card">\n' +
+      '          <a class="product-link" href="' + href + '"><div class="product-thumb">' + (p.is_bundle ? '<span class="product-badge">Kit risparmio</span>' : '<span class="product-badge">In evidenza</span>') + thumb + '</div></a>\n' +
+      '          <div class="product-body">\n' +
+      '            <span class="product-cat">' + escapeHtml(p.categories ? p.categories.name : '') + '</span>\n' +
+      '            <a class="product-link" href="' + href + '"><h4>' + escapeHtml(p.name) + '</h4></a>\n' +
+      '            <div class="product-price"><strong>' + price + '</strong></div>\n' +
+      '          </div>\n' +
+      '        </div>\n';
+  }
+  html = html.replace(/<!--HOME-FEATURED-START-->[\s\S]*?<!--HOME-FEATURED-END-->/, function () { return '<!--HOME-FEATURED-START-->\n' + out + '<!--HOME-FEATURED-END-->'; });
+  fs.writeFileSync(homePath, html, 'utf8');
+  console.log('index.html aggiornato: ' + featured.length + ' prodotti in evidenza.');
 }
 
 // catalogo.html: elenco statico di tutti i prodotti con link normali, così
