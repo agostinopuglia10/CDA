@@ -236,6 +236,16 @@ function singleUnitShippingCents(p) {
   return bands.length ? bands[0].price_cents : null;
 }
 
+// Google accetta uno sku di al massimo 50 caratteri (Search Console: "Lunghezza stringa non valida nel campo sku").
+// Sotto i 50 resta lo slug; sopra, i primi 42 caratteri + "-" + 6 caratteri di un hash dello slug (stesso risultato in js/main.js).
+function shortSku(slug) {
+  const s = String(slug || '');
+  if (s.length <= 50) return s;
+  let h = 5381;
+  for (let i = 0; i < s.length; i++) h = ((h * 33) ^ s.charCodeAt(i)) >>> 0;
+  return s.slice(0, 42).replace(/-+$/, '') + '-' + h.toString(36).padStart(6, '0').slice(-6);
+}
+
 function normDesc(d) { return String(d || '').replace(/\s+/g, ' ').trim().toLowerCase(); }
 
 // Guide che citano ogni prodotto: lette dai file guida-*.html già generati (committati nel repo),
@@ -356,7 +366,7 @@ function buildPage(template, p, dupDesc) {
     description: shortDesc,
     image: imageUrl,
     url: pageUrl,
-    sku: p.slug
+    sku: shortSku(p.slug)
   };
   if (p.brand && p.brand.trim()) productLd.brand = { '@type': 'Brand', name: p.brand.trim() };
   if (p.gtin && /^\d{8,14}$/.test(String(p.gtin).trim())) productLd.gtin = String(p.gtin).trim();

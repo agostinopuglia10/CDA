@@ -949,6 +949,16 @@ function renderProductPage(p) {
 // senza questo, ogni pagina prodotto (stesso template, ?id= diverso)
 // mandava a Google/motori AI gli stessi identici dati statici del
 // prodotto di esempio, indipendentemente dal prodotto mostrato.
+// Stesso calcolo di scripts/build-product-pages.js: lo sku non puo' superare i 50 caratteri (Google).
+function shortSku(slug) {
+  var s = String(slug || '');
+  if (s.length <= 50) return s;
+  var h = 5381;
+  for (var i = 0; i < s.length; i++) h = ((h * 33) ^ s.charCodeAt(i)) >>> 0;
+  var tail = ('000000' + h.toString(36)).slice(-6);
+  return s.slice(0, 42).replace(/-+$/, '') + '-' + tail;
+}
+
 function updateProductSeoTags(p, descText, topName, topSlug) {
   var pageUrl = 'https://cda-camper.it/' + productUrl(p);
   var shortDesc = descText.slice(0, 200);
@@ -1003,7 +1013,7 @@ function updateProductSeoTags(p, descText, topName, topSlug) {
       description: shortDesc,
       image: imageUrl,
       url: pageUrl,
-      sku: p.slug
+      sku: shortSku(p.slug)
     };
     if (p.brand && String(p.brand).trim()) productLd.brand = { '@type': 'Brand', name: String(p.brand).trim() };
     if (!priceNotSet) {
