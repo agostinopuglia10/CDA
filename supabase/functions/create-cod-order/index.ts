@@ -119,6 +119,16 @@ Deno.serve(async (req) => {
 
     // Avviso via email: mai far fallire l'ordine se l'email non parte.
     await notifyNewOrder(order, lineItems, isPickup ? 'Pagamento al ritiro in officina' : 'Contrassegno', isPickup).catch(() => {});
+    await sendCustomerConfirmation(
+      order,
+      lineItems.map((li: { product: { id: string; name: string; price_cents: number } }) => ({
+        name: li.product.name,
+        quantity: (items.find((i: { product_id: string }) => i.product_id === li.product.id) || {}).quantity || 1,
+        unit_price_cents: li.product.price_cents,
+      })),
+      'contrassegno',
+      isPickup
+    ).catch(() => {});
 
     return new Response(JSON.stringify({ order_id: order.id }), {
       headers: { ...CORS_HEADERS, 'Content-Type': 'application/json' },
@@ -240,6 +250,57 @@ async function notifyNewOrder(
     headers: { Title: `Nuovo ordine - ${(order.total_cents / 100).toFixed(2)} EUR`, Priority: 'high' },
     body: `${paymentLabel} (${isPickup ? 'da riscuotere in officina al ritiro' : 'da riscuotere al corriere alla consegna'}) - ${order.customer_name || 'Cliente'} - ${lineItems.map((li) => li.product.name).join(', ')}`,
   }).catch(() => {});
+}
+
+// E-mail di conferma al cliente: prima il cliente non riceveva nulla dal sito (con la carta solo l'eventuale
+// ricevuta Stripe, in contrassegno niente). Stesso mittente di avvisi e promemoria carrello (FROM_EMAIL,
+// dominio verificato su Resend); le risposte vanno a info@cda-camper.it. Mai far fallire l'ordine se non parte.
+async function sendCustomerConfirmation(
+  order: { id: string; customer_name: string; customer_email: string; total_cents: number; shipping_cents?: number },
+  items: { name: string; quantity: number; unit_price_cents: number }[],
+  mode: 'carta' | 'contrassegno',
+  isPickup: boolean
+) {
+  if (!RESEND_API_KEY || !order.customer_email) return;
+  const eur = (c: number) => (c / 100).toFixed(2).replace('.', ',') + ' €';
+  const firstName = String(order.customer_name || '').trim().split(/\s+/)[0] || '';
+  const orderRef = String(order.id).slice(0, 8).toUpperCase();
+  const itemsHtml = items
+    .map((li) => `<tr><td style="padding:4px 8px 4px 0;">${escapeHtml(li.name)} × ${li.quantity}</td><td style="padding:4px 0;text-align:right;">${eur(li.unit_price_cents * li.quantity)}</td></tr>`)
+    .join('');
+  const shippingRow = isPickup
+    ? `<tr><td style="padding:4px 8px 4px 0;">Ritiro in officina a Tivoli</td><td style="padding:4px 0;text-align:right;">0,00 €</td></tr>`
+    : `<tr><td style="padding:4px 8px 4px 0;">Spedizione</td><td style="padding:4px 0;text-align:right;">${eur(order.shipping_cents || 0)}</td></tr>`;
+  const payment = mode === 'carta'
+    ? 'Il pagamento con carta è andato a buon fine.'
+    : isPickup ? 'Paghi al momento del ritiro in officina.' : 'Paghi in contanti al corriere alla consegna.';
+  const next = isPickup
+    ? 'Ti chiamiamo appena è pronto per il ritiro in Strada Arci n.24, Tivoli. Se vuoi, al ritiro te lo montiamo noi in officina.'
+    : 'Prepariamo il pacco e ti aggiorniamo quando parte.';
+
+  const html = `
+    <div style="font-family:Arial,sans-serif;max-width:560px;color:#222;line-height:1.5;">
+      <h2 style="margin:0 0 12px;">Grazie${firstName ? ', ' + escapeHtml(firstName) : ''}: abbiamo ricevuto il tuo ordine</h2>
+      <p>Ordine n. <strong>${orderRef}</strong>. ${payment}</p>
+      <table style="width:100%;border-collapse:collapse;font-size:14px;">${itemsHtml}${shippingRow}
+        <tr><td style="padding:8px 8px 0 0;border-top:1px solid #ddd;"><strong>Totale</strong></td><td style="padding:8px 0 0;border-top:1px solid #ddd;text-align:right;"><strong>${eur(order.total_cents)}</strong></td></tr>
+      </table>
+      <p>${next}</p>
+      <p>Per qualsiasi dubbio rispondi a questa e-mail, chiamaci al 348 990 5455 o scrivici su WhatsApp allo stesso numero.</p>
+      <p>CDA Camper, Strada Arci n.24, 00019 Tivoli (RM)<br><a href="https://cda-camper.it">cda-camper.it</a></p>
+    </div>`;
+
+  await fetch('https://api.resend.com/emails', {
+    method: 'POST',
+    headers: { Authorization: `Bearer ${RESEND_API_KEY}`, 'Content-Type': 'application/json' },
+    body: JSON.stringify({
+      from: FROM_EMAIL,
+      to: order.customer_email,
+      reply_to: 'info@cda-camper.it',
+      subject: `Ordine ${orderRef} ricevuto - CDA Camper`,
+      html,
+    }),
+  });
 }
 
 function escapeHtml(value: unknown): string {
