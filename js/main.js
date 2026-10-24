@@ -2002,7 +2002,11 @@ function renderCardBadge(p, savingsMap) {
   return p.featured ? '<span class="product-badge">In evidenza</span>' : '';
 }
 
-var FREE_SHIPPING_THRESHOLD_CENTS = 150000; // € 1.500,00 — soglia reale confermata dall'utente il 19/09/2026
+var FREE_SHIPPING_THRESHOLD_CENTS = 150000; // € 1.500,00 — pallet e collo lungo (soglia confermata il 19/09/2026)
+var FREE_SHIPPING_NORMAL_THRESHOLD_CENTS = 15000; // € 150,00 — colli normali (decisione del 24/10/2026, stessa regola del server)
+function freeShippingThresholdFor(packageType) {
+  return packageType === 'normale' ? FREE_SHIPPING_NORMAL_THRESHOLD_CENTS : FREE_SHIPPING_THRESHOLD_CENTS;
+}
 
 // Calcola il costo di spedizione reale interrogando peso/pallet/pacco-lungo dei
 // prodotti in carrello e le fasce in shipping_rate_bands. È solo una stima per
@@ -2043,8 +2047,10 @@ function calculateShippingEstimate(items, subtotalCents, zona) {
       if (totalWeight === 0) return { shippingCents: 0, needsZone: false, packageType: 'inclusa' };
 
       var packageType = anyPallet ? 'pallet' : (anyLong ? 'lungo' : 'normale');
+      var thresholdCents = freeShippingThresholdFor(packageType);
+      if (packageType === 'normale' && subtotalCents >= thresholdCents) return { shippingCents: 0, needsZone: false, packageType: packageType, thresholdCents: thresholdCents };
       var neededZone = anyPallet;
-      if (neededZone && !zona) return { shippingCents: null, needsZone: true, packageType: packageType };
+      if (neededZone && !zona) return { shippingCents: null, needsZone: true, packageType: packageType, thresholdCents: thresholdCents };
 
       var zonaFilter = packageType === 'pallet' ? (zona || 'italia') : 'tutte';
 
@@ -2057,8 +2063,8 @@ function calculateShippingEstimate(items, subtotalCents, zona) {
         .order('weight_min_kg', { ascending: false })
         .limit(1)
         .then(function (bandRes) {
-          if (bandRes.error || !bandRes.data || bandRes.data.length === 0) return { shippingCents: null, needsZone: neededZone, packageType: packageType };
-          return { shippingCents: bandRes.data[0].price_cents, needsZone: neededZone, packageType: packageType };
+          if (bandRes.error || !bandRes.data || bandRes.data.length === 0) return { shippingCents: null, needsZone: neededZone, packageType: packageType, thresholdCents: thresholdCents };
+          return { shippingCents: bandRes.data[0].price_cents, needsZone: neededZone, packageType: packageType, thresholdCents: thresholdCents };
         });
     });
 }
@@ -2172,10 +2178,7 @@ function initCartPage() {
       return;
     }
 
-    var remaining = FREE_SHIPPING_THRESHOLD_CENTS - subtotal;
-    var pct = Math.min(100, Math.round((subtotal / FREE_SHIPPING_THRESHOLD_CENTS) * 100));
-
-    if (remaining <= 0) {
+    if (subtotal >= FREE_SHIPPING_THRESHOLD_CENTS) {
       shippingProgressEl.className = 'shipping-progress reached';
       shippingProgressEl.innerHTML =
         '<div class="shipping-progress-label">🎉 <strong>Hai la spedizione gratuita!</strong></div>' +
@@ -2188,15 +2191,30 @@ function initCartPage() {
     }
 
     shippingProgressEl.className = 'shipping-progress';
-    shippingProgressEl.innerHTML =
-      '<div class="shipping-progress-label">Ti mancano <strong>' + formatEUR(remaining) + '</strong> alla spedizione gratuita</div>' +
-      '<div class="shipping-progress-bar"><div class="shipping-progress-bar-fill" style="width:' + pct + '%"></div></div>';
+    shippingProgressEl.innerHTML = '';
     if (shippingEl) shippingEl.textContent = 'Calcolo in corso...';
 
     var zona = deliveryZoneEl ? deliveryZoneEl.value : '';
     calculateShippingEstimate(items, subtotal, zona).then(function (result) {
       lastShippingEstimate = result;
       if (deliveryZoneFieldEl) deliveryZoneFieldEl.style.display = result.needsZone ? '' : 'none';
+
+      // La soglia dipende dal tipo di collo (150 EUR normale, 1.500 EUR pallet o lungo): si mostra solo ora che e' nota.
+      var threshold = result.thresholdCents || FREE_SHIPPING_THRESHOLD_CENTS;
+      var remaining = threshold - subtotal;
+      var pct = Math.min(100, Math.round((subtotal / threshold) * 100));
+      if (remaining <= 0 && result.shippingCents === 0 && result.packageType !== 'inclusa') {
+        shippingProgressEl.className = 'shipping-progress reached';
+        shippingProgressEl.innerHTML =
+          '<div class="shipping-progress-label">🎉 <strong>Hai la spedizione gratuita!</strong></div>' +
+          '<div class="shipping-progress-bar"><div class="shipping-progress-bar-fill" style="width:100%"></div></div>';
+        if (shippingEl) shippingEl.textContent = 'Gratuita';
+        totalEl.textContent = formatEUR(subtotal);
+        return;
+      }
+      shippingProgressEl.innerHTML =
+        '<div class="shipping-progress-label">Ti mancano <strong>' + formatEUR(Math.max(remaining, 0)) + '</strong> alla spedizione gratuita' + ((result.packageType === 'pallet' || result.packageType === 'lungo') ? ' (pallet e colli lunghi: da ' + formatEUR(FREE_SHIPPING_THRESHOLD_CENTS) + ')' : '') + '</div>' +
+        '<div class="shipping-progress-bar"><div class="shipping-progress-bar-fill" style="width:' + pct + '%"></div></div>';
 
       if (result.needsZone && !zona) {
         if (shippingEl) shippingEl.textContent = 'Seleziona la zona di consegna';

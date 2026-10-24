@@ -20,14 +20,19 @@ const SUPABASE_URL = 'https://udynqqqxjcyhdeygqumi.supabase.co';
 const SUPABASE_ANON_KEY = 'sb_publishable_xjJru5AOW6V242H2L7rZTg_Lg6zXYw5';
 const SITE_URL = 'https://cda-camper.it';
 const ROOT = path.join(__dirname, '..');
-// Stessa soglia di create-checkout-session / js/main.js (spedizione gratuita da 1.500 €).
+// Stesse soglie di create-checkout-session / js/main.js: spedizione gratuita da 150 € per i colli normali
+// (decisione del 24/10/2026), da 1.500 € per pallet e collo lungo.
 const FREE_SHIPPING_THRESHOLD_CENTS = 150000;
+const FREE_SHIPPING_NORMAL_THRESHOLD_CENTS = 15000;
+function freeShippingFor(p) {
+  return p.price_cents >= ((p.ships_on_pallet || p.long_package) ? FREE_SHIPPING_THRESHOLD_CENTS : FREE_SHIPPING_NORMAL_THRESHOLD_CENTS);
+}
 
 const esc = (s) => String(s == null ? '' : s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
 const eur = (cents) => (cents / 100).toLocaleString('it-IT', { minimumFractionDigits: 2, maximumFractionDigits: 2 }) + ' €';
 
 async function fetchProducts(nameFilter) {
-  const url = SUPABASE_URL + '/rest/v1/products?select=name,slug,brand,price_cents,shipping_included,weight_kg,description'
+  const url = SUPABASE_URL + '/rest/v1/products?select=name,slug,brand,price_cents,shipping_included,ships_on_pallet,long_package,weight_kg,description'
     + '&active=eq.true&price_cents=gt.0&' + nameFilter + '&order=price_cents.asc';
   const res = await fetch(url, { headers: { apikey: SUPABASE_ANON_KEY, Authorization: 'Bearer ' + SUPABASE_ANON_KEY } });
   if (!res.ok) throw new Error('Fetch prodotti per guide fallita: ' + res.status + ' ' + (await res.text()));
@@ -121,7 +126,7 @@ function tableRows(rows) {
 
 function shippingNote(p) {
   if (p.shipping_included) return 'Spedizione inclusa nel prezzo';
-  if (p.price_cents >= FREE_SHIPPING_THRESHOLD_CENTS) return 'Spedizione gratuita';
+  if (freeShippingFor(p)) return 'Spedizione gratuita';
   return 'Spedizione calcolata nel carrello';
 }
 
@@ -155,7 +160,7 @@ function buildClimateGuide(products) {
     ];
   });
   const cheapest = Math.min.apply(null, list.map((p) => p.price_cents));
-  const allFree = cheapest >= FREE_SHIPPING_THRESHOLD_CENTS;
+  const allFree = list.every(freeShippingFor);
   return {
     file: 'guida-climatizzatore-camper.html',
     shortTitle: 'Guida al climatizzatore per camper',
@@ -188,7 +193,7 @@ ${tableRows(rows)}
 
       <h2>Spedizione, ritiro e montaggio</h2>
       <ul>
-        <li><strong>Spedizione in tutta Italia:</strong> ${allFree ? 'i climatizzatori a catalogo superano la soglia di 1.500 €, quindi la spedizione è gratuita.' : 'gratuita sopra 1.500 €, altrimenti calcolata nel carrello.'}</li>
+        <li><strong>Spedizione in tutta Italia:</strong> ${allFree ? 'i climatizzatori a catalogo superano la soglia per la spedizione gratuita, quindi la spedizione è gratuita.' : 'gratuita da 150 € per i colli standard (da 1.500 € per pallet e colli lunghi), altrimenti calcolata nel carrello.'}</li>
         <li><strong>Ritiro gratis in officina a Tivoli:</strong> puoi ordinare online e passare a ritirarlo da noi, senza spedizione.</li>
         <li><strong>Montaggio nel nostro centro tecnico:</strong> se acquisti il climatizzatore da noi, lo installiamo, lo colleghiamo e lo collaudiamo a Tivoli. Il montaggio lo facciamo soltanto per i prodotti acquistati da CDA.</li>
         <li><strong>Reso entro 14 giorni</strong> e garanzia legale di 24 mesi.</li>
@@ -289,7 +294,7 @@ ${tableRows(rows)}
 
       <h2>Spedizione, ritiro e montaggio</h2>
       <ul>
-        <li><strong>Spedizione in tutta Italia</strong>, con costo calcolato nel carrello in base a peso e dimensioni (inclusa nel prezzo per la serie Ultimatron ULM, gratuita sopra 1.500 €).</li>
+        <li><strong>Spedizione in tutta Italia</strong>, con costo calcolato nel carrello in base a peso e dimensioni (inclusa nel prezzo per la serie Ultimatron ULM, gratuita da 150 € per i colli standard, da 1.500 € per pallet e colli lunghi).</li>
         <li><strong>Ritiro gratis in officina a Tivoli</strong>, senza spedizione.</li>
         <li><strong>Montaggio nel nostro centro tecnico</strong> per le batterie acquistate da noi: collegamento all'impianto e collaudo. Il montaggio lo facciamo soltanto per i prodotti acquistati da CDA.</li>
         <li><strong>Reso entro 14 giorni</strong> e garanzia legale di 24 mesi.</li>
@@ -441,7 +446,7 @@ ${rowsHtml(portableRows)}
 
       <h2>Spedizione, ritiro e montaggio</h2>
       <ul>
-        <li><strong>Spedizione in tutta Italia</strong>, con costo calcolato nel carrello (gratuita sopra 1.500 €).</li>
+        <li><strong>Spedizione in tutta Italia</strong>, con costo calcolato nel carrello (gratuita da 150 € per i colli standard, da 1.500 € per pallet e colli lunghi).</li>
         <li><strong>Ritiro gratis in officina a Tivoli</strong>, senza spedizione.</li>
         <li><strong>Montaggio nel nostro centro tecnico</strong> per i prodotti acquistati da noi. Un riscaldatore fisso richiede collegamenti al combustibile e allo scarico: va fatto a regola d'arte. Il montaggio lo facciamo soltanto per i prodotti acquistati da CDA.</li>
         <li><strong>Reso entro 14 giorni</strong> e garanzia legale di 24 mesi.</li>
@@ -644,7 +649,7 @@ ${tableRows(invRows)}
 
       <h2>Spedizione, ritiro e montaggio</h2>
       <ul>
-        <li><strong>Spedizione in tutta Italia</strong>, con costo calcolato nel carrello (gratuita sopra 1.500 €).</li>
+        <li><strong>Spedizione in tutta Italia</strong>, con costo calcolato nel carrello (gratuita da 150 € per i colli standard, da 1.500 € per pallet e colli lunghi).</li>
         <li><strong>Ritiro gratis in officina a Tivoli</strong>, senza spedizione.</li>
         <li><strong>Montaggio nel nostro centro tecnico</strong> per i prodotti acquistati da noi: un impianto elettrico va collegato a regola d'arte. Il montaggio lo facciamo soltanto per i prodotti acquistati da CDA.</li>
         <li><strong>Reso entro 14 giorni</strong> e garanzia legale di 24 mesi.</li>
@@ -728,7 +733,7 @@ ${tableRows(rows)}
 
       <h2>Spedizione, ritiro e montaggio</h2>
       <ul>
-        <li><strong>Spedizione in tutta Italia</strong>, con costo calcolato nel carrello (gratuita sopra 1.500 €).</li>
+        <li><strong>Spedizione in tutta Italia</strong>, con costo calcolato nel carrello (gratuita da 150 € per i colli standard, da 1.500 € per pallet e colli lunghi).</li>
         <li><strong>Ritiro gratis in officina a Tivoli</strong>, senza spedizione.</li>
         <li><strong>Montaggio nel nostro centro tecnico</strong> per i prodotti acquistati da noi. Il montaggio lo facciamo soltanto per i prodotti acquistati da CDA.</li>
         <li><strong>Reso entro 14 giorni</strong> e garanzia legale di 24 mesi.</li>
@@ -814,7 +819,7 @@ function buildBattery200Compare(products) {
 
       <h2>Spedizione, ritiro e montaggio</h2>
       <ul>
-        <li><strong>Spedizione in tutta Italia</strong>, con costo calcolato nel carrello in base a peso e dimensioni (inclusa nel prezzo per la Ultimatron ULM, gratuita sopra 1.500 €).</li>
+        <li><strong>Spedizione in tutta Italia</strong>, con costo calcolato nel carrello in base a peso e dimensioni (inclusa nel prezzo per la Ultimatron ULM, gratuita da 150 € per i colli standard, da 1.500 € per pallet e colli lunghi).</li>
         <li><strong>Ritiro gratis in officina a Tivoli</strong>, senza spedizione.</li>
         <li><strong>Montaggio nel nostro centro tecnico</strong> per le batterie acquistate da noi. Il montaggio lo facciamo soltanto per i prodotti acquistati da CDA.</li>
         <li><strong>Reso entro 14 giorni</strong> e garanzia legale di 24 mesi.</li>
@@ -914,7 +919,7 @@ function buildPanelCompare(products) {
 
       <h2>Spedizione, ritiro e montaggio</h2>
       <ul>
-        <li><strong>Spedizione in tutta Italia</strong>, con costo calcolato nel carrello in base a peso e dimensioni (gratuita sopra 1.500 €).</li>
+        <li><strong>Spedizione in tutta Italia</strong>, con costo calcolato nel carrello in base a peso e dimensioni (gratuita da 150 € per i colli standard, da 1.500 € per pallet e colli lunghi).</li>
         <li><strong>Ritiro gratis in officina a Tivoli</strong>, senza spedizione.</li>
         <li><strong>Montaggio nel nostro centro tecnico</strong> per i riscaldatori acquistati da noi. Il montaggio lo facciamo soltanto per i prodotti acquistati da CDA.</li>
       </ul>
@@ -999,7 +1004,7 @@ function buildTrumaCompare(products) {
 
       <h2>Spedizione, ritiro e montaggio</h2>
       <ul>
-        <li><strong>Spedizione in tutta Italia</strong>, con costo calcolato nel carrello in base a peso e dimensioni (gratuita sopra 1.500 €).</li>
+        <li><strong>Spedizione in tutta Italia</strong>, con costo calcolato nel carrello in base a peso e dimensioni (gratuita da 150 € per i colli standard, da 1.500 € per pallet e colli lunghi).</li>
         <li><strong>Ritiro gratis in officina a Tivoli</strong>, senza spedizione.</li>
         <li><strong>Montaggio nel nostro centro tecnico</strong> per le stufe acquistate da noi, con collegamento e collaudo. Il montaggio lo facciamo soltanto per i prodotti acquistati da CDA.</li>
       </ul>

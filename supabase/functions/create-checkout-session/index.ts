@@ -164,7 +164,10 @@ function jsonError(message: string, status: number) {
   });
 }
 
-const FREE_SHIPPING_THRESHOLD_CENTS = 150000; // € 1.500,00
+// Spedizione gratuita: da 150 € per i colli normali (decisione del 24/10/2026), da 1.500 € per
+// pallet e collo lungo (costano molto di piu'). Stessa logica in js/main.js e nei dati strutturati delle schede.
+const FREE_SHIPPING_THRESHOLD_CENTS = 150000; // € 1.500,00 (pallet, collo lungo)
+const FREE_SHIPPING_NORMAL_THRESHOLD_CENTS = 15000; // € 150,00 (colli normali)
 
 // Scritto sull'ordine quando il cliente sceglie il ritiro in officina. Il prefisso
 // "RITIRO IN OFFICINA" e' usato da stripe-webhook per non sovrascriverlo con
@@ -202,6 +205,7 @@ async function calculateShippingCents(
   if (totalWeight === 0) return 0; // tutto shipping_included, niente da spedire a parte
 
   const packageType = anyPallet ? 'pallet' : anyLong ? 'lungo' : 'normale';
+  if (packageType === 'normale' && subtotalCents >= FREE_SHIPPING_NORMAL_THRESHOLD_CENTS) return 0;
   const zonaFilter = packageType === 'pallet' ? (zona === 'isole' ? 'isole' : 'italia') : 'tutte';
 
   const { data: bands, error } = await supabase

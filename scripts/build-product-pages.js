@@ -223,13 +223,15 @@ function autoSeoTitle(p) {
 }
 
 // Costo di spedizione di una sola unita' con le stesse regole del checkout (create-checkout-session):
-// gratis da 1.500 EUR, gratis se la spedizione e' gia' nel prezzo, fascia "lungo" fissa, fascia "normale" a peso.
+// gratis da 150 EUR per i colli normali e da 1.500 EUR per il collo lungo (decisione del 24/10/2026), gratis se la
+// spedizione e' gia' nel prezzo, fascia "lungo" fissa, fascia "normale" a peso.
 // I prodotti su bancale costano di piu' sulle isole: per non dare un prezzo sbagliato restano senza dato.
 let SHIPPING_BANDS = [];
 function singleUnitShippingCents(p) {
   if (p.ships_on_pallet) return null;
-  if (p.price_cents >= 150000 || p.shipping_included) return 0;
+  if (p.shipping_included) return 0;
   const type = p.long_package ? 'lungo' : 'normale';
+  if (p.price_cents >= (type === 'normale' ? 15000 : 150000)) return 0;
   const w = p.weight_kg != null ? Number(p.weight_kg) : 0.5;
   const bands = SHIPPING_BANDS.filter(function (b) { return b.package_type === type && b.zona === 'tutte' && Number(b.weight_min_kg) <= w; })
     .sort(function (a, b) { return Number(b.weight_min_kg) - Number(a.weight_min_kg); });
