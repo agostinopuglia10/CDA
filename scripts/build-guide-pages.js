@@ -70,7 +70,7 @@ function pageHtml(shell, g) {
 <link rel="icon" type="image/svg+xml" href="favicon.svg">
 <link rel="icon" type="image/png" sizes="96x96" href="images/favicon-96.png">
 <title>${esc(g.title)}</title>
-<meta name="description" content="${esc(g.description)}">
+<meta name="description" content="${esc(g.description)}">${g.noindex ? '\n<meta name="robots" content="noindex,follow">' : ''}
 <link rel="canonical" href="${url}">
 <meta property="og:type" content="article">
 <meta property="og:site_name" content="CDA">
@@ -1507,6 +1507,12 @@ async function main() {
   fs.writeFileSync(path.join(ROOT, hubPage.file), pageHtml(shell, hubPage), 'utf8');
   console.log('Generata', hubPage.file);
 
+  // Pagina del link in bio di Instagram (noindex, fuori dalla sitemap): solo prodotti e prezzi reali del catalogo.
+  const energia = await fetchProducts('slug=in.(cda-0089-batteria-lifepo4-extrapower-100-ah,cda-0091-batteria-lifepo4-extrapower-200-ah,cda-0191-pannello-solare-all-black-300w)');
+  const profilePage = buildProfilePage(riscaldamento, energia);
+  fs.writeFileSync(path.join(ROOT, profilePage.file), pageHtml(shell, profilePage), 'utf8');
+  console.log('Generata', profilePage.file);
+
   // sitemap: rimuove le vecchie voci guida-* e le riaggiunge
   const sitemapPath = path.join(ROOT, 'sitemap.xml');
   let sitemap = fs.readFileSync(sitemapPath, 'utf8');
@@ -1546,4 +1552,42 @@ function genericHero(spec) {
     + '<h2 id="scegli">Alcuni modelli, subito nel carrello</h2>'
     + '<div class="guide-cards">' + cards + '</div>'
     + '<p class="guide-cards-note">Reso entro 14 giorni. Il confronto completo di tutti i modelli è qui sotto.</p>';
+}
+
+// ---- Pagina "dal profilo" (link in bio Instagram) ----
+function guideCardsHtml(list) {
+  return '<div class="guide-cards">' + list.map((p) => '<div class="guide-card">'
+    + (p.brand ? '<span class="guide-card-tag">' + esc(p.brand) + '</span>' : '')
+    + '<a href="prodotto-' + esc(p.slug) + '.html"><img src="' + esc(p.image_url) + '" alt="' + esc(p.name) + '" loading="lazy"></a>'
+    + '<div class="guide-card-name guide-card-name-lg"><a href="prodotto-' + esc(p.slug) + '.html">' + esc(p.name) + '</a></div>'
+    + '<div class="guide-card-price">' + eur(p.price_cents) + (freeShippingFor(p) ? ' <small>· spedizione gratuita</small>' : '') + '</div>'
+    + guideCartButton(p) + '</div>').join('') + '</div>';
+}
+
+function buildProfilePage(riscaldamento, energia) {
+  const heat = ['cda-0146-autoterm-air-2d-pannello-pu5', 'truma-sl-3004-stf9039', 'kit-autoterm-air-2d-pu5-ris9420']
+    .map((sl) => riscaldamento.find((p) => p.slug === sl)).filter((p) => p && p.image_url);
+  const energy = energia.filter((p) => p.image_url);
+  let body = genericHero({ eyebrow: 'Inverno in camper', list: heat, sub: 'per scaldare il camper di notte senza collegarti alla corrente: riscaldatore a gasolio Autoterm o stufa a gas Truma' });
+  if (energy.length) {
+    body += '<h2>Energia: batterie e pannello</h2>' + guideCardsHtml(energy)
+      + '<p class="guide-cards-note">Quanti Ah servono davvero: <a href="guida-batteria-litio-camper.html">leggi la guida alla batteria al litio</a>.</p>';
+  }
+  body += '<h2>Come ordinare</h2>'
+    + '<ul>'
+    + '<li><strong>Spedizione gratuita da 150 €</strong> per i colli standard (pallet e colli lunghi: gratis da 1.500 €).</li>'
+    + '<li><strong>Ritiro gratis</strong> nella nostra officina di Tivoli (Strada Arci n.24).</li>'
+    + '<li><strong>Montaggio</strong> dei prodotti acquistati da noi, nel nostro centro tecnico di Tivoli, con preventivo.</li>'
+    + '<li><strong>Reso</strong> entro 14 giorni.</li></ul>'
+    + '<p><a href="shop.html">Tutto il catalogo</a> · <a href="guide.html">Guide e confronti</a> · <a href="camper-usati.html">Camper usati</a> · <a href="contatti.html">Contatti</a></p>';
+  return {
+    file: 'dal-profilo.html',
+    shortTitle: 'Dal nostro profilo',
+    title: 'Dal nostro profilo | CDA Camper Tivoli',
+    description: "I prodotti che consigliamo questa settimana: riscaldamento per l'inverno, batterie e pannelli. Spedizione gratuita da 150 €, ritiro e montaggio a Tivoli.",
+    h1: 'Dal nostro profilo',
+    lead: 'I prodotti che stiamo consigliando questa settimana, con prezzo e spedizione chiari.',
+    noindex: true,
+    body
+  };
 }
