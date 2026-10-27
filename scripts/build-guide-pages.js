@@ -32,7 +32,7 @@ const esc = (s) => String(s == null ? '' : s).replace(/&/g, '&amp;').replace(/</
 const eur = (cents) => (cents / 100).toLocaleString('it-IT', { minimumFractionDigits: 2, maximumFractionDigits: 2 }) + ' €';
 
 async function fetchProducts(nameFilter) {
-  const url = SUPABASE_URL + '/rest/v1/products?select=name,slug,brand,price_cents,shipping_included,ships_on_pallet,long_package,weight_kg,description'
+  const url = SUPABASE_URL + '/rest/v1/products?select=id,image_url,name,slug,brand,price_cents,shipping_included,ships_on_pallet,long_package,weight_kg,description'
     + '&active=eq.true&price_cents=gt.0&' + nameFilter + '&order=price_cents.asc';
   const res = await fetch(url, { headers: { apikey: SUPABASE_ANON_KEY, Authorization: 'Bearer ' + SUPABASE_ANON_KEY } });
   if (!res.ok) throw new Error('Fetch prodotti per guide fallita: ' + res.status + ' ' + (await res.text()));
@@ -375,6 +375,34 @@ function buildHeatingGuide(products) {
     eur(p.price_cents),
     esc(shippingNote(p))
   ]);
+  // Parte alta della pagina (arrivo dai post social): numero-gancio, foto e tre schede con pulsante carrello.
+  const pick = (list, re) => list.find((p) => re.test(p.slug)) || list[0];
+  const kit = pick(heaters, /^kit-autoterm-air-2d-pu5/);
+  const truma = pick(gas, /3004/);
+  const travel = pick(portable, /travel-box/);
+  const cartBtn = (p) => '<button class="add-btn add-btn-lg" data-product-id="' + esc(p.id) + '" data-product-name="' + esc(p.name) + '" data-product-price="' + p.price_cents + '" data-product-image="' + esc(p.image_url || '') + '" aria-label="Aggiungi al carrello: ' + esc(p.name) + '">Aggiungi al carrello</button>';
+  const card = (p, tag, forWho, bullets) => '<div class="guide-card">'
+    + '<span class="guide-card-tag">' + tag + '</span>'
+    + '<a href="prodotto-' + esc(p.slug) + '.html"><img src="' + esc(p.image_url) + '" alt="' + esc(p.name) + '" loading="lazy"></a>'
+    + '<h3>' + forWho + '</h3>'
+    + '<ul>' + bullets.map((b) => '<li>' + b + '</li>').join('') + '</ul>'
+    + '<div class="guide-card-name"><a href="prodotto-' + esc(p.slug) + '.html">' + esc(p.name) + '</a></div>'
+    + '<div class="guide-card-price">' + eur(p.price_cents) + (freeShippingFor(p) ? ' <small>· spedizione gratuita</small>' : '') + '</div>'
+    + cartBtn(p) + '</div>';
+  const heroHtml = '<div class="guide-hero">'
+    + '<div class="guide-hero-text"><span class="guide-hero-eyebrow">Inverno in camper</span>'
+    + '<div class="guide-hero-big">1-2 litri</div>'
+    + '<p class="guide-hero-sub">di gasolio per scaldare il camper <strong>tutta la notte</strong>.</p>'
+    + '<p class="guide-hero-note">Autoterm Air 2D: da 0,10 a 0,24 litri all\'ora a seconda della potenza impostata, quindi circa 1-2 litri in 8 ore.</p>'
+    + '<a href="#scegli" class="btn guide-hero-cta">Scegli il tuo sistema</a></div>'
+    + '<img class="guide-hero-img" src="' + esc(kit.image_url) + '" alt="' + esc(kit.name) + '"></div>'
+    + '<h2 id="scegli">Scegli il tuo sistema</h2>'
+    + '<div class="guide-cards">'
+    + card(kit, 'Gasolio', 'Per chi viaggia in inverno', ['Fisso, silenzioso e indipendente dal gas', 'Funziona fino a −45 °C', 'Kit completo con pannello PU-5'])
+    + card(truma, 'Gas', 'Per chi ha già il gas', ['Calore subito, accensione automatica', 'Potenza termica 3.500 W', 'Funziona a GPL, venduta senza pannello'])
+    + card(travel, 'Portatile', 'Per chi non vuole installare', ['Nessuna installazione fissa', 'Pronto all\'uso in pochi minuti', 'Portatile a gasolio, 12 V, 2 kW'])
+    + '</div>'
+    + '<p class="guide-cards-note">Montaggio nella nostra officina di Tivoli per i prodotti acquistati da noi. Reso entro 14 giorni.</p>';
   const rowsHtml = (rows, valueCol) => rows.map((r) => `<tr>${r.map((c, i) => `<td${i === r.length - 2 ? ' class="num"' : ''}>${c}</td>`).join('')}</tr>`).join('\n');
 
   return {
@@ -384,7 +412,8 @@ function buildHeatingGuide(products) {
     description: 'Riscaldamento camper a gasolio o a gas: Autoterm Air 2D e 4D, stufe Truma (Trumatic) S 3004 e 5004, consumi per notte, pannelli e prezzi aggiornati.',
     h1: 'Riscaldamento per camper: a gasolio, a gas o portatile?',
     lead: 'Le tre soluzioni che vendiamo, a confronto, con i prezzi aggiornati e le cose da controllare prima di ordinare (compreso il pannello di controllo).',
-    body: `      <p>Con l'arrivo del freddo, scaldare il camper diventa la priorità. Le soluzioni che teniamo a catalogo sono tre: il <strong>riscaldatore a gasolio indipendente</strong> (Autoterm), la <strong>stufa a gas</strong> (Truma) e il <strong>riscaldatore portatile</strong> (Travel Box). Qui trovi come si differenziano. I prezzi sono letti dal nostro catalogo e si aggiornano da soli.</p>
+    body: heroHtml + `
+      <p>Con l'arrivo del freddo, scaldare il camper diventa la priorità. Le soluzioni che teniamo a catalogo sono tre: il <strong>riscaldatore a gasolio indipendente</strong> (Autoterm), la <strong>stufa a gas</strong> (Truma) e il <strong>riscaldatore portatile</strong> (Travel Box). Qui trovi come si differenziano. I prezzi sono letti dal nostro catalogo e si aggiornano da soli.</p>
 
       <h2>Riscaldatore a gasolio indipendente</h2>
       <p>Un riscaldatore a gasolio funziona in modo indipendente e si installa in modo fisso nel camper. I modelli Autoterm hanno un motore brushless silenzioso e il funzionamento è garantito fino a −45 °C. La scelta è tra <strong>Air 2D</strong> (soluzione compatta) e <strong>Air 4D</strong> (più potenza per ambienti più grandi).</p>
