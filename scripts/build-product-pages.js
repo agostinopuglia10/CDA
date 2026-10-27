@@ -729,6 +729,42 @@ function categorySummary(cp, name) {
   return out + '. Spedizione in tutta Italia o ritiro nella nostra officina di Tivoli (RM).';
 }
 
+// Prodotti consigliati in cima alle categorie principali (prova del 27/10/2026): foto, prezzo e "Aggiungi al carrello" gia' sopra l'elenco.
+// Lista scelta a mano per stagione; prezzi e spedizione sono letti dal catalogo, mai scritti qui.
+const CATEGORY_PICKS = {
+  'clima': {
+    title: 'Per l\'inverno: i nostri consigliati',
+    slugs: ['cda-0146-autoterm-air-2d-pannello-pu5', 'truma-sl-3004-stf9039', 'kit-autoterm-air-2d-pu5-ris9420'],
+    note: 'Come funziona il riscaldatore a gasolio e quanto consuma: <a href="guida-riscaldamento-camper.html">leggi la guida</a>.'
+  },
+  'energia': {
+    title: 'Per partire con l\'energia: i nostri consigliati',
+    slugs: ['cda-0089-batteria-lifepo4-extrapower-100-ah', 'cda-0091-batteria-lifepo4-extrapower-200-ah', 'cda-0191-pannello-solare-all-black-300w'],
+    note: 'Quanti Ah servono davvero: <a href="guida-batteria-litio-camper.html">leggi la guida alla batteria al litio</a>.'
+  }
+};
+function categoryPicksHtml(cpath) {
+  const spec = CATEGORY_PICKS[cpath];
+  if (!spec) return '';
+  const picks = spec.slugs.map(function (sl) { return ALL_PRODUCTS.find(function (x) { return x.slug === sl; }); })
+    .filter(function (x) { return x && x.image_url && x.price_cents > 0; });
+  if (picks.length === 0) return '';
+  const cards = picks.map(function (p) {
+    const ship = singleUnitShippingCents(p);
+    return '<div class="guide-card">'
+      + (p.brand ? '<span class="guide-card-tag">' + escapeHtml(p.brand) + '</span>' : '')
+      + '<a href="prodotto-' + escapeHtml(p.slug) + '.html"><img src="' + escapeHtml(p.image_url) + '" alt="' + escapeHtml(p.name) + '" loading="lazy"></a>'
+      + '<div class="guide-card-name guide-card-name-lg"><a href="prodotto-' + escapeHtml(p.slug) + '.html">' + escapeHtml(p.name) + '</a></div>'
+      + '<div class="guide-card-price">' + euro(p.price_cents) + (ship === 0 ? ' <small>· spedizione gratuita</small>' : '') + '</div>'
+      + '<button class="add-btn add-btn-lg" data-product-id="' + escapeHtml(p.id) + '" data-product-name="' + escapeHtml(p.name) + '" data-product-price="' + p.price_cents + '" data-product-image="' + escapeHtml(p.image_url) + '" aria-label="Aggiungi al carrello: ' + escapeHtml(p.name) + '">Aggiungi al carrello</button></div>';
+  }).join('');
+  return '<!-- CATEGORY-PICKS:START -->\n<section class="category-picks" style="padding:24px 0 0;"><div class="container">'
+    + '<h2 style="margin:0 0 14px;">' + escapeHtml(spec.title) + '</h2>'
+    + '<div class="guide-cards">' + cards + '</div>'
+    + '<p class="guide-cards-note">' + spec.note + ' Reso entro 14 giorni.</p>'
+    + '</div></section>\n<!-- CATEGORY-PICKS:END -->\n\n';
+}
+
 function buildCategoryPages() {
   const template = fs.readFileSync(path.join(ROOT, 'categoria.html'), 'utf8');
   const data = loadCategoriesData();
@@ -791,6 +827,8 @@ function buildCategoryPages() {
     const summaryHtml = summary ? '\n      <p class="category-guides category-summary">' + escapeHtml(summary) + '</p>' : '';
     html = html.replace(/(<p id="category-desc">)[\s\S]*?(<\/p>)/, function (m, a, b) { return a + escapeHtml(c.node.description || '') + b + summaryHtml + guidesHtml; });
     html = html.replace(/(<div class="breadcrumb" id="breadcrumb">)[\s\S]*?(<\/div>)/, '$1' + trail + '$2');
+    const picksHtml = categoryPicksHtml(c.path);
+    if (picksHtml) html = html.replace('<section style="padding:20px 0 8px;">', function (m) { return picksHtml + m; });
     // Elenco statico: sottocategorie e prodotti (anche delle sottocategorie) con link normali.
     let staticOut = '';
     const kids = Object.keys(c.node.children || {});
