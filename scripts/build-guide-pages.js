@@ -1477,6 +1477,27 @@ async function main() {
   ]);
 
   const guides = [buildClimateGuide(dometic), buildBatteryGuide(batterie), buildHeatingGuide(riscaldamento), buildWaterGuide(acqua), buildPowerGuide(elettrico), buildFridgeGuide(frigoriferi), buildBattery200Compare(batterie), buildPanelCompare(riscaldamento), buildTrumaCompare(riscaldamento), buildMpptCompare(elettrico), buildKitLitio620(kitProdotti), buildSolarPillar(pannelli, elettrico.filter((p) => /^Regolatore/i.test(p.name)), batterie, elettrico.filter((p) => /^Inverter/i.test(p.name)), caricabatterie), buildMultiPlusGuide(multiplus)].filter(Boolean);
+  // Parte alta con foto, numero e schede con carrello su tutte le guide (la guida riscaldamento ha la sua, piu' ricca).
+  const HEROES = {
+    'guida-climatizzatore-camper.html': { eyebrow: 'Clima in camper', list: dometic, sub: 'per un climatizzatore da tetto Dometic: FreshJet, Freshlight e Freshwell a confronto' },
+    'guida-batteria-litio-camper.html': { eyebrow: 'Energia', list: batterie, sub: 'per una batteria al litio per il camper: ExtraPOWER e Ultimatron a confronto' },
+    'guida-impianto-acqua-camper.html': { eyebrow: 'Impianto acqua', list: acqua, sub: "per pompe e serbatoi dell'impianto acqua del camper" },
+    'guida-impianto-elettrico-camper.html': { eyebrow: 'Impianto elettrico', list: elettrico, sub: 'per inverter, regolatori e caricabatterie del camper' },
+    'guida-frigorifero-camper.html': { eyebrow: 'Frigorifero', list: frigoriferi, sub: 'per un frigorifero a compressore per camper' },
+    'guida-batteria-200ah-ultimatron-extrapower.html': { eyebrow: 'Batterie 200 Ah', list: batterie.filter((p) => /200/.test(p.name)), sub: 'per una batteria al litio da 200 Ah: ExtraPOWER e Ultimatron a confronto' },
+    'guida-pannello-pu5-o-comfort-autoterm.html': { eyebrow: 'Riscaldatore Autoterm', list: riscaldamento.filter((p) => /Autoterm Air 2D con pannello/i.test(p.name)), sub: 'per il riscaldatore Autoterm Air 2D: pannello PU-5 o Comfort' },
+    'guida-stufa-truma-s-3004-o-5004.html': { eyebrow: 'Stufa a gas', list: riscaldamento.filter((p) => /truma/i.test(p.name)), sub: 'per la stufa a gas Truma S: 3004 o 5004' },
+    'guida-regolatore-mppt-o-pwm.html': { eyebrow: 'Energia solare', list: elettrico.filter((p) => /^Regolatore/i.test(p.name)), sub: 'per un regolatore di carica solare' },
+    'guida-fotovoltaico-camper.html': { eyebrow: 'Fotovoltaico', list: pannelli, sub: 'per un pannello solare per il camper' },
+    'guida-inverter-caricabatterie-multiplus-ii-camper.html': { eyebrow: 'Inverter e caricabatterie', list: multiplus.filter((p) => /0221/.test(p.slug)), sub: 'Victron MultiPlus-II 12/3000: inverter e caricabatterie in uno' }
+  };
+  guides.forEach((g) => {
+    const spec = HEROES[g.file];
+    if (spec && g.body.indexOf('guide-hero') === -1) {
+      const html = genericHero(spec);
+      if (html) g.body = html + g.body;
+    }
+  });
   guides.forEach((g) => {
     fs.writeFileSync(path.join(ROOT, g.file), pageHtml(shell, g), 'utf8');
     console.log('Generata', g.file);
@@ -1497,3 +1518,32 @@ async function main() {
 }
 
 main().catch((err) => { console.error(err); process.exit(1); });
+
+// ---- Parte alta comune delle guide (per chi arriva da post e annunci) ----
+function guideCartButton(p) {
+  return '<button class="add-btn add-btn-lg" data-product-id="' + esc(p.id) + '" data-product-name="' + esc(p.name) + '" data-product-price="' + p.price_cents + '" data-product-image="' + esc(p.image_url || '') + '" aria-label="Aggiungi al carrello: ' + esc(p.name) + '">Aggiungi al carrello</button>';
+}
+
+function genericHero(spec) {
+  const list = (spec.list || []).filter((p) => p.id && p.image_url && p.price_cents > 0).sort((a, b) => a.price_cents - b.price_cents);
+  if (list.length === 0) return '';
+  const picks = list.length <= 3 ? list : [list[0], list[Math.floor(list.length / 2)], list[list.length - 1]];
+  const big = list.length === 1 ? eur(list[0].price_cents) : 'da ' + eur(list[0].price_cents);
+  const allFree = list.every(freeShippingFor);
+  const cards = picks.map((p) => '<div class="guide-card">'
+    + (p.brand ? '<span class="guide-card-tag">' + esc(p.brand) + '</span>' : '')
+    + '<a href="prodotto-' + esc(p.slug) + '.html"><img src="' + esc(p.image_url) + '" alt="' + esc(p.name) + '" loading="lazy"></a>'
+    + '<div class="guide-card-name guide-card-name-lg"><a href="prodotto-' + esc(p.slug) + '.html">' + esc(p.name) + '</a></div>'
+    + '<div class="guide-card-price">' + eur(p.price_cents) + (freeShippingFor(p) ? ' <small>· spedizione gratuita</small>' : '') + '</div>'
+    + guideCartButton(p) + '</div>').join('');
+  return '<div class="guide-hero">'
+    + '<div class="guide-hero-text"><span class="guide-hero-eyebrow">' + esc(spec.eyebrow) + '</span>'
+    + '<div class="guide-hero-big sm">' + big + '</div>'
+    + '<p class="guide-hero-sub">' + esc(spec.sub) + '.</p>'
+    + '<p class="guide-hero-note">Prezzi letti dal nostro catalogo' + (allFree ? '. Spedizione gratuita.' : '.') + ' Montaggio nella nostra officina di Tivoli per i prodotti acquistati da noi.</p>'
+    + '<a href="#scegli" class="btn guide-hero-cta">Scegli il modello</a></div>'
+    + '<img class="guide-hero-img" src="' + esc(picks[picks.length - 1].image_url) + '" alt="' + esc(picks[picks.length - 1].name) + '"></div>'
+    + '<h2 id="scegli">Alcuni modelli, subito nel carrello</h2>'
+    + '<div class="guide-cards">' + cards + '</div>'
+    + '<p class="guide-cards-note">Reso entro 14 giorni. Il confronto completo di tutti i modelli è qui sotto.</p>';
+}
