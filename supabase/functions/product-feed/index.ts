@@ -57,18 +57,32 @@ Deno.serve(async (req) => {
   try {
     const supabase = createClient(SUPABASE_URL, SERVICE_ROLE_KEY);
 
-    const { data: products, error } = await supabase
+    const baseFields = 'id, slug, name, description, price_cents, compare_at_price_cents, currency, image_url, brand, stock, is_bundle, long_package, ships_on_pallet, shipping_included, weight_kg, google_product_category, gtin, categories(name, path)';
+    const fetchProducts = (fields: string) => supabase
       .from('products')
-      .select('id, slug, name, description, price_cents, compare_at_price_cents, currency, image_url, brand, stock, is_bundle, long_package, ships_on_pallet, weight_kg, google_product_category, gtin, categories(name, path)')
+      .select(fields)
       .eq('active', true)
       .eq('in_store_only', false) // aerosol/infiammabili: acquistabili solo in officina, niente Google Shopping
       .gt('price_cents', 0)
       .not('image_url', 'is', null)
       .neq('image_url', '');
 
+    // additional_image_urls arriva con la migrazione 029: se la funzione viene distribuita prima
+    // della migrazione, il feed continua a funzionare con la sola foto principale.
+    let { data: products, error } = await fetchProducts(baseFields + ', additional_image_urls');
+    if (error && /additional_image_urls/.test(error.message)) {
+      ({ data: products, error } = await fetchProducts(baseFields));
+    }
+
     if (error) {
       return new Response('Errore nel recupero prodotti: ' + error.message, { status: 500, headers: CORS_HEADERS });
     }
+
+    // Stesse fasce del checkout (create-checkout-session): servono a dire a Google il costo
+    // di spedizione vero di ogni prodotto, gratuita compresa.
+    const { data: bands } = await supabase
+      .from('shipping_rate_bands')
+      .select('package_type, zona, weight_min_kg, price_cents');
 
     const items = (products || [])
       .map((p) => {
@@ -80,7 +94,20 @@ Deno.serve(async (req) => {
         // hanno un percorso relativo nel database (images/prodotti/...);
         // Google Merchant richiede sempre un URL assoluto, altrimenti scarta
         // il prodotto dal feed.
-        const imageLink = p.image_url.startsWith('http') ? p.image_url : `${SITE_URL}/${p.image_url}`;
+        const imageLink = absoluteUrl(p.image_url);
+        // Foto in piu' (Merchant Center > Qualita' del negozio > Immagini per offerta): Google ne accetta fino a 10.
+        const additionalImages = (p.additional_image_urls || [])
+          .filter((u: string) => u && u.trim() && u !== p.image_url)
+          .slice(0, 10)
+          .map((u: string) => `<g:additional_image_link>${escapeXml(absoluteUrl(u.trim()))}</g:additional_image_link>`)
+          .join('\n    ');
+        // Costo di spedizione del prodotto comprato da solo, calcolato come nel checkout. Senza questo
+        // Google usa le impostazioni dell'account, che non conoscono la spedizione gratuita da 150 €
+        // (Qualita' del negozio: "Costo di spedizione discreto", media 14,99 € al 19/10).
+        const shippingCents = itemShippingCents(p, bands || []);
+        const shipping = shippingCents === null
+          ? ''
+          : `<g:shipping><g:country>IT</g:country><g:price>${(shippingCents / 100).toFixed(2)} EUR</g:price></g:shipping>`;
         const priceEUR = (p.price_cents / 100).toFixed(2);
         // Prezzo ribassato (lo stesso prezzo barrato mostrato sul sito): Google Shopping mostra il ribasso.
         const onSale = p.compare_at_price_cents && p.compare_at_price_cents > p.price_cents;
@@ -108,6 +135,7 @@ Deno.serve(async (req) => {
     <description>${escapeXml(truncate(p.description || p.name, 5000))}</description>
     <link>${escapeXml(link)}</link>
     <g:image_link>${escapeXml(imageLink)}</g:image_link>
+    ${additionalImages}
     <g:availability>${availability}</g:availability>
     <g:price>${onSale ? (p.compare_at_price_cents / 100).toFixed(2) : priceEUR} ${currency}</g:price>
     ${onSale ? `<g:sale_price>${priceEUR} ${currency}</g:sale_price>` : ''}
@@ -116,6 +144,7 @@ Deno.serve(async (req) => {
     <g:shipping_label>${escapeXml(shippingLabel)}</g:shipping_label>
     ${p.google_product_category ? `<g:google_product_category>${escapeXml(p.google_product_category)}</g:google_product_category>` : ''}
     ${shippingWeight}
+    ${shipping}
     ${p.brand ? `<g:brand>${escapeXml(p.brand)}</g:brand>` : ''}
     ${productType ? `<g:product_type>${escapeXml(productType)}</g:product_type>` : ''}
   </item>`;
@@ -194,6 +223,34 @@ function addProductType(title: string, p: { name: string; is_bundle?: boolean | 
   if (/Truma S 3004/i.test(out) && !/trumatic/i.test(out)) out = `${out} (Trumatic S 3004)`;
   if (!/camper|\bvan\b|caravan|motorhome/i.test(out)) out = `${out} per camper`;
   return out;
+}
+
+// Spedizione gratuita: da 150 € per i colli normali, da 1.500 € per pallet e collo lungo.
+// Stesse soglie di create-checkout-session, create-cod-order e js/main.js: se cambiano li', vanno cambiate qui.
+const FREE_SHIPPING_THRESHOLD_CENTS = 150000;
+const FREE_SHIPPING_NORMAL_THRESHOLD_CENTS = 15000;
+
+// Come calculateShippingCents del checkout, per un solo pezzo. Per i pallet si usa la fascia "italia":
+// la fascia isole (piu' cara) resta solo nel checkout, perche' il feed non distingue le regioni.
+// null = fascia non trovata: niente g:shipping, Google usa le impostazioni dell'account.
+function itemShippingCents(
+  p: { price_cents: number; weight_kg: number | null; ships_on_pallet: boolean | null; long_package: boolean | null; shipping_included: boolean | null },
+  bands: { package_type: string; zona: string; weight_min_kg: number | string; price_cents: number }[]
+): number | null {
+  if (p.shipping_included) return 0;
+  if (p.price_cents >= FREE_SHIPPING_THRESHOLD_CENTS) return 0;
+  const packageType = p.ships_on_pallet ? 'pallet' : p.long_package ? 'lungo' : 'normale';
+  if (packageType === 'normale' && p.price_cents >= FREE_SHIPPING_NORMAL_THRESHOLD_CENTS) return 0;
+  const zona = packageType === 'pallet' ? 'italia' : 'tutte';
+  const weight = p.weight_kg != null ? Number(p.weight_kg) : 0.5; // stesso fallback del checkout
+  const band = bands
+    .filter((b) => b.package_type === packageType && b.zona === zona && Number(b.weight_min_kg) <= weight)
+    .sort((a, b) => Number(b.weight_min_kg) - Number(a.weight_min_kg))[0];
+  return band ? band.price_cents : null;
+}
+
+function absoluteUrl(path: string): string {
+  return path.startsWith('http') ? path : `${SITE_URL}/${path.replace(/^\//, '')}`;
 }
 
 function escapeXml(value: string): string {
