@@ -526,6 +526,17 @@ async function main() {
     );
   }
 
+  // Prodotti disattivati dopo la prima generazione (es. non piu' disponibili dal fornitore): la loro pagina statica va tolta,
+  // altrimenti resta online e si puo' ancora aggiungere al carrello. Chi ci arriva viene mandato alla categoria (o al catalogo).
+  // Aggiunto il 28/10/2026 dopo l'uscita della batteria ExtraPOWER 150 Ah da GES.
+  const RETIRED_TO = { 'prodotto-cda-0090-batteria-lifepo4-extrapower-150-ah.html': 'categoria-energia-batterie.html' };
+  const staleRedirectLines = [];
+  fs.readdirSync(ROOT).filter(function (f) { return /^prodotto-.+\.html$/.test(f) && generatedFiles.indexOf(f) === -1; }).forEach(function (f) {
+    fs.unlinkSync(path.join(ROOT, f));
+    staleRedirectLines.push('/' + f + '  /' + (RETIRED_TO[f] || 'catalogo.html') + '  301!');
+    console.log('Pagina rimossa (prodotto non piu\' attivo): ' + f);
+  });
+
   // _redirects: dal vecchio formato ?id= al nuovo URL reale, un redirect
   // 301 per prodotto — protegge i link già condivisi/indicizzati e le
   // fonti esterne che ancora puntano al vecchio formato (feed Google
@@ -533,7 +544,7 @@ async function main() {
   const redirectsPath = path.join(ROOT, '_redirects');
   const existingLines = fs.existsSync(redirectsPath)
     ? fs.readFileSync(redirectsPath, 'utf8').split('\n').filter(function (l) {
-        return l.trim() && !/^\/(prodotto|categoria)(\.html)?\s/.test(l);
+        return l.trim() && !/^\/(prodotto|categoria)(\.html)?\s/.test(l) && !/^\/prodotto-[^\s]+\.html\s/.test(l);
       })
     : [];
   const categoryRedirectLines = categoryPaths().map(function (cp) { return '/categoria.html  slug=' + cp + '  /' + categoryFileName(cp) + '  301!'; });
@@ -547,7 +558,7 @@ async function main() {
     '/categoria.html  /shop.html  301!',
     '/categoria  /shop.html  301!'
   ];
-  fs.writeFileSync(redirectsPath, existingLines.concat(redirectLines, categoryRedirectLines, templateFallbackLines).join('\n') + '\n', 'utf8');
+  fs.writeFileSync(redirectsPath, existingLines.concat(staleRedirectLines, redirectLines, categoryRedirectLines, templateFallbackLines).join('\n') + '\n', 'utf8');
 
   // sitemap.xml: sostituisce le vecchie voci prodotto.html?id=... (se
   // presenti da una generazione precedente) con gli URL statici reali.
