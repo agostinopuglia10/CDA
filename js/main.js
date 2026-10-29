@@ -1363,6 +1363,9 @@ function initCookieBanner() {
   var STORAGE_KEY = 'cda_cookie_consent';
   var stored = localStorage.getItem(STORAGE_KEY);
 
+  // Consent Mode v2: il tag Google parte subito ma con tutto NEGATO; "Accetta tutti" lo aggiorna a concesso.
+  startGoogleTag();
+
   if (stored) {
     try {
       if (JSON.parse(stored).status === 'all') loadAnalytics();
@@ -1376,7 +1379,7 @@ function initCookieBanner() {
   banner.setAttribute('aria-label', 'Consenso cookie');
   banner.innerHTML =
     '<div class="cookie-banner-inner">' +
-      '<p>Usiamo cookie tecnici necessari al funzionamento del sito e, solo con il tuo consenso, cookie di analisi statistica e di marketing (per mostrarti annunci pertinenti su Facebook/Instagram). Maggiori informazioni nella <a href="privacy.html">Privacy Policy</a>.</p>' +
+      '<p>Usiamo cookie tecnici necessari al funzionamento del sito e, solo con il tuo consenso, cookie di analisi statistica e di marketing (Google Analytics, Google Ads, Facebook e Instagram) per misurare le visite e mostrarti annunci pertinenti. Se scegli &ldquo;Solo necessari&rdquo;, Google riceve soltanto segnali anonimi senza cookie, usati per statistiche aggregate. Maggiori informazioni nella <a href="privacy.html">Privacy Policy</a>.</p>' +
       '<div class="cookie-banner-actions">' +
         '<button type="button" class="btn btn-outline cookie-reject">Solo necessari</button>' +
         '<button type="button" class="btn btn-primary cookie-accept">Accetta tutti</button>' +
@@ -1441,24 +1444,49 @@ function sendPageViewOnce() {
   });
 }
 
+// Consent Mode v2 (28-29/10/2026): il tag Google (GA4 + Google Ads tramite l'importazione delle conversioni) parte SEMPRE,
+// ma con ogni consenso negato di default. Senza consenso Google riceve solo segnali anonimi senza cookie;
+// url_passthrough conserva il gclid tra le pagine anche prima del consenso, cosi' l'acquisto resta attribuibile all'annuncio.
+// "Accetta tutti" porta il consenso a "concesso" (loadAnalytics). Il Pixel Meta resta SOLO dopo il consenso.
+var GA_MEASUREMENT_ID = 'G-H2W2W8FGY6';
+function startGoogleTag() {
+  if (isInternalVisitor()) return; // traffico interno: niente GA4
+  if (window.__gaLoaded) return;
+  window.__gaLoaded = true;
+  window.dataLayer = window.dataLayer || [];
+  window.gtag = window.gtag || function(){ window.dataLayer.push(arguments); };
+  window.gtag('consent', 'default', {
+    ad_storage: 'denied',
+    ad_user_data: 'denied',
+    ad_personalization: 'denied',
+    analytics_storage: 'denied',
+    wait_for_update: 500
+  });
+  window.gtag('set', 'url_passthrough', true);
+  window.gtag('set', 'ads_data_redaction', true);
+  var script = document.createElement('script');
+  script.async = true;
+  script.src = 'https://www.googletagmanager.com/gtag/js?id=' + GA_MEASUREMENT_ID;
+  document.head.appendChild(script);
+  window.gtag('js', new Date());
+  // page_view inviata a mano da sendPageViewOnce, non in automatico:
+  // l'invio automatico partiva prima che prodotto/categoria impostassero
+  // il titolo reale, e GA4 registrava tutte le schede con lo stesso titolo.
+  window.gtag('config', GA_MEASUREMENT_ID, { send_page_view: false });
+  pageViewState.analytics = true;
+  sendPageViewOnce();
+}
+
 function loadAnalytics() {
   if (isInternalVisitor()) return; // traffico interno: niente GA4 né Pixel Meta
-  var GA_MEASUREMENT_ID = 'G-H2W2W8FGY6';
-  if (!window.__gaLoaded) {
-    window.__gaLoaded = true;
-    var script = document.createElement('script');
-    script.async = true;
-    script.src = 'https://www.googletagmanager.com/gtag/js?id=' + GA_MEASUREMENT_ID;
-    document.head.appendChild(script);
-    window.dataLayer = window.dataLayer || [];
-    window.gtag = window.gtag || function(){ window.dataLayer.push(arguments); };
-    window.gtag('js', new Date());
-    // page_view inviata a mano da sendPageViewOnce, non in automatico:
-    // l'invio automatico partiva prima che prodotto/categoria impostassero
-    // il titolo reale, e GA4 registrava tutte le schede con lo stesso titolo.
-    window.gtag('config', GA_MEASUREMENT_ID, { send_page_view: false });
-    pageViewState.analytics = true;
-    sendPageViewOnce();
+  startGoogleTag();
+  if (window.gtag) {
+    window.gtag('consent', 'update', {
+      ad_storage: 'granted',
+      ad_user_data: 'granted',
+      ad_personalization: 'granted',
+      analytics_storage: 'granted'
+    });
   }
 
   var META_PIXEL_ID = '1274471299084547';
@@ -1571,8 +1599,8 @@ function logFunnelEvent(name, params) {
   } catch (e) {}
 }
 
-// Invia un evento a GA4 e al Pixel Meta, solo se il consenso è stato dato
-// (loadAnalytics imposta i due flag qui sotto). Se il consenso non c'è, non fa nulla.
+// Invia un evento a GA4 (sempre: senza consenso Google riceve solo segnali anonimi senza cookie, Consent Mode v2)
+// e al Pixel Meta (solo dopo il consenso: __metaLoaded lo imposta loadAnalytics).
 function trackEvent(name, params) {
   params = params || {};
   logFunnelEvent(name, params);

@@ -91,7 +91,7 @@
       <li><span>Dati di navigazione</span><span>Indirizzo IP, browser, pagine visitate (log di sistema)</span></li>
       <li><span>Dati forniti volontariamente</span><span>Nome, email, telefono, messaggio (form contatti/preventivo, iscrizione newsletter)</span></li>
       <li><span>Dati di acquisto</span><span>Nome, email, telefono, indirizzo di spedizione, dettagli ordine (quando si completa un acquisto nello shop online)</span></li>
-      <li><span>Dati di navigazione a fini statistici/marketing</span><span>Raccolti solo previo consenso, tramite Google Analytics e Meta Pixel — vedi sezione Cookie</span></li>
+      <li><span>Dati di navigazione a fini statistici/marketing</span><span>Raccolti previo consenso, tramite Google Analytics, Google Ads e Meta Pixel; senza consenso Google riceve solo segnali anonimi senza cookie — vedi sezione Cookie</span></li>
     </ul>
 
     <h2>3. Finalità e base giuridica del trattamento</h2>
@@ -108,7 +108,7 @@
       <li><span>Stripe</span><span>Elaborazione dei pagamenti con carta</span></li>
       <li><span>MailerLite</span><span>Invio della newsletter a chi vi si iscrive volontariamente</span></li>
       <li><span>Resend</span><span>Invio delle email transazionali (es. notifica di una richiesta preventivo)</span></li>
-      <li><span>Google Analytics, Meta Pixel</span><span>Statistiche di navigazione e marketing, solo previo consenso — vedi sezione Cookie</span></li>
+      <li><span>Google Analytics, Google Ads, Meta Pixel</span><span>Statistiche di navigazione e marketing, previo consenso (Google riceve solo segnali anonimi senza cookie se il consenso non viene dato) — vedi sezione Cookie</span></li>
     </ul>
     <p>Alcuni di questi fornitori hanno sede legale negli Stati Uniti: in tal caso il trasferimento dei dati avviene sulla base delle garanzie previste dal fornitore stesso (clausole contrattuali standard o framework equivalenti riconosciuti dalla Commissione Europea). Corrieri per la spedizione saranno aggiunti a questo elenco non appena selezionati.</p>
 
@@ -116,7 +116,15 @@
     <p>In qualsiasi momento è possibile esercitare, nei limiti e alle condizioni previste dagli artt. 15-22 del GDPR, i diritti di: accesso, rettifica, cancellazione, limitazione, portabilità, opposizione al trattamento e revoca del consenso, scrivendo a info@cda-camper.it. È inoltre possibile proporre reclamo al Garante per la Protezione dei Dati Personali.</p>
 
     <h2>7. Cookie</h2>
-    <p>Il sito utilizza cookie tecnici necessari al funzionamento e, previo consenso, cookie di analisi statistica (Google Analytics) e di marketing/remarketing (Meta Pixel, per mostrare annunci pertinenti su Facebook e Instagram a chi ha visitato il sito). Il dettaglio completo è disponibile nel banner cookie mostrato alla prima visita e resta modificabile in qualsiasi momento.</p>
+    <p>Il sito utilizza cookie tecnici necessari al funzionamento e, previo consenso, cookie di analisi statistica (Google Analytics), di misurazione delle conversioni pubblicitarie (Google Ads) e di marketing/remarketing (Meta Pixel, per mostrare annunci pertinenti su Facebook e Instagram a chi ha visitato il sito). Il dettaglio completo è disponibile nel banner cookie mostrato alla prima visita.</p>
+    <p>Il sito utilizza la modalità di consenso di Google (Consent Mode v2): finché non viene dato il consenso, il tag di Google è caricato con tutte le autorizzazioni negate e non scrive né legge cookie di analisi o pubblicità; Google può ricevere soltanto segnali anonimi (per esempio che una pagina è stata visitata), senza identificatori, usati per statistiche aggregate e stime delle conversioni. Scegliendo «Accetta tutti» le autorizzazioni vengono concesse; scegliendo «Solo necessari» restano negate. Il Meta Pixel non viene caricato senza consenso.</p>
+    <p>Puoi cambiare la tua scelta in qualsiasi momento: <button type="button" class="btn btn-outline" id="reset-cookie-choice">Modifica la scelta sui cookie</button></p>
+    <script>
+      document.getElementById('reset-cookie-choice').addEventListener('click', function () {
+        try { localStorage.removeItem('cda_cookie_consent'); } catch (e) {}
+        window.location.reload();
+      });
+    </script>
 
     <h2>8. Modifiche alla presente informativa</h2>
     <p>La presente informativa potrà essere aggiornata nel tempo. Eventuali modifiche saranno pubblicate su questa pagina con indicazione della data di ultimo aggiornamento.</p>
